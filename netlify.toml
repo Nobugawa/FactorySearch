@@ -13,7 +13,22 @@
   status = 404
   force = true
 [[redirects]]
-  from = "/*.sql"
+  from = "/schema_fs_v1.sql"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/migration_fs_v1_1_owner_analytics.sql"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/migration_fs_v1_2_reviewer.sql"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/hardening_optional_job_tables.sql"
   to = "/404"
   status = 404
   force = true
