@@ -1,0 +1,10 @@
+const s=require('fs').readFileSync(__dirname+'/../app.js','utf8');const a=s.indexOf('function authUrlState'),b=s.indexOf('const AUTH0');
+const authUrlState=new Function(s.slice(a,b)+';return authUrlState;')();let f=0,n=0;const ok=(c,m)=>{n++;if(!c){f++;console.log('FAIL',m)}};
+let r=authUrlState('#access_token=x&refresh_token=y&type=recovery','');ok(r.recovery&&r.hasTokens&&!r.error,'recovery hash');
+r=authUrlState('','?setup=1');ok(r.recovery&&!r.hasTokens,'setup query');
+r=authUrlState('#/worksheet?s=B1','');ok(!r.recovery&&!r.hasTokens,'app route');
+r=authUrlState('#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid','');ok(r.error.includes('invalid'),'error');
+r=authUrlState('#access_token=x&type=magiclink','');ok(!r.recovery&&r.hasTokens,'magiclink not recovery');
+ok(!/console\.log/.test(s),'no console logging in app.js');
+ok(!/password[^']*'\)\s*;?\s*log\(|log\([^)]*password/i.test(s),'no password in log()');
+console.log(n,'checks',f,'failures');process.exit(f?1:0);

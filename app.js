@@ -1,5 +1,11 @@
 (function(){
-const C=window.FS_CONFIG, sb=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_PUBLISHABLE_KEY);
+const C=window.FS_CONFIG;
+// Password setup: admin-generated recovery links use the implicit flow (tokens in URL hash). Read flags BEFORE the client consumes them; never log tokens.
+function authUrlState(hash,search){const h=new URLSearchParams((hash||'').replace(/^#/,'')), q=new URLSearchParams(search||'');
+  return {recovery:h.get('type')==='recovery'||q.has('setup'), error:h.get('error_description')||q.get('error_description')||'', hasTokens:h.has('access_token')||h.has('refresh_token')||q.has('code')};}
+const AUTH0=authUrlState(location.hash,location.search);
+const sb=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'implicit',detectSessionInUrl:true,persistSession:true}});
+const cleanUrl=()=>history.replaceState(null,'',location.pathname);
 const $=s=>document.querySelector(s), app=$('#app'); $('#ver').textContent=C.VERSION;
 const allowed=C.ALLOWED_EMAILS.filter(Boolean).map(e=>e.toLowerCase());
 const KEYS=['cap','cert','scale','usexp','cost','lead','geo'], LBL=['Capability','Certs','Scale','US exp','Cost','Lead time','Geo risk'];
@@ -11,6 +17,17 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 function log(type,sid,detail){ if(!S.user)return; sb.from('fs_events').insert({user_email:S.user,event_type:type,supplier_id:sid||null,detail:detail||{}}).then(()=>{}); }
 function secs(){return Math.round((Date.now()-S.t0)/1000);}
 
+function setPasswordView(em){
+  $('#nav').style.display='none';
+  app.innerHTML=`<div class="card login"><h1>Set your password</h1><p class="sub">${esc(em)}</p>
+  <input id="p1" type="password" placeholder="New password (12+ characters)" autocomplete="new-password"><input id="p2" type="password" placeholder="Repeat password" autocomplete="new-password">
+  <button class="btn" id="setpw">Save password</button><p class="muted" id="msg"></p></div>`;
+  $('#setpw').onclick=async()=>{const a=$('#p1').value,b=$('#p2').value;
+    if(a.length<12){$('#msg').textContent='Use at least 12 characters.';return;} if(a!==b){$('#msg').textContent='Passwords do not match.';return;}
+    $('#setpw').disabled=true; const {error}=await sb.auth.updateUser({password:a}); $('#p1').value='';$('#p2').value='';
+    if(error){$('#setpw').disabled=false;$('#msg').textContent=error.message;return;}
+    pwSetup=false; boot();};
+}
 function loginView(msg){
   $('#nav').style.display='none';
   app.innerHTML=`<div class="card login"><h1>Sign in</h1><p class="sub">Private supplier study. Authorized users only.</p><p class="muted" style="font-size:12px">Usage notice: this portal records sign-in sessions, time on site, supplier rows opened, source links clicked and worksheet saves, linked to your email. The portal owner (Philos Kim) can review this activity.</p>
@@ -22,15 +39,19 @@ function loginView(msg){
     if(error)$('#msg').textContent=error.message; else boot();};
   $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#go').click();};
 }
+let pwSetup=AUTH0.recovery;
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();
-  if(!session)return loginView();
+  if(AUTH0.hasTokens||AUTH0.error||AUTH0.recovery)cleanUrl(); AUTH0.hasTokens=false;
+  if(AUTH0.error){const m=AUTH0.error;AUTH0.error='';pwSetup=false;return loginView('Link problem: '+m+'. Ask the owner for a new setup link.');}
+  if(!session){pwSetup=false;return loginView();}
   const em=(session.user.email||'').toLowerCase();
   if(!allowed.includes(em)){await sb.auth.signOut();return loginView('This portal is private. Your account is not authorized.');}
+  if(pwSetup)return setPasswordView(em);
   S.user=em; $('#nav').style.display='';
   const [r,m,p]=await Promise.all([sb.from('fs_suppliers').select('*'),sb.from('fs_meta').select('*'),sb.from('fs_weight_prefs').select('*').eq('user_email',em).maybeSingle()]);
   if(r.error){app.innerHTML=`<div class="card"><h2>Data not available</h2><p class="muted">${esc(r.error.message)}. Has schema_fs_v1.sql been run and seeded?</p></div>`;return;}
-  S.rows=r.data||[]; (m.data||[]).forEach(x=>{if(x.key==='data_as_of')$('#asof').textContent=x.value;});
+  S.rows=r.data||[]; (m.data||[]).forEach(x=>{if(x.key==='data_as_of')$('#asof').textContent=x.value; if(x.key==='homepage_recheck'){try{S.recheck=JSON.parse(x.value);}catch(e){}}});
   if(p.data&&validW(p.data.weights,p.data.locked)){S.w=p.data.weights;S.lk=p.data.locked.map(Boolean);}
   S.t0=Date.now(); log('session_start',null,{ua:navigator.userAgent});
   setInterval(()=>log('session_ping',null,{seconds:secs(),kind:'heartbeat'}),60000);
@@ -40,9 +61,29 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('beforeunload',()=>log('session_ping',null,{seconds:secs(),kind:'unload'}));
 $('#logout').onclick=async e=>{e.preventDefault();log('session_end',null,{seconds:secs()});await sb.auth.signOut();S.user=null;loginView();};
 window.addEventListener('hashchange',()=>S.user&&route());
-function route(){const ws=location.hash.startsWith('#/worksheet');
-  document.querySelectorAll('nav a[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===(ws?'ws':'score')));
-  ws?worksheet():scorecard();}
+function route(){const h=location.hash, v=h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':'score';
+  document.querySelectorAll('nav a[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+  v==='ws'?worksheet():v==='src'?sources():scorecard();}
+function sources(){
+  const rc=S.recheck||{results:{}}; log('sources_open');
+  app.innerHTML=`<h1>Methodology &amp; sources</h1><p class="sub">How this short list was built, and what each link does and does not prove.</p>
+  <div class="card" style="margin-bottom:14px"><h2>How suppliers were found (original pass, Nov 2, 2026)</h2><ul>
+  <li><b>Method:</b> desk research from known industry names in each part family (hydraulics, forgings/castings, precision machining), checked against each company's public website. A US sales office or subsidiary was used as a signal they already export to the US.</li>
+  <li><b>Not used:</b> no trade-show exhibitor lists, customs/import records (ImportYeti, Panjiva), or paid directories. Those were named as the next step, not done.</li>
+  <li><b>Not done:</b> no supplier was contacted, no quote was requested, and no certificate was pulled.</li>
+  <li><b>Per-supplier discovery trail:</b> not recorded. We cannot say which specific search or reference surfaced each name, so none is claimed.</li></ul></div>
+  <div class="card" style="margin-bottom:14px"><h2>What the data means</h2><ul>
+  <li>Scores (1–5) are <b>preliminary desk judgments</b>, not audited facts, quotes, or capacity confirmations.</li>
+  <li>Certifications are listed as <b>expected, not verified</b>.</li>
+  <li>The source link is the company homepage. It supports that the company exists and describes the product family. It does not prove certification, capacity, pricing, or lead time.</li></ul></div>
+  <div class="card wrap"><h2>Per-supplier sources</h2><table class="tbl"><tr><th>Supplier</th><th>Discovery source / method</th><th>Supporting evidence URL</th><th>Original check (Nov 2)</th><th>Re-check (${esc(rc.checked||'—')}, automated)</th><th>What it supports</th></tr>
+  ${S.rows.slice().sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})).map(r=>{const x=rc.results[r.url]||'';return `<tr><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td>
+  <td>Industry-name desk research. Original discovery trail not recorded.</td>
+  <td>${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:'—'}</td>
+  <td>${esc(r.url_check===200?'HTTP 200':r.url_check??'')}</td><td>${esc(x?('HTTP '+x.split(' ')[0]):'not rechecked')}</td>
+  <td>Company exists; product family description. Homepage only. No product or certificate page verified.</td></tr>`}).join('')}</table>
+  <p class="muted" style="font-size:12px">Re-check = scripted page load showing the site responded. It is newly done, not part of the original discovery. HTTP 403 usually means the site blocks scripts; open it in a browser.</p></div>`;
+}
 
 // --- weights: always total 100; locked stay fixed (same rebalance as canvas) ---
 function rebalance(w,lk,i,v){ // pure: returns new weights summing to 100; locked fixed
@@ -119,7 +160,7 @@ async function worksheet(){
     const {error}=await sb.from('fs_worksheet').upsert(rows); $('#st').textContent=error?error.message:'Saved '+new Date().toLocaleTimeString(); if(!error)log('worksheet_save',sel);$('#sv').disabled=false;};
 }
 if(C.GA4_MEASUREMENT_ID){const s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id='+C.GA4_MEASUREMENT_ID;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',C.GA4_MEASUREMENT_ID);}
-sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')S.user=null;});
+sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')S.user=null; if(ev==='PASSWORD_RECOVERY')pwSetup=true;});
 boot();
 })();
 

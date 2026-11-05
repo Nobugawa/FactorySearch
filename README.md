@@ -1,4 +1,4 @@
-# FactorySearch v1.0.1
+# FactorySearch v1.1.0
 Password-gated HYTORC supplier scorecard + qualification worksheet (Philos Kim / Teddy Hume). Static site on Netlify, data in Supabase (`fs_*` tables, same project as the job portal).
 
 ## Setup (once)
@@ -24,3 +24,10 @@ Password-gated HYTORC supplier scorecard + qualification worksheet (Philos Kim /
 
 ## Usage notice
 The login screen and footer tell users their activity is logged and visible to the owner.
+
+## Reviewer login (philos@greymatterfusion.com)
+Sees exactly what Teddy will (no owner analytics). Auth user exists (confirmed, no password yet). Run `migration_fs_v1_2_reviewer.sql`.
+Password setup: add `https://factorysearch.netlify.app/**` to Supabase Auth → URL Configuration → Redirect URLs, then generate a recovery link with redirect `https://factorysearch.netlify.app/?setup=1`. The site detects it, shows *Set your password*, and clears the token from the URL.
+
+## Sources view
+`#/sources` explains the original desk-research method, what was not done, and per-supplier evidence. Per-supplier discovery trail was not recorded and is labeled that way. Homepage re-check results (fs_meta `homepage_recheck`) are newly done checks, not original discovery.
