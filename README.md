@@ -1,12 +1,13 @@
-# FactorySearch v1.0.0
+# FactorySearch v1.0.1
 Password-gated HYTORC supplier scorecard + qualification worksheet (Philos Kim / Teddy Hume). Static site on Netlify, data in Supabase (`fs_*` tables, same project as the job portal).
 
 ## Setup (once)
 1. **Schema:** Supabase → SQL Editor → paste all of `schema_fs_v1.sql` → Run.
 2. **Seed:** `SUPABASE_SERVICE_ROLE_KEY=... python3 scripts/seed_fs.py` (34 suppliers + data_as_of/version). Never commit the key.
-3. **Auth:** Supabase → Authentication → Providers → Email enabled (password). Users → *Add user* → create `philoskim990@gmail.com` with a password (auto-confirm). Sign-ups are not created from the site.
+3. **Auth:** Philos already has an Auth user in this project (job portal) — reuse it; no new account. Email/password provider must be enabled and that user must have a password set (if it was magic-link only, set one via Users → ⋯ → Send password recovery). The site never creates users.
 4. **URL config:** Authentication → URL Configuration → add the Netlify URL (e.g. `https://factorysearch.netlify.app`) to Redirect URLs (Site URL can stay as job portal).
-5. **Netlify:** project FactorySearch → Link repo `Nobugawa/FactorySearch`, branch `main`, build command empty, publish `.`.
+5. **Owner analytics (optional):** run `migration_fs_v1_1_owner_analytics.sql` so Philos can see all users' `fs_events` and `fs_usage_summary`.
+6. **Netlify:** project FactorySearch → Link repo `Nobugawa/FactorySearch`, branch `main`, build command empty, publish `.`.
 
 ## Adding Teddy
 1. Auth → Add user with Teddy's email + password; share the password privately.
@@ -17,3 +18,9 @@ Password-gated HYTORC supplier scorecard + qualification worksheet (Philos Kim /
 ## Analytics
 `fs_events` logs session_start, session_ping (seconds; 60s heartbeat, tab hidden, unload), supplier_open, source_click, worksheet_open/save. Query in SQL Editor, e.g.
 `select user_email, event_type, count(*), max((detail->>'seconds')::int) from fs_events group by 1,2;`
+
+## Tests
+`node tests/rebalance.test.js` — weight rebalance invariants (sum 100, locks fixed, clamps, zero-sum, typed input, fuzz).
+
+## Usage notice
+The login screen and footer tell users their activity is logged and visible to the owner.

@@ -6,13 +6,14 @@ const KEYS=['cap','cert','scale','usexp','cost','lead','geo'], LBL=['Capability'
 const DEF=[25,15,10,10,20,10,10];
 const GATES=[['drawing','Drawing fit'],['certs','Certificates'],['customs','Customs history'],['fa','First article'],['audit','Plant/audit'],['commercial','Commercial'],['pilot','Pilot to volume']];
 let S={user:null,rows:[],w:DEF.slice(),lk:Array(7).fill(false),f:{cat:'',reg:'',min:0,sort:'score'},t0:Date.now()};
+const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function log(type,sid,detail){ if(!S.user)return; sb.from('fs_events').insert({user_email:S.user,event_type:type,supplier_id:sid||null,detail:detail||{}}).then(()=>{}); }
 function secs(){return Math.round((Date.now()-S.t0)/1000);}
 
 function loginView(msg){
   $('#nav').style.display='none';
-  app.innerHTML=`<div class="card login"><h1>Sign in</h1><p class="sub">Private supplier study. Authorized users only.</p>
+  app.innerHTML=`<div class="card login"><h1>Sign in</h1><p class="sub">Private supplier study. Authorized users only.</p><p class="muted" style="font-size:12px">Usage notice: this portal records sign-in sessions, time on site, supplier rows opened, source links clicked and worksheet saves, linked to your email. The portal owner (Philos Kim) can review this activity.</p>
   <input id="em" type="email" placeholder="Email" autocomplete="username"><input id="pw" type="password" placeholder="Password" autocomplete="current-password">
   <button class="btn" id="go">Sign in</button><p class="muted" id="msg">${esc(msg||'')}</p></div>`;
   $('#go').onclick=async()=>{const email=$('#em').value.trim().toLowerCase();
@@ -30,7 +31,7 @@ async function boot(){
   const [r,m,p]=await Promise.all([sb.from('fs_suppliers').select('*'),sb.from('fs_meta').select('*'),sb.from('fs_weight_prefs').select('*').eq('user_email',em).maybeSingle()]);
   if(r.error){app.innerHTML=`<div class="card"><h2>Data not available</h2><p class="muted">${esc(r.error.message)}. Has schema_fs_v1.sql been run and seeded?</p></div>`;return;}
   S.rows=r.data||[]; (m.data||[]).forEach(x=>{if(x.key==='data_as_of')$('#asof').textContent=x.value;});
-  if(p.data&&p.data.weights?.length===7){S.w=p.data.weights;S.lk=p.data.locked||S.lk;}
+  if(p.data&&validW(p.data.weights,p.data.locked)){S.w=p.data.weights;S.lk=p.data.locked.map(Boolean);}
   S.t0=Date.now(); log('session_start',null,{ua:navigator.userAgent});
   setInterval(()=>log('session_ping',null,{seconds:secs(),kind:'heartbeat'}),60000);
   route();
@@ -44,16 +45,21 @@ function route(){const ws=location.hash.startsWith('#/worksheet');
   ws?worksheet():scorecard();}
 
 // --- weights: always total 100; locked stay fixed (same rebalance as canvas) ---
-function setW(i,v){
-  const lockedSum=S.w.reduce((a,x,j)=>a+(S.lk[j]&&j!==i?x:0),0);
-  const free=KEYS.map((_,j)=>j).filter(j=>j!==i&&!S.lk[j]);
-  v=Math.max(0,Math.min(Math.round(v),100-lockedSum)); if(!free.length)return; // nothing to absorb
-  const rem=100-lockedSum-v, cur=free.reduce((a,j)=>a+S.w[j],0);
-  free.forEach(j=>S.w[j]=cur>0?S.w[j]*rem/cur:rem/free.length);
-  S.w[i]=v; free.forEach(j=>S.w[j]=Math.round(S.w[j]));
-  const diff=100-S.w.reduce((a,b)=>a+b,0); if(diff){const j=free.reduce((b,j)=>S.w[j]>S.w[b]?j:b,free[0]);S.w[j]+=diff;}
-  savePrefs();
+function rebalance(w,lk,i,v){ // pure: returns new weights summing to 100; locked fixed
+  w=w.slice(); v=Number(v); if(!Number.isFinite(v))return w;
+  const lockedSum=w.reduce((a,x,j)=>a+(lk[j]&&j!==i?x:0),0);
+  const free=w.map((_,j)=>j).filter(j=>j!==i&&!lk[j]);
+  if(lk[i]||!free.length)return w; // nothing can absorb the change
+  v=Math.max(0,Math.min(Math.round(v),100-lockedSum));
+  const rem=100-lockedSum-v, cur=free.reduce((a,j)=>a+w[j],0);
+  free.forEach(j=>w[j]=cur>0?w[j]*rem/cur:rem/free.length);
+  w[i]=v; free.forEach(j=>w[j]=Math.round(w[j]));
+  let diff=100-w.reduce((a,b)=>a+b,0);
+  while(diff){const j=diff>0?free.reduce((b,j)=>w[j]>w[b]?j:b,free[0]):free.filter(j=>w[j]>0).reduce((b,j)=>w[j]>w[b]?j:b);const d=diff>0?diff:Math.max(diff,-w[j]);w[j]+=d;diff-=d;}
+  return w;
 }
+const validW=(w,lk)=>Array.isArray(w)&&w.length===7&&w.every(x=>Number.isInteger(x)&&x>=0&&x<=100)&&w.reduce((a,b)=>a+b,0)===100&&Array.isArray(lk)&&lk.length===7;
+function setW(i,v){S.w=rebalance(S.w,S.lk,i,v);savePrefs();}
 let pt; function savePrefs(){clearTimeout(pt);pt=setTimeout(()=>sb.from('fs_weight_prefs').upsert({user_email:S.user,weights:S.w,locked:S.lk,updated_at:new Date().toISOString()}).then(()=>{}),800);}
 const score=r=>KEYS.reduce((a,k,i)=>a+(r[k]||0)*S.w[i],0)/100;
 
@@ -87,18 +93,19 @@ function table(){
   let rows=S.rows.map(r=>({...r,_s:score(r)})).filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
   const so=S.f.sort; rows.sort((a,b)=>so==='score'?b._s-a._s:so==='cost'?(b.cost||0)-(a.cost||0):String(a[so]).localeCompare(b[so]));
   $('#tb').innerHTML=`<tr><th>#</th><th>Supplier</th><th>Cat</th><th>Country</th><th>Makes</th>${['Cap','Cert','Scale','US','Cost','Lead','Geo'].map(h=>`<th>${h}</th>`).join('')}<th>Score</th><th>US presence</th><th>Certs</th><th>Source</th></tr>`+
-  rows.map((r,n)=>`<tr class="r" data-id="${esc(r.id)}"><td>${n+1}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td>${r[k]??''}</td>`).join('')}<td class="sc">${r._s.toFixed(2)}</td><td>${esc(r.us_presence)}</td><td>${esc(r.certs_note)}</td><td>${r.url?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:''}</td></tr>`).join('');
+  rows.map((r,n)=>`<tr class="r" data-id="${esc(r.id)}"><td>${n+1}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td>${r[k]??''}</td>`).join('')}<td class="sc">${r._s.toFixed(2)}</td><td>${esc(r.us_presence)}</td><td>${esc(r.certs_note)}</td><td>${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:''}</td></tr>`).join('');
   document.querySelectorAll('tr.r').forEach(tr=>tr.onclick=e=>{if(e.target.tagName==='A'){log('source_click',tr.dataset.id,{url:e.target.href});return;}detail(tr.dataset.id);});
 }
 function detail(id){const r=S.rows.find(x=>x.id===id);if(!r)return;log('supplier_open',id,{name:r.name});
   $('#det').innerHTML=`<div class="card detail"><button class="btn sec" style="float:right" id="dx">×</button><h2>${esc(r.name)}</h2>
   <p class="muted">${esc(r.category)} · ${esc(r.country)} (${esc(r.region)})</p><p>${esc(r.what_they_make)}</p><p><b>US:</b> ${esc(r.us_presence)}</p><p><b>Certs:</b> ${esc(r.certs_note)}</p>
   <p>${KEYS.map((k,i)=>`${LBL[i]}: <b>${r[k]??'–'}</b>`).join(' · ')}</p><p>Weighted score: <b>${score(r).toFixed(2)}</b></p>
-  ${r.url?`<p><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}<a class="btn" href="#/worksheet?s=${encodeURIComponent(id)}">Open worksheet</a></div>`;
+  ${safeUrl(r.url)?`<p><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}<a class="btn" href="#/worksheet?s=${encodeURIComponent(id)}">Open worksheet</a></div>`;
   $('#dx').onclick=()=>$('#det').innerHTML='';}
 
 async function worksheet(){
-  const q=new URLSearchParams(location.hash.split('?')[1]||''); const sel=q.get('s')||(S.rows[0]||{}).id;
+  const q=new URLSearchParams(location.hash.split('?')[1]||''); let sel=q.get('s'); if(!S.rows.some(r=>r.id===sel))sel=(S.rows[0]||{}).id;
+  if(!sel){app.innerHTML='<div class="card"><p class="muted">No suppliers loaded yet.</p></div>';return;}
   const opts=S.rows.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.id)}" ${r.id===sel?'selected':''}>${esc(r.name)} (${esc(r.category)})</option>`).join('');
   app.innerHTML=`<h1>Supplier Qualification Worksheet</h1><p class="sub">Seven gates from short list to volume. Saved to shared worksheet.</p>
   <div class="card"><select id="sup" class="fld" style="max-width:420px">${opts}</select><div id="gates"></div><button class="btn" id="sv">Save</button> <span class="muted" id="st"></span></div>`;
@@ -107,11 +114,12 @@ async function worksheet(){
   $('#gates').innerHTML=GATES.map(([g,l])=>{const x=m[g]||{};return `<div class="gate"><b>${l}</b><select class="fld" data-g="${g}">${['Not started','In progress','Passed','Failed','N/A'].map(s=>`<option ${x.status===s?'selected':''}>${s}</option>`).join('')}</select>
   <input class="fld" data-e="${g}" placeholder="Evidence / notes" value="${esc(x.evidence||'')}"></div>`}).join('');
   log('worksheet_open',sel);
-  $('#sv').onclick=async()=>{const now=new Date().toISOString();
+  $('#sv').onclick=async()=>{$('#sv').disabled=true;const now=new Date().toISOString();
     const rows=GATES.map(([g])=>({supplier_id:sel,gate_id:g,status:$(`[data-g="${g}"]`).value,evidence:$(`[data-e="${g}"]`).value,updated_by:S.user,updated_at:now}));
-    const {error}=await sb.from('fs_worksheet').upsert(rows); $('#st').textContent=error?error.message:'Saved '+new Date().toLocaleTimeString(); if(!error)log('worksheet_save',sel);};
+    const {error}=await sb.from('fs_worksheet').upsert(rows); $('#st').textContent=error?error.message:'Saved '+new Date().toLocaleTimeString(); if(!error)log('worksheet_save',sel);$('#sv').disabled=false;};
 }
 if(C.GA4_MEASUREMENT_ID){const s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id='+C.GA4_MEASUREMENT_ID;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',C.GA4_MEASUREMENT_ID);}
 sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')S.user=null;});
 boot();
 })();
+
