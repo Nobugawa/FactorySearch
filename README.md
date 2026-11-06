@@ -1,4 +1,4 @@
-# FactorySearch v1.4.0
+# FactorySearch v1.4.1
 
 Public HYTORC supplier scorecard, Sources, and Study, plus a private qualification worksheet. Static site on Netlify. Research rows ship in `catalog.js`. Shared worksheet notes, per-account weights, and email-linked activity stay in Supabase (`fs_*` tables, same project as the job portal).
 
@@ -7,7 +7,7 @@ Anonymous visitors are not granted database access. The publishable key in `conf
 ## What is public
 Scorecard, Sources, and Study render from `catalog.js` (the original 34 suppliers, snapshotted from the database without worksheet or account fields, plus four Nov 6, 2026 China candidates). Anonymous weight changes stay in `localStorage`. They are not written to `fs_weight_prefs`, `fs_suppliers`, or `fs_events`.
 
-The Nov 2 list was spread across regions on purpose. Cost, lead time, and geo scores are assumptions, not proof that a non-China supplier is a better fit. The Nov 6 pages are a separate evidence pass. Suggested 1-5 scores are preliminary desk judgments, not qualifications or quotes. A US office is not verified shipment history. A certificate named on a page, or a registrar row whose expiry was not checked, is not a verified certificate. Price, MOQ, and volume willingness were not found.
+v1.4.1 is copy only: the Study, Sources, and scorecard describe coverage and score assumptions without the internal note about how China names were brought back in. No schema change and no GA4 change. Cost, lead time, and geography remain indicative assumptions, not quotations or measured outcomes. Suggested 1-5 scores are preliminary desk judgments. A US office is not verified shipment history. A certificate named on a page, or a registrar row whose expiry was not checked, is not a verified certificate. Price, MOQ, and volume willingness were not found. Source dates stay Nov 2, 2026 and Nov 6, 2026.
 
 Beijing Huade and Shandong Taifeng are not on the scorecard. A ~700 bar bolting-pump line was not confirmed, so they are not qualified bolting-pump matches. They are on the unscored watchlist with TZ Yuci.
 
