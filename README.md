@@ -1,4 +1,4 @@
-# FactorySearch v1.3.0
+# FactorySearch v1.3.1
 Password-gated HYTORC supplier scorecard + qualification worksheet (Philos Kim / Teddy Hume). Static site on Netlify, data in Supabase (`fs_*` tables, same project as the job portal).
 
 ## Setup (once)
@@ -32,5 +32,8 @@ Password setup: add `https://factorysearch.netlify.app/**` to Supabase Auth → 
 ## Sources view
 `#/sources` explains the original desk-research method, what was not done, and per-supplier evidence. Per-supplier discovery trail was not recorded and is labeled that way. Homepage re-check results (fs_meta `homepage_recheck`) are newly done checks, not original discovery.
 
-## Structured worksheet (v1.3.0)
+## Structured worksheet (v1.3.1)
 Run `migration_fs_v1_4_worksheet_details.sql` once (adds nullable `details jsonb` to `fs_worksheet`, object-only, ~20 KB cap). Until then the site keeps saving gate status + notes and shows expanded fields read-only. Tests: `node tests/worksheet.test.js`, `NODE_PATH=<jsdom> node tests/worksheet_dom.test.js`.
+
+## Releases
+Bump VERSION in config.js and the matching ?v= on every asset in index.html (tests/dom.test.js checks they match).

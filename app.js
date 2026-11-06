@@ -163,6 +163,7 @@ function rebalance(w,lk,i,v){ // pure: returns new weights summing to 100; locke
   while(diff){const j=diff>0?free.reduce((b,j)=>w[j]>w[b]?j:b,free[0]):free.filter(j=>w[j]>0).reduce((b,j)=>w[j]>w[b]?j:b);const d=diff>0?diff:Math.max(diff,-w[j]);w[j]+=d;diff-=d;}
   return w;
 }
+const setLocks=(lk,v)=>lk.map(()=>!!v); // lock state only; never touches weights
 const validW=(w,lk)=>Array.isArray(w)&&w.length===7&&w.every(x=>Number.isInteger(x)&&x>=0&&x<=100)&&w.reduce((a,b)=>a+b,0)===100&&Array.isArray(lk)&&lk.length===7;
 function setW(i,v){S.w=rebalance(S.w,S.lk,i,v);savePrefs();}
 let pt; function savePrefs(){clearTimeout(pt);pt=setTimeout(()=>sb.from('fs_weight_prefs').upsert({user_email:S.user,weights:S.w,locked:S.lk,updated_at:new Date().toISOString()}).then(()=>{}),800);}
@@ -173,7 +174,8 @@ function scorecard(){
   app.innerHTML=`<h1>Supplier scorecard</h1><p class="sub">${S.rows.length} screened candidates · preliminary 1–5 desk scores from public information (Nov 2, 2026), not audits or quotes · <a href="#/study">method</a></p>
   ${altCards()}
   <div class="card" style="margin-bottom:14px"><h2>Weights</h2><div class="weights" id="wts"></div>
-  <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div></div>
+  <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
+  <div class="wlocks"><span class="muted">Locks:</span> <button type="button" class="btn sec sm" id="lkall">Select all</button> <button type="button" class="btn sec sm" id="lknone">Unselect all</button> <span class="muted" style="font-size:12px">These buttons only check or uncheck the Lock boxes. Weights stay as they are and still total 100%.</span></div></div>
   <div class="filters"><select id="fc"><option value="">All categories</option>${cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
   <select id="fr"><option value="">All regions</option>${regs.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
   <label>Min score <input id="fm" type="number" step="0.1" min="0" max="5" style="width:70px"></label>
@@ -183,6 +185,7 @@ function scorecard(){
   [['#fc','cat'],['#fr','reg'],['#fs','sort']].forEach(([s,k])=>$(s).onchange=e=>{S.f[k]=e.target.value;table();});
   $('#fm').oninput=e=>{S.f.min=+e.target.value||0;table();};
   $('#rst').onclick=()=>{S.w=DEF.slice();S.lk=Array(7).fill(false);savePrefs();weights();table();};
+  const setAllLocks=v=>{S.lk=setLocks(S.lk,v);savePrefs();weights();};$('#lkall').onclick=()=>setAllLocks(true);$('#lknone').onclick=()=>setAllLocks(false);
   weights();table();
 }
 function weights(){

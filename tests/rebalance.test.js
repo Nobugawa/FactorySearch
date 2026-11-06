@@ -14,4 +14,5 @@ ok(rebalance(D,Array(7).fill(false),0,'33.6')[0]===34,'typed string');
 for(let k=0;k<20000;k++){const lk=Array.from({length:7},()=>Math.random()<.3);let ww=D.slice();for(let s=0;s<5;s++)ww=rebalance(ww,lk,Math.floor(Math.random()*7),Math.random()*130-15);
  ok(sum(ww)===100&&ww.every(x=>Number.isInteger(x)&&x>=0)&&D.every((x,j)=>!lk[j]||ww[j]===x),'fuzz '+ww+' '+lk);if(fails>3)break;}
 ok(validW(D,Array(7).fill(false))&&!validW([1,2],[])&&!validW([50,50,50,0,0,0,0],Array(7).fill(0)),'validW');
+{const all=Array(7).fill(true);for(let i=0;i<7;i++)for(const v of [0,13,50,100,-4,'x'])ok(JSON.stringify(rebalance(D,all,i,v))===JSON.stringify(D),'all locked unchanged '+i+' '+v);}
 console.log(n,'checks',fails,'failures');

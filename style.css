@@ -130,3 +130,4 @@ footer{position:static;width:100%;max-width:none;background:#fff;border-top:1px 
 .wsbar{position:sticky;bottom:0;background:#f4f6fa;padding:10px 0;border-top:1px solid #e5e8ef;z-index:3}.dirty{color:#8a5a00;font-weight:600}
 .callout.warn{background:#fff6e0;border-left-color:#c58a00}
 @media(max-width:900px){.wgrid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.wgrid{grid-template-columns:1fr}.gst{margin-left:0;width:100%}}
+.btn.sm{padding:5px 10px;font-size:12px}.wlocks{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}

@@ -4,7 +4,7 @@ const html=fs.readFileSync(R+'index.html','utf8').replace(/<script[^>]*src=[^>]*
 const rows=JSON.parse(fs.readFileSync(process.env.FS_ROWS||'/workspace/fs_suppliers_seed.json','utf8'));
 let f=0,n=0;const ok=(c,m)=>{n++;if(!c){f++;console.log('FAIL',m)}};const tick=()=>new Promise(r=>setTimeout(r,30));
 function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.netlify.app/'+(hash||''),runScripts:'outside-only'});const w=dom.window;const logged=[];
-  const q=(data)=>{const o={select:()=>o,eq:()=>o,maybeSingle:()=>Promise.resolve({data:null}),insert:(x)=>{logged.push(x);return Promise.resolve({})},upsert:()=>Promise.resolve({}),then:(res)=>res({data,error:null})};return o;};
+  const q=(data)=>{const o={select:()=>o,eq:()=>o,maybeSingle:()=>Promise.resolve({data:null}),insert:(x)=>{logged.push(x);return Promise.resolve({})},upsert:(x)=>{(w.__ups=w.__ups||[]).push(x);return Promise.resolve({})},then:(res)=>res({data,error:null})};return o;};
   w.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session}}),signOut:async()=>{},signInWithPassword:async()=>({error:{message:'bad'}}),updateUser:async()=>({}),onAuthStateChange:()=>{}},
     from:(t)=>q(t==='fs_suppliers'?rows:t==='fs_meta'?[{key:'data_as_of',value:'2026-11-02'}]:[])})};
   w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
@@ -23,11 +23,19 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(tb.tHead&&tb.tHead.rows.length===1,'thead present');ok(tb.tBodies[0].rows.length===34,'34 body rows');
  ok(tb.firstElementChild.tagName==='THEAD','thead before tbody');ok(!tb.tBodies[0].querySelector('th'),'no header cells in body');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.3.0','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.3.1','version');
  ok(!L.some(x=>JSON.stringify(x).toLowerCase().includes('password')),'no password in events');
  ok(tb.querySelectorAll('td.u').length===34&&[...tb.querySelectorAll('td.u a')].every(a=>a.textContent.length>0&&!a.textContent.includes('…')),'full URL text in source cells');
  const css=fs.readFileSync(R+'style.css','utf8');ok(/footer\{position:static/.test(css)&&/overflow-wrap:anywhere/.test(css)&&/#tb\{min-width:1480px\}/.test(css),'css: footer in flow, wrap, min-width');
  ok(!/table td\{display:none/.test(css),'no mobile rule hiding table cells');
+ {const boxes=()=>[...D.querySelectorAll('[data-l]')],wts=()=>[...D.querySelectorAll('[data-n]')].map(e=>+e.value);const before=wts();
+  ok(/only check or uncheck the Lock boxes/.test(D.body.textContent),'lock buttons explained');
+  D.getElementById('lkall').click();ok(boxes().length===7&&boxes().every(b=>b.checked),'select all locks');ok(JSON.stringify(wts())===JSON.stringify(before)&&wts().reduce((a,b)=>a+b,0)===100,'weights unchanged after select all');
+  ok([...D.querySelectorAll('[data-i]')].every(e=>e.disabled),'sliders disabled when all locked');
+  await new Promise(r=>setTimeout(r,900));const lastUp=(w.__ups||[]).filter(x=>x&&x.locked).pop();ok(lastUp&&lastUp.locked.every(Boolean)&&JSON.stringify(lastUp.weights)===JSON.stringify(before),'locks persisted to prefs');
+  D.getElementById('lknone').click();ok(boxes().every(b=>!b.checked)&&JSON.stringify(wts())===JSON.stringify(before),'unselect all; weights unchanged');
+  D.getElementById('lkall').click();D.getElementById('rst').click();ok(boxes().every(b=>!b.checked)&&JSON.stringify(wts())==='[25,15,10,10,20,10,10]','return to defaults unlocks all');
+  const vs=new Set([...fs.readFileSync(R+'index.html','utf8').matchAll(/\?v=([0-9.]+)/g)].map(m=>m[1]));ok(vs.size===1&&('v'+[...vs][0])===w.FS_CONFIG.VERSION,'asset cache-bust version matches config');}
  w.location.hash='#/study';await tick();D=w.document;const st=D.body.textContent;
  ok(/Capability is catalog fit, not an audit/.test(st),'capability vs audit');ok(/Private label/.test(st)&&/Questions for discussion/.test(st)&&/Qualification method/.test(st),'study sections');
  ok(/cannot by itself qualify a supplier/.test(st)&&/used earlier, to find and screen candidates/.test(st)&&!/next deepening step/.test(st),'study customs wording');
