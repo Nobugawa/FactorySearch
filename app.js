@@ -5,17 +5,41 @@ function authUrlState(hash,search){const h=new URLSearchParams((hash||'').replac
   return {recovery:h.get('type')==='recovery'||q.has('setup'), error:h.get('error_description')||q.get('error_description')||'', hasTokens:h.has('access_token')||h.has('refresh_token')||q.has('code')};}
 const AUTH0=authUrlState(location.hash,location.search);
 const sb=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'implicit',detectSessionInUrl:true,persistSession:true}});
-const cleanUrl=()=>history.replaceState(null,'',location.pathname);
-const $=s=>document.querySelector(s), app=$('#app'); $('#ver').textContent=C.VERSION;
+const cleanUrl=()=>history.replaceState(null,'',location.pathname+(location.hash||'').split('?')[0].replace(/^#access_token.*$/,'').replace(/^#error.*$/,''));
+const $=s=>document.querySelector(s), app=$('#app'); if($('#ver')) $('#ver').textContent=C.VERSION;
 const allowed=C.ALLOWED_EMAILS.filter(Boolean).map(e=>e.toLowerCase());
 const KEYS=['cap','cert','scale','usexp','cost','lead','geo'], LBL=['Capability','Certs','Scale','US exp','Cost','Lead time','Geo risk'];
 const DEF=[25,15,10,10,20,10,10];
-const GATES=[['drawing','Drawing fit'],['certs','Certificates'],['customs','Customs history'],['fa','First article'],['audit','Plant/audit'],['commercial','Commercial'],['pilot','Pilot to volume']];
-let S={user:null,rows:[],w:DEF.slice(),lk:Array(7).fill(false),f:{cat:'',reg:'',min:0,sort:'score'},t0:Date.now()};
+const LOCAL_W='fs_local_weights_v1';
+let S={user:null,rows:[],w:DEF.slice(),lk:Array(7).fill(false),f:{cat:'',reg:'',min:0,sort:'score'},t0:Date.now(),open:null,banner:'',logging:false,ping:null};
 const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function log(type,sid,detail){ if(!S.user)return; sb.from('fs_events').insert({user_email:S.user,event_type:type,supplier_id:sid||null,detail:detail||{}}).then(()=>{}); }
 function secs(){return Math.round((Date.now()-S.t0)/1000);}
+function syncTopbar(){const el=document.querySelector('.top'); if(el&&el.offsetHeight) document.documentElement.style.setProperty('--topbar', el.offsetHeight+'px');}
+function paintChrome(){
+  $('#ver').textContent=C.VERSION;
+  const inn=$('#signin'), out=$('#logout'), nav=$('#nav');
+  if(nav) nav.style.display='';
+  if(inn) inn.hidden=!!S.user;
+  if(out) out.hidden=!S.user;
+  const n=$('#notice');
+  if(n) n.textContent=S.user
+    ? 'Signed in as '+S.user+'. Session time, supplier rows opened, source clicks, and worksheet saves are linked to this email and visible to the owner.'
+    : 'Viewing does not require an account. The shared worksheet, notes, and saved weights stay private to signed-in accounts.';
+  syncTopbar();
+}
+function bannerHtml(){return S.banner?`<div class="callout warn" role="status">${esc(S.banner)}</div>`:'';}
+function loadLocalW(){
+  try{const o=JSON.parse(localStorage.getItem(LOCAL_W)||''); if(validW(o.w,o.lk)){S.w=o.w; S.lk=o.lk.map(Boolean);}}catch(e){}
+}
+function startSessionLog(){
+  if(S.logging||!S.user) return;
+  S.logging=true; S.t0=Date.now();
+  log('session_start',null,{ua:navigator.userAgent});
+  S.ping=setInterval(()=>{if(S.user)log('session_ping',null,{seconds:secs(),kind:'heartbeat'});},60000);
+}
+function stopSessionLog(){if(S.ping){clearInterval(S.ping); S.ping=null;} S.logging=false;}
 
 function pwField(id,label,ac,ph){return `<label class="fl" for="${id}">${label}</label><div class="pwwrap"><input id="${id}" type="password" placeholder="${ph}" autocomplete="${ac}" autocapitalize="off" spellcheck="false"><button type="button" class="pwtog" data-for="${id}" aria-controls="${id}" aria-pressed="false" aria-label="Show ${label.toLowerCase()}">Show</button></div>`;}
 function wirePwToggles(){document.querySelectorAll('.pwtog').forEach(b=>b.onclick=()=>{const i=document.getElementById(b.dataset.for),show=i.type==='password';
@@ -32,49 +56,84 @@ function setPasswordView(em){
     if(error){$('#setpw').disabled=false;$('#msg').textContent=error.message;return;}
     pwSetup=false; boot();};
 }
-function loginView(msg){
-  $('#nav').style.display='none';
-  app.innerHTML=`<div class="card login"><h1>Sign in</h1><p class="sub">Private supplier study. Authorized users only.</p><p class="muted" style="font-size:12px">Usage notice: this portal records sign-in sessions, time on site, supplier rows opened, source links clicked and worksheet saves, linked to your email. The portal owner (Philos Kim) can review this activity.</p>
+function signInView(msg, lead){
+  if($('#nav')) $('#nav').style.display='';
+  app.innerHTML=`<div class="card login"><h1>Sign in</h1>
+  <p class="sub">The scorecard, Sources, and Study are public. Sign in to open the shared worksheet and to save weights to your account.</p>
+  ${lead?`<div class="callout">${esc(lead)}</div>`:''}
+  <p class="muted" style="font-size:12px">After you sign in, this portal records session time, supplier rows opened, source links clicked, and worksheet saves, linked to your email. The portal owner (Philos Kim) can review that signed-in activity. Browsing while signed out is not tied to an account and is not written to the shared database.</p>
+  ${bannerHtml()}
   <label class="fl" for="em">Email</label><input id="em" type="email" placeholder="Email" autocomplete="username">${pwField('pw','Password','current-password','Password')}
   <button class="btn" id="go">Sign in</button><p class="muted" id="msg" role="status">${esc(msg||'')}</p></div>`; wirePwToggles();
   $('#go').onclick=async()=>{const email=$('#em').value.trim().toLowerCase();
-    if(!allowed.includes(email)){$('#msg').textContent='This portal is private.';return;}
+    if(!allowed.includes(email)){$('#msg').textContent='This account is not an editor.';return;}
+    $('#go').disabled=true;
     const {error}=await sb.auth.signInWithPassword({email,password:$('#pw').value});
-    if(error)$('#msg').textContent=error.message; else {$('#pw').value='';boot();}};
+    if(error){$('#go').disabled=false;$('#msg').textContent=error.message;return;}
+    $('#pw').value=''; pwSetup=false; boot();};
   $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#go').click();};
 }
 let pwSetup=AUTH0.recovery;
+function applyCatalog(){
+  const cat=window.FS_CATALOG;
+  if(!cat||!Array.isArray(cat.suppliers)||!cat.suppliers.length) return false;
+  S.rows=cat.suppliers.slice();
+  S.recheck=cat.recheck||{results:{}};
+  const asof=$('#asof');
+  if(asof) asof.textContent='Original list '+cat.original_as_of+' · China additions '+cat.china_as_of+' (desk research)';
+  return true;
+}
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();
-  if(AUTH0.hasTokens||AUTH0.error||AUTH0.recovery)cleanUrl(); AUTH0.hasTokens=false;
-  if(AUTH0.error){const m=AUTH0.error;AUTH0.error='';pwSetup=false;return loginView('Link problem: '+m+'. Ask the owner for a new setup link.');}
-  if(!session){pwSetup=false;return loginView();}
-  const em=(session.user.email||'').toLowerCase();
-  if(!allowed.includes(em)){await sb.auth.signOut();return loginView('This portal is private. Your account is not authorized.');}
-  if(pwSetup)return setPasswordView(em);
-  S.user=em; $('#nav').style.display='';
-  const [r,m,p]=await Promise.all([sb.from('fs_suppliers').select('*'),sb.from('fs_meta').select('*'),sb.from('fs_weight_prefs').select('*').eq('user_email',em).maybeSingle()]);
-  if(r.error){app.innerHTML=`<div class="card"><h2>Data not available</h2><p class="muted">${esc(r.error.message)}. Has schema_fs_v1.sql been run and seeded?</p></div>`;return;}
-  S.rows=r.data||[]; (m.data||[]).forEach(x=>{if(x.key==='data_as_of')$('#asof').textContent=x.value; if(x.key==='homepage_recheck'){try{S.recheck=JSON.parse(x.value);}catch(e){}}});
-  if(p.data&&validW(p.data.weights,p.data.locked)){S.w=p.data.weights;S.lk=p.data.locked.map(Boolean);}
-  S.t0=Date.now(); log('session_start',null,{ua:navigator.userAgent});
-  setInterval(()=>log('session_ping',null,{seconds:secs(),kind:'heartbeat'}),60000);
+  if(AUTH0.hasTokens||AUTH0.error||AUTH0.recovery){cleanUrl(); AUTH0.hasTokens=false;}
+  if(!applyCatalog()){app.innerHTML='<div class="card"><h2>Research snapshot missing</h2><p class="muted">catalog.js did not load. The public pages do not read supplier rows from the database.</p></div>';return;}
+  if(AUTH0.error){S.banner='Link problem: '+AUTH0.error+'. Ask the owner for a new setup link.'; AUTH0.error=''; pwSetup=false;}
+  let sessionUser=null;
+  if(session){
+    const em=(session.user.email||'').toLowerCase();
+    if(!allowed.includes(em)){await sb.auth.signOut(); S.banner=(S.banner?S.banner+' ':'')+'That account is not authorized to edit. The research pages stay available.';}
+    else sessionUser=em;
+  }
+  if(sessionUser&&pwSetup) return setPasswordView(sessionUser);
+  pwSetup=false;
+  if(sessionUser){
+    S.user=sessionUser;
+    const p=await sb.from('fs_weight_prefs').select('*').eq('user_email',sessionUser).maybeSingle();
+    if(p.data&&validW(p.data.weights,p.data.locked)){S.w=p.data.weights; S.lk=p.data.locked.map(Boolean);}
+    startSessionLog();
+  }else{
+    S.user=null; stopSessionLog(); loadLocalW();
+  }
+  paintChrome();
   route();
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')log('session_ping',null,{seconds:secs(),kind:'hidden'});});
 window.addEventListener('beforeunload',()=>log('session_ping',null,{seconds:secs(),kind:'unload'}));
-$('#logout').onclick=async e=>{e.preventDefault();log('session_end',null,{seconds:secs()});await sb.auth.signOut();S.user=null;loginView();};
+window.addEventListener('resize',syncTopbar);
+$('#logout').onclick=async e=>{e.preventDefault();
+  if(S.wsDirty&&!confirm('You have unsaved worksheet changes. Sign out without saving?'))return;
+  log('session_end',null,{seconds:secs()});
+  await sb.auth.signOut();
+  S.user=null; S.wsDirty=false; stopSessionLog(); loadLocalW(); paintChrome();
+  if(location.hash.startsWith('#/worksheet')||location.hash.startsWith('#/signin')) history.replaceState(null,'',location.pathname+'#/');
+  lastHash=location.hash; route();};
 let lastHash=location.hash;
-window.addEventListener('hashchange',()=>{if(!S.user)return; if(S.wsDirty&&!confirm('You have unsaved worksheet changes. Leave without saving?')){history.replaceState(null,'',lastHash||'#/worksheet');return;} S.wsDirty=false; lastHash=location.hash; route();});
+window.addEventListener('hashchange',()=>{if(S.wsDirty&&!confirm('You have unsaved worksheet changes. Leave without saving?')){history.replaceState(null,'',lastHash||'#/worksheet');return;} S.wsDirty=false; lastHash=location.hash; route();});
 window.addEventListener('beforeunload',e=>{if(S.wsDirty){e.preventDefault();e.returnValue='';}});
-function route(){const h=location.hash, v=h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':'score';
+function route(){const h=location.hash, v=h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':h.startsWith('#/signin')?'in':'score';
   document.querySelectorAll('nav a[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
-  v==='ws'?worksheet():v==='src'?sources():v==='study'?study():scorecard();}
+  if(v==='in'&&S.user){history.replaceState(null,'',location.pathname+'#/'); lastHash='#/'; return scorecard();}
+  if(v==='ws') return S.user?worksheet():signInView('', 'The shared worksheet and its notes are visible only to signed-in editors. Nothing on that worksheet is in the public snapshot.');
+  if(v==='in') return signInView('');
+  if(v==='src') return sources();
+  if(v==='study') return study();
+  scorecard();
+}
 const ALTS=[
- {fam:'Hydraulics (pumps, power packs, valves)',lead:'HAWE Hydraulik (Germany)',leadWhy:'Public catalog shows compact high-pressure pumps and power packs up to 700 bar, the closest catalog fit to bolting-tool pumps among the 34. US entity: HAWE North America.',
+ {fam:'Hydraulics (pumps, power packs, valves)',lead:'HAWE Hydraulik (Germany)',leadWhy:'Public catalog shows compact high-pressure pumps and power packs up to 700 bar, the closest catalog fit to bolting-tool pumps on the original list. US entity: HAWE North America. Nov 6 China hydraulics names were not added because a 700 bar line was not confirmed.',
   alt:'Yuken Kogyo or Kawasaki Precision Machinery (Japan)',altWhy:'Established pump and valve makers outside China with US offices (Yuken America, KPM USA). Considered for geographic spread, not because their parts are known to match HAWE units.',
-  note:'Bosch Rexroth scores highest overall but is broader than this need. Jiangsu Hengli (China) is an option for cylinders, with tariff exposure to be checked.'},
- {fam:'Forgings / castings',lead:'Bharat Forge (India)',leadWhy:'Large closed-die forging and machining group with a US sales arm (Bharat Forge America). Considered as a non-China option for volume forgings.',
+  note:'Bosch Rexroth scores highest overall but is broader than this need. Jiangsu Hengli (China) was the only China hydraulics name on the Nov 2 list. Tariff exposure is an assumption to check, not a measured cost.'},
+ {fam:'Forgings / castings',lead:'Bharat Forge (India)',leadWhy:'Large closed-die forging and machining group with a US sales arm (Bharat Forge America). Considered as a non-China option for volume forgings. That is a diversification choice, not proof it is a better fit than a China forge.',
   alt:'Hirschvogel (Germany) or voestalpine BÖHLER (Austria)',altWhy:'European options for high-alloy or critical grades (for example reaction-arm material), at an expected higher unit price.',note:''},
  {fam:'Precision machining',lead:'Sansera Engineering or Craftsman Automation (India)',leadWhy:'Precision machining groups with automotive/aerospace work on their public sites. Considered for cost and to pair with Indian forging where practical.',
   alt:'Hirschvogel (machining) or Zollern (Germany)',altWhy:'Forge-plus-machine or cast-plus-machine in one supplier, which can cut handoffs. Ashot Ashkelon (Israel) noted for the tightest tolerances.',note:''}];
@@ -98,24 +157,34 @@ const CHANNELS={
   ['KOTRA / buyKOREA (Korea)','https://buykorea.org/','Korean manufacturers by category to deepen the thin Korea list. KOTRA main site: kotra.or.kr.','Directory listing is self-reported, not verified capability.'],
   ['PTC ASIA (Shanghai, power transmission & hydraulics)','https://www.ptc-asia.com/index-en.html','Hydraulics and transmission exhibitors in China and Asia.','Exhibitor list not yet located on the site; same directory caveat.'],
   ['EMO Hannover (metalworking)','https://emo-hannover.de/en/','European and global machining and machine-tool exhibitors.','Same directory caveat.']]};
+function evidenceHtml(r){return (r.evidence||[]).map(e=>safeUrl(e[0])?`<div class="evitem"><a href="${esc(e[0])}" target="_blank" rel="noopener">${esc(e[0])}</a><div>${esc(e[1])}</div><div class="muted">${esc(e[2])}</div></div>`:'').join('');}
 function sources(){
   const rc=S.recheck||{results:{}}; log('sources_open');
-  app.innerHTML=`<h1>Sources</h1><p class="sub">Research channels for this short list, and what each link does and does not prove. See <a href="#/study">Study</a> for the full method.</p>
+  const cat=window.FS_CATALOG||{};
+  app.innerHTML=`<h1>Sources</h1><p class="sub">Research channels for this short list, and what each link does and does not prove. The Nov 6 China pass is a separate set of pages from the Nov 2 list. See <a href="#/study">Study</a> for the method.</p>
+  ${bannerHtml()}
   <div class="card" style="margin-bottom:14px"><h2>Used in this screening (desk pass, Nov 2, 2026)</h2>
   <table class="tbl"><thead><tr><th>Channel</th><th>How it was used</th><th>Limitation</th></tr></thead><tbody>
   ${CHANNELS.used.map(c=>`<tr><td><b>${esc(c[0])}</b></td><td>${esc(c[1])}</td><td>${esc(c[2])}</td></tr>`).join('')}</tbody></table>
-  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. Which reference first surfaced each individual supplier was not recorded.</p></div>
+  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. Which reference first surfaced each individual supplier was not recorded. The list was spread across regions on purpose. That diversification is not proof that a non-China supplier is a better fit.</p></div>
+  <div class="card" style="margin-bottom:14px"><h2>China pass (Nov 6, 2026), separate evidence</h2>
+  <p>Official company sites, one Shenzhen exchange filing, and one registrar record. No contact and no quotes. Price, MOQ, and willingness to take HYTORC volumes were not found. Four names were added to the scorecard (Pacific Precision Forging, Leap, Shuanghuan, Xusheng). Beijing Huade and Shandong Taifeng are not on the scorecard: a ~700 bar bolting-pump line was not confirmed, so they are not qualified bolting-pump matches. A US office or US-base claim is not verified shipment history. A certificate named on a page, or a registrar row whose expiry was not checked, is not a verified certificate.</p></div>
   <div class="card" style="margin-bottom:14px"><h2>Planned research channels (not yet checked)</h2>
   <p class="muted" style="margin-top:-6px">Named in the study as the next research step. Customs-data platforms can both find new candidates and screen or validate existing ones; exhibitor lists mainly add candidates. None of these has been searched for any supplier yet. Links are to the public service or event site (opened Nov 6, 2026).</p>
   <table class="tbl"><thead><tr><th>Channel</th><th>What would be checked</th><th>Limitation</th></tr></thead><tbody>
-  ${CHANNELS.planned.map(c=>`<tr><td><b>${esc(c[0])}</b><br><a href="${esc(c[1])}" target="_blank" rel="noopener">${esc(c[1].replace(/^https?:\/\//,''))}</a></td><td>${c[2]}</td><td>${esc(c[3])}</td></tr>`).join('')}</tbody></table></div>
-  <div class="card wrap tblwrap"><h2>Per-supplier sources</h2><table class="tbl"><thead><tr><th>Supplier</th><th>Found via</th><th>Company URL</th><th>Original check (Nov 2)</th><th>Re-check (${esc(rc.checked||'—')}, automated)</th><th>What the URL supports</th></tr></thead><tbody>
-  ${S.rows.slice().sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})).map(r=>{const x=rc.results[r.url]||'';return `<tr><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td>
-  <td>Known industry name + company website. Specific discovery trail not recorded.</td>
-  <td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:'—'}</td>
-  <td>${esc(r.url_check===200?'Site responded':(r.url_check??'not recorded'))}</td><td>${esc(x?(x.split(' ')[0]==='200'?'Site responded':'HTTP '+x.split(' ')[0]+' (likely blocks scripts)'):'not rechecked')}</td>
-  <td>Company exists; product family. Homepage only. Not a product, certificate, or customs record.</td></tr>`}).join('')}</tbody></table>
-  <p class="muted" style="font-size:12px">Re-check is a later scripted page load showing the site responded. It was not part of the original discovery.</p></div>`;
+  ${CHANNELS.planned.map(c=>`<tr><td><b>${esc(c[0])}</b><br><a href="${esc(c[1])}" target="_blank" rel="noopener">${esc(c[1])}</a></td><td>${c[2]}</td><td>${esc(c[3])}</td></tr>`).join('')}</tbody></table></div>
+  <div class="card tblwrap"><h2>Per-supplier sources</h2><table class="tbl"><thead><tr><th>Supplier</th><th>Pass</th><th>Found via</th><th>Company URL</th><th>URL check on that pass</th><th>Re-check (${esc(rc.checked||'—')}, automated)</th><th>What the URL supports</th></tr></thead><tbody>
+  ${S.rows.slice().sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})).map(r=>{const x=rc.results[r.url]||''; const china=r.pass==='2026-11-06';
+    const check=r.url_check===200?(china?'Opened in the Nov 6 pass (HTTP 200)':'Site responded'):(r.url_check==null?'not recorded':esc(r.url_check));
+    return `<tr><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.pass||'')}</td>
+  <td>${china?evidenceHtml(r)+'<p class="muted">Nov 6, 2026 desk pass. This evidence is not the Nov 2 discovery trail.</p>':'Known industry name + company website. Specific discovery trail was not recorded on the Nov 2 pass.'}</td>
+  <td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:'—'}</td>
+  <td>${check}</td><td>${china?'Not part of the Nov 5 recheck.':esc(x?(x.split(' ')[0]==='200'?'Site responded':'HTTP '+x.split(' ')[0]+' (likely blocks scripts)'):'not rechecked')}</td>
+  <td>${china?'Pages opened on Nov 6 support the product family and the claims in the evidence column. They do not prove price, MOQ, volume willingness, customs shipments, or a current certificate.':'Company exists; product family. Homepage only. Not a product, certificate, or customs record.'}</td></tr>`;}).join('')}</tbody></table>
+  <p class="muted" style="font-size:12px">The Nov 5 recheck is a later scripted page load showing the site responded. It was not part of the original Nov 2 discovery, and it does not cover the Nov 6 China pages.</p></div>
+  <div class="card watchcard"><h2>Watchlist sources, not scored</h2>
+  ${(cat.watchlist||[]).map(w=>`<article class="watchitem"><h3>${esc(w.name)} <span class="tag alt2">${esc(w.id)}</span></h3><p>${esc(w.why)}</p><p class="muted">${esc(w.checked)}</p>${safeUrl(w.url)?`<p class="u"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>`:''}</article>`).join('')}
+  </div>`;
 }
 const RUBRIC=[['Capability','25%','Clear public fit to the part family (e.g. HAWE compact ~700 bar packs)','Makes related products; fit to HYTORC geometry unproven from the site','Wrong category or no public evidence of the process'],
  ['Certs','15%','ISO / IATF / AS9100 named on site for the relevant scope (still unverified)','Quality system mentioned without a named standard','Nothing found'],
@@ -126,28 +195,37 @@ const RUBRIC=[['Capability','25%','Clear public fit to the part family (e.g. HAW
  ['Geo risk','10%','Lower concentration / tariff / disruption risk','Moderate','Higher; single-country exposure']];
 function study(){ log('study_open');
   const li=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
-  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research pass, Nov 2, 2026. Live controls are on <a href="#/">Scorecard</a> and <a href="#/worksheet">Worksheet</a>; channels on <a href="#/sources">Sources</a>.</p>
+  const orig=S.rows.filter(r=>r.pass==='2026-11-02'), add=S.rows.filter(r=>r.pass==='2026-11-06');
+  const ncat=(rows,c)=>rows.filter(r=>r.category===c).length;
+  const chinaOrig=orig.filter(r=>r.country==='China');
+  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Original desk research pass, Nov 2, 2026, plus a separate China desk pass on Nov 6, 2026. Live controls are on <a href="#/">Scorecard</a>. The shared <a href="#/worksheet">worksheet</a> is private to signed-in editors. Channels are on <a href="#/sources">Sources</a>.</p>
+  ${bannerHtml()}
   <div class="card study">
   <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: real manufacturers, a scorecard that can be re-weighted, and alternative candidates per part family rather than a single low-cost bet. Three part families that are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized.</p>
-  <p>Geography: China, Taiwan, Korea, Japan, India and Europe (Germany, Austria, Italy, Poland, Czech Republic, Israel), chosen for where each part family is strong rather than lowest cost alone. 34 suppliers: 13 hydraulics, 12 forgings/castings, 9 precision machining.</p>
-  <h2>How scores were set</h2><p>Each of the seven scores is a 1–5 desk judgment from public websites only: no quotes, plant visits, or certificate downloads. Default weights total 100 and can be changed on the Scorecard.</p>
+  <p>The Nov 2 pass listed ${orig.length} suppliers (${ncat(orig,'Hydraulics')} hydraulics, ${ncat(orig,'Forgings/Castings')} forgings/castings, ${ncat(orig,'Precision machining')} precision machining), of which ${chinaOrig.length} is in China (${chinaOrig.map(r=>esc(r.name)).join(', ')||'none'}). Geography on that pass covered China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, Czech Republic, Israel). The scorecard now also lists ${add.length} China candidates from Nov 6.</p>
+  <h2>The original list was diversification-biased</h2>
+  <p>Nov 2 was built to spread the short list across regions, so China was not the main search. Cost, lead time, and geo-risk scores assume tariff exposure, ocean freight, and single-country concentration. Those are planning assumptions. They are not quotes, transit measurements, or proof that a non-China supplier is a better fit. Changing the weights changes the ranking because the assumptions change, not because new factory evidence arrived.</p>
+  <h2>China additions, Nov 6, 2026</h2>
+  <p>A later desk pass added ${add.map(r=>esc(r.id+' '+r.name)).join('; ')}. The pages, filing, and registrar record from that pass are a different evidence set from Nov 2. No supplier was contacted and no quote was requested. Price, MOQ, and willingness to take HYTORC volumes were not found. The suggested 1-5 scores are preliminary judgments on the original rubric. They are not qualifications and not quotes.</p>
+  <p>A US office, a US manufacturing claim, or an export sentence is not verified US shipment history. A certificate named on a website, or a registrar row whose expiry was not checked, is not a verified certificate.</p>
+  <p>Beijing Huade and Shandong Taifeng were reviewed in the same pass and left off the scorecard. A ~700 bar bolting-pump line was not confirmed for either, so they are not qualified bolting-pump matches. They appear only on the watchlist, unscored. TZ Yuci is on that watchlist because its profile page was not opened.</p>
+  <h2>How scores were set</h2><p>Each of the seven scores is a 1-5 desk judgment from public websites only: no quotes, plant visits, or certificate downloads. Default weights total 100 and can be changed on the Scorecard. For the Nov 6 rows, a 5 on certificates means a named standard was found, not that the certificate was verified.</p>
   <div class="wrap"><table class="tbl"><thead><tr><th>Criterion</th><th>Default weight</th><th>5 (strong)</th><th>3 (mixed)</th><th>1 (weak)</th></tr></thead><tbody>${RUBRIC.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="callout" style="margin-top:10px"><b>Capability is catalog fit, not an audit.</b> It reflects product and process fit from public material, not plant quality. Certifications are expected from public text, not verified. Quality is established through the qualification steps below.</div>
   <h2>Landed cost assumption</h2><p>The Cost score is meant to reflect expected landed cost, not factory price alone:</p>
   <p class="eq">Landed cost ≈ unit price + freight + insurance + duties and any additional tariffs (e.g. Section 301 / 232 where applicable) + broker fees</p>
-  ${li(['Tariff treatment varies by HTS line, origin and date, and has changed often. Rates were not verified line by line in this pass; each Cost cell is a starting flag, not a quote.','Europe tends to score lower on Cost (higher unit price) and higher on Capability and Geo risk. That tradeoff is intentional and adjustable with the weights.','Steel and aluminum content can shift forging and casting costs where metal tariffs apply.'])}
+  ${li(['Tariff treatment varies by HTS line, origin and date, and has changed often. Rates were not verified line by line in this pass; each Cost cell is a starting flag, not a quote.','Europe tends to score lower on Cost (higher unit price) and higher on Capability and Geo risk. That tradeoff is an assumption and is adjustable with the weights. It is not proof that a non-China supplier is a better fit.','Steel and aluminum content can shift forging and casting costs where metal tariffs apply.'])}
   <h2>Proposed sourcing alternatives</h2><p>Summarized on the Scorecard. Lead and alternative candidates per part family are a starting point. They are not qualified and not interchangeable until drawings, specs and trials confirm fit.</p>
   <h2>Beyond factories: private label and agents</h2>
   ${li(['<b>Private label / white label:</b> buying a ready-made or lightly adapted product under the HYTORC name. Private label usually implies some exclusivity or customization; white label is a generic product many brands rebrand.','<b>Where it fits:</b> standard or near-standard items (hoses, fittings, some valves, C-parts, packaging) more than housings, reaction arms, or compact high-pressure pumps that must match tool geometry.','<b>Industrial distributors</b> with private-label programs can cover the standardized slice; they are a weaker fit for unique hydraulic power packs.','<b>Sourcing agents / trading companies:</b> useful for mapping an industrial district; the risks are markup and an obscured factory. Best used once the part family is defined, with factory identity, capability evidence, and a path to direct dual sourcing.'])}
-  <h2>Qualification method</h2><p>Desk scores only produce a short list. Each candidate then moves through seven gates, tracked on the <a href="#/worksheet">Worksheet</a>:</p>
+  <h2>Qualification method</h2><p>Desk scores only produce a short list. Each candidate then moves through seven gates, tracked on the <a href="#/worksheet">Worksheet</a> (signed-in editors only):</p>
   <ol><li><b>Drawing fit</b>: capability vs drawings, alloys, pressure class, annual volumes</li><li><b>Certificates</b>: pull and verify ISO / IATF / AS9100</li><li><b>Customs history</b>: ImportYeti / Panjiva shipment records cross-checked against the supplier\'s claimed US customers and export history (not yet done). The same data can also be used earlier, to find and screen candidates; see <a href="#/sources">Sources</a>.</li><li><b>First article</b>: sample parts; critical dimensions and material certs before a production PO</li><li><b>Plant / audit</b>: visit or third-party audit: process control, capacity, hidden subcontracting</li><li><b>Commercial</b>: MOQ, tooling ownership, lead time under load, payment terms, dual-source plan</li><li><b>Pilot to volume</b>: pilot lot, then PPAP or equivalent, then volume, with an exit if quality or lead time slips</li></ol>
   <h2>Questions for discussion</h2>
   ${li(['Which category (hydraulics, forgings/castings, machining) is the biggest drag today on quality, lead time, or cost?','Which part numbers, volumes, and alloy grades should drive the next pass?','Are there factories already trusted or ruled out, so the list does not duplicate them?'])}
   <h2>Limitations and next checks</h2>
-  ${li(['All scores are preliminary desk judgments; certifications and customs history are unverified for all 34 suppliers.','No supplier was contacted and no quote requested.','Customs records (ImportYeti, Panjiva) and trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','Vietnam and Thailand are not yet covered; Taiwan and Korea are thin.','HYTORC part lists, volumes and alloy grades are not in the model; scores should change once those are known.'])}
+  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, and volume willingness are unknown for the Nov 6 additions and were not collected on Nov 2 either.','The Nov 2 list was diversification-biased. Geo, cost, and lead scores are assumptions, not proof that a non-China supplier is a better fit.','Customs records (ImportYeti, Panjiva) and trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','Vietnam and Thailand are not yet covered; Taiwan and Korea are thin.','HYTORC part lists, volumes and alloy grades are not in the model; scores should change once those are known.'])}
   </div>`;
 }
-
 
 // --- weights: always total 100; locked stay fixed (same rebalance as canvas) ---
 function rebalance(w,lk,i,v){ // pure: returns new weights summing to 100; locked fixed
@@ -166,27 +244,45 @@ function rebalance(w,lk,i,v){ // pure: returns new weights summing to 100; locke
 const setLocks=(lk,v)=>lk.map(()=>!!v); // lock state only; never touches weights
 const validW=(w,lk)=>Array.isArray(w)&&w.length===7&&w.every(x=>Number.isInteger(x)&&x>=0&&x<=100)&&w.reduce((a,b)=>a+b,0)===100&&Array.isArray(lk)&&lk.length===7;
 function setW(i,v){S.w=rebalance(S.w,S.lk,i,v);savePrefs();}
-let pt; function savePrefs(){clearTimeout(pt);pt=setTimeout(()=>sb.from('fs_weight_prefs').upsert({user_email:S.user,weights:S.w,locked:S.lk,updated_at:new Date().toISOString()}).then(()=>{}),800);}
+let pt; function savePrefs(){
+  if(!S.user){
+    try{localStorage.setItem(LOCAL_W, JSON.stringify({w:S.w,lk:S.lk}));}catch(e){}
+    return;
+  }
+  clearTimeout(pt);pt=setTimeout(()=>sb.from('fs_weight_prefs').upsert({user_email:S.user,weights:S.w,locked:S.lk,updated_at:new Date().toISOString()}).then(()=>{}),800);
+}
 const score=r=>KEYS.reduce((a,k,i)=>a+(r[k]||0)*S.w[i],0)/100;
+const COLS=['n','name','cat','country','makes','num','num','num','num','num','num','num','num','uspres','certs','src'];
+const WIDTHS=['3%','10.5%','7%','6.5%','13%','3.4%','3.4%','3.6%','3.2%','3.4%','3.4%','3.3%','4.3%','10.5%','11.2%','10.3%'];
 
 function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
-  app.innerHTML=`<h1>Supplier scorecard</h1><p class="sub">${S.rows.length} screened candidates · preliminary 1–5 desk scores from public information (Nov 2, 2026), not audits or quotes · <a href="#/study">method</a></p>
+  const orig=S.rows.filter(r=>r.pass==='2026-11-02').length, add=S.rows.filter(r=>r.pass==='2026-11-06').length;
+  app.innerHTML=`<h1>Supplier scorecard</h1><p class="sub">${S.rows.length} screened names · ${orig} from the Nov 2, 2026 desk list and ${add} China additions from a separate Nov 6, 2026 pass. Suggested 1-5 scores are preliminary judgments, not qualifications or quotes. <a href="#/study">How to read the scores</a></p>
+  ${bannerHtml()}
+  <div class="callout"><b>Diversification, not a proof.</b> The original list was spread across regions on purpose, so it was light on China. Cost, lead time, and geo scores are assumptions about tariffs, freight, and concentration. They are not proof that a non-China supplier is a better fit. Nov 6 rows carry their own evidence. Price, MOQ, and volume willingness were not found.</div>
   ${altCards()}
-  <div class="card" style="margin-bottom:14px"><h2>Weights</h2><div class="weights" id="wts"></div>
+  <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">${S.user?'Weight changes are saved to your account only. They do not change shared supplier scores or anyone else\'s weights.':'Weight changes stay in this browser. They are not written to the shared database.'}</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
   <div class="wlocks"><span class="muted">Locks:</span> <button type="button" class="btn sec sm" id="lkall">Select all</button> <button type="button" class="btn sec sm" id="lknone">Unselect all</button> <span class="muted" style="font-size:12px">These buttons only check or uncheck the Lock boxes. Weights stay as they are and still total 100%.</span></div></div>
   <div class="filters"><select id="fc"><option value="">All categories</option>${cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
   <select id="fr"><option value="">All regions</option>${regs.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
   <label>Min score <input id="fm" type="number" step="0.1" min="0" max="5" style="width:70px"></label>
   <select id="fs"><option value="score">Sort: score</option><option value="name">Sort: name</option><option value="country">Sort: country</option><option value="cost">Sort: cost</option></select></div>
-  <div class="card wrap tblwrap"><table class="tbl" id="tb"></table></div><div id="det"></div>`;
+  <div class="card scorewrap"><table class="tbl" id="tb"></table></div>${watchlistHtml()}`;
   $('#fc').value=S.f.cat;$('#fr').value=S.f.reg;$('#fm').value=S.f.min||'';$('#fs').value=S.f.sort;
   [['#fc','cat'],['#fr','reg'],['#fs','sort']].forEach(([s,k])=>$(s).onchange=e=>{S.f[k]=e.target.value;table();});
   $('#fm').oninput=e=>{S.f.min=+e.target.value||0;table();};
   $('#rst').onclick=()=>{S.w=DEF.slice();S.lk=Array(7).fill(false);savePrefs();weights();table();};
   const setAllLocks=v=>{S.lk=setLocks(S.lk,v);savePrefs();weights();};$('#lkall').onclick=()=>setAllLocks(true);$('#lknone').onclick=()=>setAllLocks(false);
-  weights();table();
+  weights();table();syncTopbar();
+}
+function watchlistHtml(){
+  const items=(window.FS_CATALOG&&window.FS_CATALOG.watchlist)||[];
+  return `<div class="card watchcard"><h2>Watchlist, not scored</h2>
+  <p class="muted">These names are from the Nov 6 desk pass. They are not qualified bolting-pump matches and they have no rank. Huade and Taifeng do not have a confirmed ~700 bar line. Suggested numbers from that research are not shown here, so they cannot be read as a score.</p>
+  ${items.map(w=>`<article class="watchitem"><h3>${esc(w.name)} <span class="tag alt2">${esc(w.id)}</span></h3><p>${esc(w.why)}</p><p class="muted">${esc(w.checked)}</p>${safeUrl(w.url)?`<p class="u"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>`:''}</article>`).join('')}
+  </div>`;
 }
 function weights(){
   $('#wts').innerHTML=KEYS.map((k,i)=>`<div class="w"><span>${LBL[i]}</span><input type="range" min="0" max="100" value="${S.w[i]}" data-i="${i}" ${S.lk[i]?'disabled':''}>
@@ -197,19 +293,51 @@ function weights(){
   document.querySelectorAll('[data-n]').forEach(el=>el.onchange=()=>{setW(+el.dataset.n,+el.value);el.value=S.w[+el.dataset.n];sync();});
   document.querySelectorAll('[data-l]').forEach(el=>el.onchange=()=>{S.lk[+el.dataset.l]=el.checked;savePrefs();weights();});
 }
+function detailInner(r){
+  const china=r.pass==='2026-11-06';
+  const ev=evidenceHtml(r), flags=(r.flags||[]).map(f=>`<li>${esc(f)}</li>`).join('');
+  return `<div class="detail"><div class="detailhead"><h2>${esc(r.name)} <span class="tag${china?' new':''}">${china?'Nov 6, 2026 addition':'Original Nov 2, 2026 list'}</span></h2><button type="button" class="btn sec" id="dx">Close</button></div>
+  <p class="muted">${esc(r.id)} · ${esc(r.category)} · ${esc(r.country)} (${esc(r.region)})${r.manufacturer?' · '+esc(r.manufacturer):''}</p>
+  <p>${esc(r.what_they_make)}</p>
+  ${r.relevance?`<p><b>Why it is listed:</b> ${esc(r.relevance)}</p>`:''}
+  <p><b>US presence:</b> ${esc(r.us_presence)}</p><p><b>Certs:</b> ${esc(r.certs_note)}</p>
+  <p>${KEYS.map((k,i)=>`${LBL[i]}: <b>${r[k]??'–'}</b>`).join(' · ')}</p>
+  <p>Weighted score at the current weights: <b>${score(r).toFixed(2)}</b></p>
+  <p class="callout">${esc(r.scores_status||'Preliminary 1-5 desk judgment from public pages on the Nov 2 pass. Not a qualification or a quote.')} Cost, lead time, and geo risk are rubric assumptions. They are not measured prices or shipments, and they are not proof that a non-China supplier is a better fit.</p>
+  ${china?'<p><b>Not established on Nov 6:</b> price, MOQ, and willingness to take HYTORC volumes. This evidence is not the Nov 2 discovery trail.</p>':'<p class="muted">Per-supplier discovery trail was not recorded for the Nov 2 list.</p>'}
+  ${flags?`<ul class="flags">${flags}</ul>`:''}
+  ${ev?`<div class="ev">${ev}</div>`:''}
+  ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
+  <a class="btn" href="#/worksheet?s=${encodeURIComponent(r.id)}">${S.user?'Open worksheet':'Sign in to open the worksheet'}</a></div>`;
+}
 function table(){
   let rows=S.rows.map(r=>({...r,_s:score(r)})).filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
   const so=S.f.sort; rows.sort((a,b)=>so==='score'?b._s-a._s:so==='cost'?(b.cost||0)-(a.cost||0):String(a[so]).localeCompare(b[so]));
-  $('#tb').innerHTML=`<thead><tr><th>#</th><th>Supplier</th><th>Cat</th><th>Country</th><th>Makes</th>${['Cap','Cert','Scale','US','Cost','Lead','Geo'].map(h=>`<th>${h}</th>`).join('')}<th>Score</th><th>US presence</th><th>Certs</th><th>Source</th></tr></thead><tbody>`+
-  rows.map((r,n)=>`<tr class="r" data-id="${esc(r.id)}"><td>${n+1}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td>${r[k]??''}</td>`).join('')}<td class="sc">${r._s.toFixed(2)}</td><td>${esc(r.us_presence)}</td><td>${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:''}</td></tr>`).join('')+'</tbody>';
-  document.querySelectorAll('tr.r').forEach(tr=>tr.onclick=e=>{if(e.target.tagName==='A'){log('source_click',tr.dataset.id,{url:e.target.href});return;}detail(tr.dataset.id);});
+  const heads=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US','Cost','Lead','Geo','Score','US presence','Certs','Source'];
+  $('#tb').innerHTML=`<colgroup>${WIDTHS.map(w=>`<col style="width:${w}">`).join('')}</colgroup><thead><tr>${heads.map((h,i)=>`<th class="${COLS[i]}">${h}</th>`).join('')}</tr></thead><tbody>`+
+  (rows.length?rows.map((r,n)=>`<tr class="r${r.pass==='2026-11-06'?' china':''}${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${n+1}</td><td class="name"><b>${esc(r.name)}</b>${r.pass==='2026-11-06'?' <span class="tag new">Nov 6</span>':''}</td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${heads.length}">No suppliers match these filters.</td></tr>`)+'</tbody>';
+  document.querySelectorAll('#tb tr.r').forEach(tr=>tr.onclick=e=>{
+    const a=e.target.closest('a'); if(a){log('source_click',tr.dataset.id,{url:a.href});return;}
+    if(e.target.closest('button'))return;
+    openDetail(tr.dataset.id);
+  });
+  if(!S.open) return;
+  const tr=[...document.querySelectorAll('#tb tr.r')].find(t=>t.dataset.id===S.open);
+  const r=S.rows.find(x=>x.id===S.open);
+  if(!tr||!r) return;
+  const d=document.createElement('tr'); d.className='detailrow';
+  const td=document.createElement('td'); td.colSpan=tr.cells.length; td.innerHTML=detailInner(r);
+  d.appendChild(td); tr.after(d);
+  td.querySelectorAll('a[href^="http"]').forEach(a=>a.addEventListener('click',()=>log('source_click', r.id, {url:a.href})));
+  const dx=td.querySelector('#dx'); if(dx) dx.onclick=ev=>{ev.stopPropagation(); S.open=null; table();};
 }
-function detail(id){const r=S.rows.find(x=>x.id===id);if(!r)return;log('supplier_open',id,{name:r.name});
-  $('#det').innerHTML=`<div class="card detail"><button class="btn sec" style="float:right" id="dx">×</button><h2>${esc(r.name)}</h2>
-  <p class="muted">${esc(r.category)} · ${esc(r.country)} (${esc(r.region)})</p><p>${esc(r.what_they_make)}</p><p><b>US:</b> ${esc(r.us_presence)}</p><p><b>Certs:</b> ${esc(r.certs_note)}</p>
-  <p>${KEYS.map((k,i)=>`${LBL[i]}: <b>${r[k]??'–'}</b>`).join(' · ')}</p><p>Weighted score: <b>${score(r).toFixed(2)}</b></p>
-  ${safeUrl(r.url)?`<p><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}<a class="btn" href="#/worksheet?s=${encodeURIComponent(id)}">Open worksheet</a></div>`;
-  $('#dx').onclick=()=>$('#det').innerHTML='';}
+function openDetail(id){
+  if(S.open===id){S.open=null; table(); return;}
+  S.open=id;
+  const r=S.rows.find(x=>x.id===id);
+  if(r) log('supplier_open', id, {name:r.name});
+  table();
+}
 
 let WS={sel:null,forms:{},loadedAt:{},dirty:false,hasDetails:null};
 function wsSetDirty(v){WS.dirty=v;S.wsDirty=v;const d=$('#wsdirty');if(d){d.textContent=v?'Unsaved changes':'';d.className=v?'dirty':'';}}
@@ -232,6 +360,7 @@ function readForm(){document.querySelectorAll('#wsform [data-gid][data-k]').forE
   if(el.dataset.k==='_status')f.status=el.value;else if(el.dataset.k==='_evidence')f.evidence=el.value;
   else{const def=FSW.fieldsOf(gid==='decision'?FSW.DECISION:FSW.GATES.find(g=>g.id===gid)).find(x=>x.k===el.dataset.k);f.details[el.dataset.k]=def.t==='urls'?FSW.cleanUrls(el.value):el.value;}});}
 async function worksheet(){
+  if(!S.user){signInView('', 'The shared worksheet and its notes are visible only to signed-in editors. Nothing on that worksheet is in the public snapshot.');return;}
   const q=new URLSearchParams(location.hash.split('?')[1]||''); let sel=q.get('s'); if(!S.rows.some(r=>r.id===sel))sel=(S.rows[0]||{}).id;
   if(!sel){app.innerHTML='<div class="card"><p class="muted">No suppliers loaded yet.</p></div>';return;}
   const sup=S.rows.find(r=>r.id===sel);
@@ -286,4 +415,3 @@ if(C.GA4_MEASUREMENT_ID){const s=document.createElement('script');s.async=1;s.sr
 sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')S.user=null; if(ev==='PASSWORD_RECOVERY')pwSetup=true;});
 boot();
 })();
-
