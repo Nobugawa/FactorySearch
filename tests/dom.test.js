@@ -7,7 +7,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
   const q=(data)=>{const o={select:()=>o,eq:()=>o,maybeSingle:()=>Promise.resolve({data:null}),insert:(x)=>{logged.push(x);return Promise.resolve({})},upsert:()=>Promise.resolve({}),then:(res)=>res({data,error:null})};return o;};
   w.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session}}),signOut:async()=>{},signInWithPassword:async()=>({error:{message:'bad'}}),updateUser:async()=>({}),onAuthStateChange:()=>{}},
     from:(t)=>q(t==='fs_suppliers'?rows:t==='fs_meta'?[{key:'data_as_of',value:'2026-11-02'}]:[])})};
-  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
+  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
 (async()=>{
  // login view + toggle
  let {w}=mk(null);await tick();const d=w.document;const pw=d.getElementById('pw'),tg=d.querySelector('.pwtog[data-for="pw"]');
@@ -23,7 +23,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(tb.tHead&&tb.tHead.rows.length===1,'thead present');ok(tb.tBodies[0].rows.length===34,'34 body rows');
  ok(tb.firstElementChild.tagName==='THEAD','thead before tbody');ok(!tb.tBodies[0].querySelector('th'),'no header cells in body');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.2.2','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.3.0','version');
  ok(!L.some(x=>JSON.stringify(x).toLowerCase().includes('password')),'no password in events');
  ok(tb.querySelectorAll('td.u').length===34&&[...tb.querySelectorAll('td.u a')].every(a=>a.textContent.length>0&&!a.textContent.includes('…')),'full URL text in source cells');
  const css=fs.readFileSync(R+'style.css','utf8');ok(/footer\{position:static/.test(css)&&/overflow-wrap:anywhere/.test(css)&&/#tb\{min-width:1480px\}/.test(css),'css: footer in flow, wrap, min-width');

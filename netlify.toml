@@ -42,3 +42,8 @@
   to = "/404"
   status = 404
   force = true
+[[redirects]]
+  from = "/migration_fs_v1_4_worksheet_details.sql"
+  to = "/404"
+  status = 404
+  force = true

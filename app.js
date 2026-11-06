@@ -64,7 +64,9 @@ async function boot(){
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')log('session_ping',null,{seconds:secs(),kind:'hidden'});});
 window.addEventListener('beforeunload',()=>log('session_ping',null,{seconds:secs(),kind:'unload'}));
 $('#logout').onclick=async e=>{e.preventDefault();log('session_end',null,{seconds:secs()});await sb.auth.signOut();S.user=null;loginView();};
-window.addEventListener('hashchange',()=>S.user&&route());
+let lastHash=location.hash;
+window.addEventListener('hashchange',()=>{if(!S.user)return; if(S.wsDirty&&!confirm('You have unsaved worksheet changes. Leave without saving?')){history.replaceState(null,'',lastHash||'#/worksheet');return;} S.wsDirty=false; lastHash=location.hash; route();});
+window.addEventListener('beforeunload',e=>{if(S.wsDirty){e.preventDefault();e.returnValue='';}});
 function route(){const h=location.hash, v=h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':'score';
   document.querySelectorAll('nav a[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
   v==='ws'?worksheet():v==='src'?sources():v==='study'?study():scorecard();}
@@ -206,21 +208,77 @@ function detail(id){const r=S.rows.find(x=>x.id===id);if(!r)return;log('supplier
   ${safeUrl(r.url)?`<p><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}<a class="btn" href="#/worksheet?s=${encodeURIComponent(id)}">Open worksheet</a></div>`;
   $('#dx').onclick=()=>$('#det').innerHTML='';}
 
+let WS={sel:null,forms:{},loadedAt:{},dirty:false,hasDetails:null};
+function wsSetDirty(v){WS.dirty=v;S.wsDirty=v;const d=$('#wsdirty');if(d){d.textContent=v?'Unsaved changes':'';d.className=v?'dirty':'';}}
+function fieldHtml(gid,f,val,disabled){const id=`f_${gid}_${f.k}`,dis=disabled?'disabled':'';
+  let ctl;
+  if(f.t==='sel')ctl=`<select id="${id}" class="fld" data-gid="${gid}" data-k="${f.k}" ${dis}>${f.o.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  else if(f.t==='area'||f.t==='urls')ctl=`<textarea id="${id}" class="fld" rows="3" data-gid="${gid}" data-k="${f.k}" ${dis} ${f.max?`maxlength="${f.max}"`:''}>${esc(f.t==='urls'?(val||[]).join('\n'):val)}</textarea>`;
+  else ctl=`<input id="${id}" class="fld" type="${f.t==='date'?'date':'text'}" data-gid="${gid}" data-k="${f.k}" value="${esc(val)}" ${f.max?`maxlength="${f.max}"`:''} ${f.ph?`placeholder="${esc(f.ph)}"`:''} ${dis}>`;
+  const wide=f.t==='area'||f.t==='urls'||f.k==='next'||f.k==='tests';
+  return `<div class="wf${wide?' wide':''}"><label for="${id}">${esc(f.l)}</label>${ctl}${f.t==='urls'&&val&&val.length?`<div class="urls">${val.map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join('')}</div>`:''}</div>`;}
+function stamp(f){return f.updated_at?`Last saved by ${esc(f.updated_by||'unknown')} · ${esc(new Date(f.updated_at).toLocaleString())}`:'Not saved yet';}
+function summaryHtml(){const r=FSW.readiness(WS.forms),c=r.counts;
+  return `<h2>Readiness summary</h2><p class="muted" style="margin-top:-6px">Summarizes what has been entered. It is not a qualification decision, and no gate passes automatically.</p>
+  <div class="rsum"><div><b>${c.Passed}</b> of 7 passed</div><div><b>${c['In progress']}</b> in progress</div><div><b>${c['Not started']}</b> not started</div><div><b>${c.Failed}</b> failed</div><div><b>${c['N/A']}</b> marked N/A</div></div>
+  <ul class="rlist"><li>Order-size fit (Commercial): <b>${esc(r.orderSize)}</b>${r.orderSize==='Unknown'?' (to confirm with the supplier; not assumed from company size)':''}</li>
+  <li>MOQ per SKU: ${r.moqEntered?'entered':'<b>not yet entered</b>'}</li>
+  <li>Open gates: ${r.gaps.length?esc(r.gaps.join(', ')):'none'}</li>${r.na?'<li>N/A gates should carry a reason in notes.</li>':''}
+  <li>Current recommendation: <b>${esc(r.decision)}</b></li></ul>`;}
+function readForm(){document.querySelectorAll('#wsform [data-gid][data-k]').forEach(el=>{const gid=el.dataset.gid,f=WS.forms[gid];
+  if(el.dataset.k==='_status')f.status=el.value;else if(el.dataset.k==='_evidence')f.evidence=el.value;
+  else{const def=FSW.fieldsOf(gid==='decision'?FSW.DECISION:FSW.GATES.find(g=>g.id===gid)).find(x=>x.k===el.dataset.k);f.details[el.dataset.k]=def.t==='urls'?FSW.cleanUrls(el.value):el.value;}});}
 async function worksheet(){
   const q=new URLSearchParams(location.hash.split('?')[1]||''); let sel=q.get('s'); if(!S.rows.some(r=>r.id===sel))sel=(S.rows[0]||{}).id;
   if(!sel){app.innerHTML='<div class="card"><p class="muted">No suppliers loaded yet.</p></div>';return;}
+  const sup=S.rows.find(r=>r.id===sel);
   const opts=S.rows.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.id)}" ${r.id===sel?'selected':''}>${esc(r.name)} (${esc(r.category)})</option>`).join('');
-  app.innerHTML=`<h1>Supplier Qualification Worksheet</h1><p class="sub">Seven gates from short list to volume. Saved to shared worksheet.</p><p class="muted" style="font-size:12px;margin-top:-10px">Customs history gate: compare ImportYeti / Panjiva shipment records with the supplier's claimed US customers and export history. Shipment data supports, but cannot replace, drawing fit, certificates, first article, and audit.</p>
-  <div class="card"><select id="sup" class="fld" style="max-width:420px">${opts}</select><div id="gates"></div><button class="btn" id="sv">Save</button> <span class="muted" id="st"></span></div>`;
-  $('#sup').onchange=e=>location.hash='#/worksheet?s='+encodeURIComponent(e.target.value);
-  const {data}=await sb.from('fs_worksheet').select('*').eq('supplier_id',sel); const m={};(data||[]).forEach(x=>m[x.gate_id]=x);
-  $('#gates').innerHTML=GATES.map(([g,l])=>{const x=m[g]||{};return `<div class="gate"><b>${l}</b><select class="fld" data-g="${g}">${['Not started','In progress','Passed','Failed','N/A'].map(s=>`<option ${x.status===s?'selected':''}>${s}</option>`).join('')}</select>
-  <input class="fld" data-e="${g}" placeholder="Evidence / notes" value="${esc(x.evidence||'')}"></div>`}).join('');
+  app.innerHTML=`<h1>Supplier Qualification Worksheet</h1><p class="sub">Seven gates from short list to volume, per supplier. This is a shared worksheet: everyone with access sees and can edit the same records, and each gate shows who saved it last.</p>
+  <div class="card wstop"><label for="sup" class="fl">Supplier</label><select id="sup" class="fld" style="max-width:420px">${opts}</select>
+  <p class="muted" style="font-size:12px">${esc(sup.category)} · ${esc(sup.country)} · desk scores are preliminary. New fields start as Unknown or blank; nothing is pre-filled from public data.</p></div>
+  <div id="wsbanner"></div><div class="card" id="wssum" style="margin:14px 0"></div><div id="wsform"><p class="muted">Loading…</p></div>
+  <div class="wsbar"><button class="btn" id="sv">Save worksheet</button> <span id="wsdirty"></span> <span class="muted" id="st" role="status"></span></div>`;
+  WS={sel,forms:{},loadedAt:{},dirty:false,hasDetails:null}; S.wsDirty=false;
+  $('#sup').onchange=e=>{if(WS.dirty&&!confirm('You have unsaved changes for this supplier. Discard them and switch?')){e.target.value=sel;return;}wsSetDirty(false);location.hash='#/worksheet?s='+encodeURIComponent(e.target.value);};
+  let res=await sb.from('fs_worksheet').select('supplier_id,gate_id,status,evidence,updated_by,updated_at,details').eq('supplier_id',sel);
+  if(res.error&&FSW.missingDetailsColumn(res.error)){WS.hasDetails=false;res=await sb.from('fs_worksheet').select('supplier_id,gate_id,status,evidence,updated_by,updated_at').eq('supplier_id',sel);}
+  else WS.hasDetails=!res.error;
+  if(res.error){$('#wsform').innerHTML=`<div class="card"><p class="muted">Could not load the worksheet: ${esc(res.error.message)}</p></div>`;$('#sv').disabled=true;return;}
+  const m={};(res.data||[]).forEach(x=>m[x.gate_id]=x);
+  FSW.GATES.concat([FSW.DECISION]).forEach(g=>{WS.forms[g.id]=FSW.deserialize(g.id,m[g.id]);WS.loadedAt[g.id]=(m[g.id]||{}).updated_at||null;});
+  const off=!WS.hasDetails;
+  if(off)$('#wsbanner').innerHTML=`<div class="callout warn">Expanded fields are read-only until the database update <code>migration_fs_v1_4_worksheet_details.sql</code> is run. Gate status and notes still save normally.</div>`;
+  $('#wsform').innerHTML=FSW.GATES.map(g=>{const f=WS.forms[g.id];return `<details class="card gatecard" ${f.status!=='Not started'||!FSW.isBlank(g,f.details)?'open':''}><summary><span class="gn">${g.n}</span> <b>${esc(g.l)}</b> <span class="gs s-${esc(f.status.replace(/\W/g,''))}">${esc(f.status)}</span><span class="muted gst" data-gid="${g.id}">${stamp(f)}</span></summary>
+    <p class="muted hint">${esc(g.hint)}</p>
+    <div class="wgrid"><div class="wf"><label for="st_${g.id}">Gate status (required checkpoint)</label><select id="st_${g.id}" class="fld" data-gid="${g.id}" data-k="_status">${FSW.STATUSES.map(s=>`<option ${s===f.status?'selected':''}>${s}</option>`).join('')}</select></div>
+    ${g.f.map(x=>fieldHtml(g.id,x,f.details[x.k],off)).join('')}</div>
+    <h4>Follow-up</h4><div class="wgrid">${FSW.COMMON.map(x=>fieldHtml(g.id,x,f.details[x.k],off)).join('')}
+    <div class="wf wide"><label for="ev_${g.id}">Notes / evidence summary</label><textarea id="ev_${g.id}" class="fld" rows="2" maxlength="4000" data-gid="${g.id}" data-k="_evidence">${esc(f.evidence)}</textarea></div></div></details>`;}).join('')+
+   `<div class="card gatecard"><h2>Open risks and recommendation</h2><div class="wgrid">${FSW.DECISION.f.map(x=>fieldHtml('decision',x,WS.forms.decision.details[x.k],off)).join('')}</div><p class="muted gst" data-gid="decision">${stamp(WS.forms.decision)}</p></div>`;
+  $('#wssum').innerHTML=summaryHtml();
+  $('#wsform').addEventListener('input',()=>{wsSetDirty(true);readForm();$('#wssum').innerHTML=summaryHtml();$('#st').textContent='';});
+  $('#wsform').addEventListener('change',()=>{wsSetDirty(true);readForm();$('#wssum').innerHTML=summaryHtml();});
   log('worksheet_open',sel);
-  $('#sv').onclick=async()=>{$('#sv').disabled=true;const now=new Date().toISOString();
-    const rows=GATES.map(([g])=>({supplier_id:sel,gate_id:g,status:$(`[data-g="${g}"]`).value,evidence:$(`[data-e="${g}"]`).value,updated_by:S.user,updated_at:now}));
-    const {error}=await sb.from('fs_worksheet').upsert(rows); $('#st').textContent=error?error.message:'Saved '+new Date().toLocaleTimeString(); if(!error)log('worksheet_save',sel);$('#sv').disabled=false;};
+  $('#sv').onclick=async()=>{readForm();$('#sv').disabled=true;$('#st').textContent='Saving…';
+    try{
+      const cur=await sb.from('fs_worksheet').select('gate_id,updated_by,updated_at').eq('supplier_id',sel);
+      if(cur.error)throw cur.error;
+      const changed=(cur.data||[]).filter(x=>x.updated_at!==WS.loadedAt[x.gate_id]&&x.updated_by!==S.user);
+      if(changed.length&&!confirm(`Someone else saved this supplier's worksheet after you opened it (${[...new Set(changed.map(x=>x.updated_by))].join(', ')}). Save anyway and overwrite their changes?`)){$('#st').textContent='Not saved. Reload the page to see the latest version.';$('#sv').disabled=false;return;}
+      const now=new Date().toISOString();
+      const ids=FSW.GATES.map(g=>g.id).concat(WS.hasDetails?['decision']:[]);
+      let rows=ids.map(id=>FSW.serialize(id,Object.assign({supplier_id:sel},WS.forms[id]),S.user,now));
+      if(!WS.hasDetails)rows=rows.map(FSW.legacyRow);
+      const {error}=await sb.from('fs_worksheet').upsert(rows);
+      if(error)throw error;
+      ids.forEach(id=>{WS.loadedAt[id]=now;WS.forms[id].updated_at=now;WS.forms[id].updated_by=S.user;});
+      wsSetDirty(false);
+      $('#st').textContent=(WS.hasDetails?'Saved all gates':'Saved gate status and notes only (expanded fields await the database update)')+' · '+new Date().toLocaleTimeString();
+      document.querySelectorAll('.gst[data-gid]').forEach(el=>{el.textContent=stamp(WS.forms[el.dataset.gid]).replace(/&amp;/g,'&');});log('worksheet_save',sel,{expanded:!!WS.hasDetails});
+    }catch(e){$('#st').textContent='Not saved: '+(e.message||e);}
+    $('#sv').disabled=false;};
 }
+
 if(C.GA4_MEASUREMENT_ID){const s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id='+C.GA4_MEASUREMENT_ID;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',C.GA4_MEASUREMENT_ID);}
 sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')S.user=null; if(ev==='PASSWORD_RECOVERY')pwSetup=true;});
 boot();
