@@ -26,7 +26,7 @@ function paintChrome(){
   const n=$('#notice');
   if(n) n.textContent=S.user
     ? 'Signed in as '+S.user+'. Session time, supplier rows opened, source clicks, and worksheet saves are linked to this email and visible to the owner.'
-    : 'Viewing does not require an account. The shared worksheet, notes, and saved weights stay private to signed-in accounts.';
+    : 'Viewing does not require an account. Sign in stores shared worksheet notes and your weights. Unsigned weight changes stay in this browser.';
   syncTopbar();
 }
 function bannerHtml(){return S.banner?`<div class="callout warn" role="status">${esc(S.banner)}</div>`:'';}
@@ -59,7 +59,7 @@ function setPasswordView(em){
 function signInView(msg, lead){
   if($('#nav')) $('#nav').style.display='';
   app.innerHTML=`<div class="card login"><h1>Sign in</h1>
-  <p class="sub">The scorecard, Sources, and Study are public. Sign in to open the shared worksheet and to save weights to your account.</p>
+  <p class="sub">Sign in to save shared worksheet notes and progress to the project database, and to save your scorecard weights to your account. Weights changed while signed out stay in this browser only.</p>
   ${lead?`<div class="callout">${esc(lead)}</div>`:''}
   <p class="muted" style="font-size:12px">After you sign in, this portal records session time, supplier rows opened, source links clicked, and worksheet saves, linked to your email. The portal owner (Philos Kim) can review that signed-in activity. Browsing while signed out is not tied to an account and is not written to the shared database.</p>
   ${bannerHtml()}
@@ -80,7 +80,7 @@ function applyCatalog(){
   S.rows=cat.suppliers.slice();
   S.recheck=cat.recheck||{results:{}};
   const asof=$('#asof');
-  if(asof) asof.textContent='Original list '+cat.original_as_of+' · China additions '+cat.china_as_of+' (desk research)';
+  if(asof) asof.textContent='Source dates '+cat.original_as_of+' and '+cat.china_as_of+' (desk research)';
   return true;
 }
 async function boot(){
@@ -123,17 +123,17 @@ window.addEventListener('beforeunload',e=>{if(S.wsDirty){e.preventDefault();e.re
 function route(){const h=location.hash, v=h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':h.startsWith('#/signin')?'in':'score';
   document.querySelectorAll('nav a[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
   if(v==='in'&&S.user){history.replaceState(null,'',location.pathname+'#/'); lastHash='#/'; return scorecard();}
-  if(v==='ws') return S.user?worksheet():signInView('', 'The shared worksheet and its notes are visible only to signed-in editors. Nothing on that worksheet is in the public snapshot.');
+  if(v==='ws') return S.user?worksheet():signInView('');
   if(v==='in') return signInView('');
   if(v==='src') return sources();
   if(v==='study') return study();
   scorecard();
 }
 const ALTS=[
- {fam:'Hydraulics (pumps, power packs, valves)',lead:'HAWE Hydraulik (Germany)',leadWhy:'Public catalog shows compact high-pressure pumps and power packs up to 700 bar, the closest catalog fit to bolting-tool pumps on the original list. US entity: HAWE North America. Nov 6 China hydraulics names were not added because a 700 bar line was not confirmed.',
+ {fam:'Hydraulics (pumps, power packs, valves)',lead:'HAWE Hydraulik (Germany)',leadWhy:'Public catalog shows compact high-pressure pumps and power packs up to 700 bar, the closest catalog fit to bolting-tool pumps in this set. US entity: HAWE North America. Huade and Taifeng are on the watchlist because a ~700 bar line was not confirmed.',
   alt:'Yuken Kogyo or Kawasaki Precision Machinery (Japan)',altWhy:'Established pump and valve makers outside China with US offices (Yuken America, KPM USA). Considered for geographic spread, not because their parts are known to match HAWE units.',
-  note:'Bosch Rexroth scores highest overall but is broader than this need. Jiangsu Hengli (China) was the only China hydraulics name on the Nov 2 list. Tariff exposure is an assumption to check, not a measured cost.'},
- {fam:'Forgings / castings',lead:'Bharat Forge (India)',leadWhy:'Large closed-die forging and machining group with a US sales arm (Bharat Forge America). Considered as a non-China option for volume forgings. That is a diversification choice, not proof it is a better fit than a China forge.',
+  note:'Bosch Rexroth scores highest overall but is broader than this need. Jiangsu Hengli is the China hydraulics manufacturer in this set. Tariff exposure is an assumption to check, not a measured cost.'},
+ {fam:'Forgings / castings',lead:'Bharat Forge (India)',leadWhy:'Large closed-die forging and machining group with a US sales arm (Bharat Forge America). Included for volume forgings. A country or a sales office does not show that price, lead time, or part fit will be better than another region.',
   alt:'Hirschvogel (Germany) or voestalpine BÖHLER (Austria)',altWhy:'European options for high-alloy or critical grades (for example reaction-arm material), at an expected higher unit price.',note:''},
  {fam:'Precision machining',lead:'Sansera Engineering or Craftsman Automation (India)',leadWhy:'Precision machining groups with automotive/aerospace work on their public sites. Considered for cost and to pair with Indian forging where practical.',
   alt:'Hirschvogel (machining) or Zollern (Germany)',altWhy:'Forge-plus-machine or cast-plus-machine in one supplier, which can cut handoffs. Ashot Ashkelon (Israel) noted for the tightest tolerances.',note:''}];
@@ -161,27 +161,27 @@ function evidenceHtml(r){return (r.evidence||[]).map(e=>safeUrl(e[0])?`<div clas
 function sources(){
   const rc=S.recheck||{results:{}}; log('sources_open');
   const cat=window.FS_CATALOG||{};
-  app.innerHTML=`<h1>Sources</h1><p class="sub">Research channels for this short list, and what each link does and does not prove. The Nov 6 China pass is a separate set of pages from the Nov 2 list. See <a href="#/study">Study</a> for the method.</p>
+  app.innerHTML=`<h1>Sources</h1><p class="sub">Research channels for this short list, and what each link does and does not prove. Source dates are Nov 2, 2026 and Nov 6, 2026. See <a href="#/study">Study</a> for the method.</p>
   ${bannerHtml()}
-  <div class="card" style="margin-bottom:14px"><h2>Used in this screening (desk pass, Nov 2, 2026)</h2>
+  <div class="card" style="margin-bottom:14px"><h2>Screening sources (Nov 2, 2026)</h2>
   <table class="tbl"><thead><tr><th>Channel</th><th>How it was used</th><th>Limitation</th></tr></thead><tbody>
   ${CHANNELS.used.map(c=>`<tr><td><b>${esc(c[0])}</b></td><td>${esc(c[1])}</td><td>${esc(c[2])}</td></tr>`).join('')}</tbody></table>
-  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. Which reference first surfaced each individual supplier was not recorded. The list was spread across regions on purpose. That diversification is not proof that a non-China supplier is a better fit.</p></div>
-  <div class="card" style="margin-bottom:14px"><h2>China pass (Nov 6, 2026), separate evidence</h2>
-  <p>Official company sites, one Shenzhen exchange filing, and one registrar record. No contact and no quotes. Price, MOQ, and willingness to take HYTORC volumes were not found. Four names were added to the scorecard (Pacific Precision Forging, Leap, Shuanghuan, Xusheng). Beijing Huade and Shandong Taifeng are not on the scorecard: a ~700 bar bolting-pump line was not confirmed, so they are not qualified bolting-pump matches. A US office or US-base claim is not verified shipment history. A certificate named on a page, or a registrar row whose expiry was not checked, is not a verified certificate.</p></div>
+  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. Which reference first surfaced each individual supplier was not recorded. Cost, lead time, and geography scores are indicative assumptions, not quotes or measured results.</p></div>
+  <div class="card" style="margin-bottom:14px"><h2>China supplier coverage (Nov 6, 2026)</h2>
+  <p>Sources opened on Nov 6, 2026: official company sites, one Shenzhen exchange filing, and one registrar record. No contact and no quotes. Price, MOQ, and willingness to take HYTORC volumes were not found. The ranked names from that date are Pacific Precision Forging, Leap, Shuanghuan, and Xusheng. Beijing Huade and Shandong Taifeng are on the watchlist only. A ~700 bar bolting-pump line was not confirmed, so they are not qualified bolting-pump matches. A US office or US-base claim is not verified shipment history. A certificate named on a page, or a registrar row whose expiry was not checked, is not a verified certificate.</p></div>
   <div class="card" style="margin-bottom:14px"><h2>Planned research channels (not yet checked)</h2>
   <p class="muted" style="margin-top:-6px">Named in the study as the next research step. Customs-data platforms can both find new candidates and screen or validate existing ones; exhibitor lists mainly add candidates. None of these has been searched for any supplier yet. Links are to the public service or event site (opened Nov 6, 2026).</p>
   <table class="tbl"><thead><tr><th>Channel</th><th>What would be checked</th><th>Limitation</th></tr></thead><tbody>
   ${CHANNELS.planned.map(c=>`<tr><td><b>${esc(c[0])}</b><br><a href="${esc(c[1])}" target="_blank" rel="noopener">${esc(c[1])}</a></td><td>${c[2]}</td><td>${esc(c[3])}</td></tr>`).join('')}</tbody></table></div>
-  <div class="card tblwrap"><h2>Per-supplier sources</h2><table class="tbl"><thead><tr><th>Supplier</th><th>Pass</th><th>Found via</th><th>Company URL</th><th>URL check on that pass</th><th>Re-check (${esc(rc.checked||'—')}, automated)</th><th>What the URL supports</th></tr></thead><tbody>
+  <div class="card tblwrap"><h2>Per-supplier sources</h2><table class="tbl"><thead><tr><th>Supplier</th><th>Source date</th><th>Found via</th><th>Company URL</th><th>URL check</th><th>Re-check (${esc(rc.checked||'—')}, automated)</th><th>What the URL supports</th></tr></thead><tbody>
   ${S.rows.slice().sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})).map(r=>{const x=rc.results[r.url]||''; const china=r.pass==='2026-11-06';
-    const check=r.url_check===200?(china?'Opened in the Nov 6 pass (HTTP 200)':'Site responded'):(r.url_check==null?'not recorded':esc(r.url_check));
+    const check=r.url_check===200?(china?'Opened Nov 6, 2026 (HTTP 200)':'Site responded'):(r.url_check==null?'not recorded':esc(r.url_check));
     return `<tr><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.pass||'')}</td>
-  <td>${china?evidenceHtml(r)+'<p class="muted">Nov 6, 2026 desk pass. This evidence is not the Nov 2 discovery trail.</p>':'Known industry name + company website. Specific discovery trail was not recorded on the Nov 2 pass.'}</td>
+  <td>${china?evidenceHtml(r)+'<p class="muted">Sources dated Nov 6, 2026.</p>':'Known industry name + company website. Specific discovery trail was not recorded. Source date Nov 2, 2026.'}</td>
   <td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:'—'}</td>
   <td>${check}</td><td>${china?'Not part of the Nov 5 recheck.':esc(x?(x.split(' ')[0]==='200'?'Site responded':'HTTP '+x.split(' ')[0]+' (likely blocks scripts)'):'not rechecked')}</td>
-  <td>${china?'Pages opened on Nov 6 support the product family and the claims in the evidence column. They do not prove price, MOQ, volume willingness, customs shipments, or a current certificate.':'Company exists; product family. Homepage only. Not a product, certificate, or customs record.'}</td></tr>`;}).join('')}</tbody></table>
-  <p class="muted" style="font-size:12px">The Nov 5 recheck is a later scripted page load showing the site responded. It was not part of the original Nov 2 discovery, and it does not cover the Nov 6 China pages.</p></div>
+  <td>${china?'Pages opened on Nov 6, 2026 support the product family and the claims in the evidence column. They do not prove price, MOQ, volume willingness, customs shipments, or a current certificate.':'Company exists; product family. Homepage only. Not a product, certificate, or customs record.'}</td></tr>`;}).join('')}</tbody></table>
+  <p class="muted" style="font-size:12px">The Nov 5 recheck is a scripted page load of the Nov 2, 2026 homepages. It shows whether the site responded. It does not include the Nov 6, 2026 China supplier pages.</p></div>
   <div class="card watchcard"><h2>Watchlist sources, not scored</h2>
   ${(cat.watchlist||[]).map(w=>`<article class="watchitem"><h3>${esc(w.name)} <span class="tag alt2">${esc(w.id)}</span></h3><p>${esc(w.why)}</p><p class="muted">${esc(w.checked)}</p>${safeUrl(w.url)?`<p class="u"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>`:''}</article>`).join('')}
   </div>`;
@@ -197,24 +197,24 @@ function study(){ log('study_open');
   const li=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
   const orig=S.rows.filter(r=>r.pass==='2026-11-02'), add=S.rows.filter(r=>r.pass==='2026-11-06');
   const ncat=(rows,c)=>rows.filter(r=>r.category===c).length;
-  const chinaOrig=orig.filter(r=>r.country==='China');
-  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Original desk research pass, Nov 2, 2026, plus a separate China desk pass on Nov 6, 2026. Live controls are on <a href="#/">Scorecard</a>. The shared <a href="#/worksheet">worksheet</a> is private to signed-in editors. Channels are on <a href="#/sources">Sources</a>.</p>
+  const china=S.rows.filter(r=>r.country==='China');
+  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026 and Nov 6, 2026. Live controls are on <a href="#/">Scorecard</a>. Sign in to save shared worksheet notes. Channels are on <a href="#/sources">Sources</a>.</p>
   ${bannerHtml()}
   <div class="card study">
   <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: real manufacturers, a scorecard that can be re-weighted, and alternative candidates per part family rather than a single low-cost bet. Three part families that are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized.</p>
-  <p>The Nov 2 pass listed ${orig.length} suppliers (${ncat(orig,'Hydraulics')} hydraulics, ${ncat(orig,'Forgings/Castings')} forgings/castings, ${ncat(orig,'Precision machining')} precision machining), of which ${chinaOrig.length} is in China (${chinaOrig.map(r=>esc(r.name)).join(', ')||'none'}). Geography on that pass covered China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, Czech Republic, Israel). The scorecard now also lists ${add.length} China candidates from Nov 6.</p>
-  <h2>The original list was diversification-biased</h2>
-  <p>Nov 2 was built to spread the short list across regions, so China was not the main search. Cost, lead time, and geo-risk scores assume tariff exposure, ocean freight, and single-country concentration. Those are planning assumptions. They are not quotes, transit measurements, or proof that a non-China supplier is a better fit. Changing the weights changes the ranking because the assumptions change, not because new factory evidence arrived.</p>
-  <h2>China additions, Nov 6, 2026</h2>
-  <p>A later desk pass added ${add.map(r=>esc(r.id+' '+r.name)).join('; ')}. The pages, filing, and registrar record from that pass are a different evidence set from Nov 2. No supplier was contacted and no quote was requested. Price, MOQ, and willingness to take HYTORC volumes were not found. The suggested 1-5 scores are preliminary judgments on the original rubric. They are not qualifications and not quotes.</p>
+  <p>The scorecard lists ${S.rows.length} manufacturers (${ncat(S.rows,'Hydraulics')} hydraulics, ${ncat(S.rows,'Forgings/Castings')} forgings and castings, ${ncat(S.rows,'Precision machining')} precision machining), including ${china.length} in China. Coverage spans China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, the Czech Republic, and Israel). Source dates are Nov 2, 2026 for ${orig.length} names and Nov 6, 2026 for China supplier coverage (${add.map(r=>esc(r.name)).join('; ')}).</p>
+  <h2>How to read cost, lead time, and geography</h2>
+  <p>This is a preliminary desk assessment across those geographies. Cost, lead time, and geography are indicative assumptions: expected tariffs and landed cost, typical freight time, and concentration in one country. They are not quotations, measured door-to-door times, or a finding that manufacturers in one country are a better source than manufacturers in another. Drawing fit, verified quality, US shipment history, MOQ, and willingness to take HYTORC volumes are still open. Changing the weights reorders these assumptions. It does not add factory evidence.</p>
+  <h2>China supplier coverage (Nov 6, 2026)</h2>
+  <p>${add.map(r=>esc(r.id+' '+r.name)).join('; ')} were screened on Nov 6, 2026 from company sites, one exchange filing, and one registrar record. No supplier was contacted and no quote was requested. Price, MOQ, and willingness to take HYTORC volumes were not found. The 1-5 scores use the same rubric as the Nov 2, 2026 names. They are preliminary judgments, not qualifications and not quotes.</p>
   <p>A US office, a US manufacturing claim, or an export sentence is not verified US shipment history. A certificate named on a website, or a registrar row whose expiry was not checked, is not a verified certificate.</p>
-  <p>Beijing Huade and Shandong Taifeng were reviewed in the same pass and left off the scorecard. A ~700 bar bolting-pump line was not confirmed for either, so they are not qualified bolting-pump matches. They appear only on the watchlist, unscored. TZ Yuci is on that watchlist because its profile page was not opened.</p>
-  <h2>How scores were set</h2><p>Each of the seven scores is a 1-5 desk judgment from public websites only: no quotes, plant visits, or certificate downloads. Default weights total 100 and can be changed on the Scorecard. For the Nov 6 rows, a 5 on certificates means a named standard was found, not that the certificate was verified.</p>
+  <p>Beijing Huade and Shandong Taifeng are on the watchlist, not in the ranked table. A ~700 bar bolting-pump line was not confirmed for either, so they are not qualified bolting-pump matches. TZ Yuci is on the watchlist because its profile page was not opened.</p>
+  <h2>How scores were set</h2><p>Each of the seven scores is a 1-5 desk judgment from public websites only: no quotes, plant visits, or certificate downloads. Default weights total 100 and can be changed on the Scorecard. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified.</p>
   <div class="wrap"><table class="tbl"><thead><tr><th>Criterion</th><th>Default weight</th><th>5 (strong)</th><th>3 (mixed)</th><th>1 (weak)</th></tr></thead><tbody>${RUBRIC.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="callout" style="margin-top:10px"><b>Capability is catalog fit, not an audit.</b> It reflects product and process fit from public material, not plant quality. Certifications are expected from public text, not verified. Quality is established through the qualification steps below.</div>
   <h2>Landed cost assumption</h2><p>The Cost score is meant to reflect expected landed cost, not factory price alone:</p>
   <p class="eq">Landed cost ≈ unit price + freight + insurance + duties and any additional tariffs (e.g. Section 301 / 232 where applicable) + broker fees</p>
-  ${li(['Tariff treatment varies by HTS line, origin and date, and has changed often. Rates were not verified line by line in this pass; each Cost cell is a starting flag, not a quote.','Europe tends to score lower on Cost (higher unit price) and higher on Capability and Geo risk. That tradeoff is an assumption and is adjustable with the weights. It is not proof that a non-China supplier is a better fit.','Steel and aluminum content can shift forging and casting costs where metal tariffs apply.'])}
+  ${li(['Tariff treatment varies by HTS line, origin and date, and has changed often. Rates were not verified line by line; each Cost cell is a starting flag, not a quote.','Europe often scores lower on Cost, on the assumption of a higher unit price, and higher on Capability and Geo risk. The weights can change that mix. These scores are not measured prices or transit times.','Steel and aluminum content can shift forging and casting costs where metal tariffs apply.'])}
   <h2>Proposed sourcing alternatives</h2><p>Summarized on the Scorecard. Lead and alternative candidates per part family are a starting point. They are not qualified and not interchangeable until drawings, specs and trials confirm fit.</p>
   <h2>Beyond factories: private label and agents</h2>
   ${li(['<b>Private label / white label:</b> buying a ready-made or lightly adapted product under the HYTORC name. Private label usually implies some exclusivity or customization; white label is a generic product many brands rebrand.','<b>Where it fits:</b> standard or near-standard items (hoses, fittings, some valves, C-parts, packaging) more than housings, reaction arms, or compact high-pressure pumps that must match tool geometry.','<b>Industrial distributors</b> with private-label programs can cover the standardized slice; they are a weaker fit for unique hydraulic power packs.','<b>Sourcing agents / trading companies:</b> useful for mapping an industrial district; the risks are markup and an obscured factory. Best used once the part family is defined, with factory identity, capability evidence, and a path to direct dual sourcing.'])}
@@ -223,7 +223,7 @@ function study(){ log('study_open');
   <h2>Questions for discussion</h2>
   ${li(['Which category (hydraulics, forgings/castings, machining) is the biggest drag today on quality, lead time, or cost?','Which part numbers, volumes, and alloy grades should drive the next pass?','Are there factories already trusted or ruled out, so the list does not duplicate them?'])}
   <h2>Limitations and next checks</h2>
-  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, and volume willingness are unknown for the Nov 6 additions and were not collected on Nov 2 either.','The Nov 2 list was diversification-biased. Geo, cost, and lead scores are assumptions, not proof that a non-China supplier is a better fit.','Customs records (ImportYeti, Panjiva) and trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','Vietnam and Thailand are not yet covered; Taiwan and Korea are thin.','HYTORC part lists, volumes and alloy grades are not in the model; scores should change once those are known.'])}
+  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, and volume willingness were not found in the Nov 6, 2026 China supplier sources, and they were not collected on Nov 2, 2026 either.','Cost, lead time, and geography are indicative assumptions, not quotations or measured outcomes. They do not establish that suppliers in one country are a better fit than suppliers in another. Drawing fit, verified quality, US export history, and MOQ remain open.','Customs records (ImportYeti, Panjiva) and trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','Vietnam and Thailand are not yet covered; Taiwan and Korea are thin.','HYTORC part lists, volumes and alloy grades are not in the model; scores should change once those are known.'])}
   </div>`;
 }
 
@@ -258,11 +258,11 @@ const WIDTHS=['3%','10.5%','7%','6.5%','13%','3.4%','3.4%','3.6%','3.2%','3.4%',
 function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
   const orig=S.rows.filter(r=>r.pass==='2026-11-02').length, add=S.rows.filter(r=>r.pass==='2026-11-06').length;
-  app.innerHTML=`<h1>Supplier scorecard</h1><p class="sub">${S.rows.length} screened names · ${orig} from the Nov 2, 2026 desk list and ${add} China additions from a separate Nov 6, 2026 pass. Suggested 1-5 scores are preliminary judgments, not qualifications or quotes. <a href="#/study">How to read the scores</a></p>
+  app.innerHTML=`<h1>Supplier scorecard</h1><p class="sub">${S.rows.length} screened manufacturers. Source dates: Nov 2, 2026 (${orig} names) and Nov 6, 2026 China supplier coverage (${add} names). Suggested 1-5 scores are preliminary judgments, not qualifications or quotes. <a href="#/study">How to read the scores</a></p>
   ${bannerHtml()}
-  <div class="callout"><b>Diversification, not a proof.</b> The original list was spread across regions on purpose, so it was light on China. Cost, lead time, and geo scores are assumptions about tariffs, freight, and concentration. They are not proof that a non-China supplier is a better fit. Nov 6 rows carry their own evidence. Price, MOQ, and volume willingness were not found.</div>
+  <div class="callout"><b>Assumptions, not measured results.</b> Cost, lead time, and geography are indicative assumptions about tariffs, freight, and concentration. They are not quotes or measured transit times, and they do not show that one country is a better source than another. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
-  <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">${S.user?'Weight changes are saved to your account only. They do not change shared supplier scores or anyone else\'s weights.':'Weight changes stay in this browser. They are not written to the shared database.'}</p><div class="weights" id="wts"></div>
+  <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">${S.user?'These weights are saved to your account. They do not change shared supplier scores or anyone else\'s weights.':'While you are signed out, weight changes stay in this browser only. Sign in to save them to your account.'}</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
   <div class="wlocks"><span class="muted">Locks:</span> <button type="button" class="btn sec sm" id="lkall">Select all</button> <button type="button" class="btn sec sm" id="lknone">Unselect all</button> <span class="muted" style="font-size:12px">These buttons only check or uncheck the Lock boxes. Weights stay as they are and still total 100%.</span></div></div>
   <div class="filters"><select id="fc"><option value="">All categories</option>${cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
@@ -280,7 +280,7 @@ function scorecard(){
 function watchlistHtml(){
   const items=(window.FS_CATALOG&&window.FS_CATALOG.watchlist)||[];
   return `<div class="card watchcard"><h2>Watchlist, not scored</h2>
-  <p class="muted">These names are from the Nov 6 desk pass. They are not qualified bolting-pump matches and they have no rank. Huade and Taifeng do not have a confirmed ~700 bar line. Suggested numbers from that research are not shown here, so they cannot be read as a score.</p>
+  <p class="muted">Reviewed Nov 6, 2026. These names are not qualified bolting-pump matches and they have no rank. Huade and Taifeng do not have a confirmed ~700 bar line. Suggested numbers from that research are not shown here.</p>
   ${items.map(w=>`<article class="watchitem"><h3>${esc(w.name)} <span class="tag alt2">${esc(w.id)}</span></h3><p>${esc(w.why)}</p><p class="muted">${esc(w.checked)}</p>${safeUrl(w.url)?`<p class="u"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>`:''}</article>`).join('')}
   </div>`;
 }
@@ -296,26 +296,26 @@ function weights(){
 function detailInner(r){
   const china=r.pass==='2026-11-06';
   const ev=evidenceHtml(r), flags=(r.flags||[]).map(f=>`<li>${esc(f)}</li>`).join('');
-  return `<div class="detail"><div class="detailhead"><h2>${esc(r.name)} <span class="tag${china?' new':''}">${china?'Nov 6, 2026 addition':'Original Nov 2, 2026 list'}</span></h2><button type="button" class="btn sec" id="dx">Close</button></div>
+  return `<div class="detail"><div class="detailhead"><h2>${esc(r.name)} <span class="tag${china?' new':''}">${china?'Researched Nov 6, 2026':'Researched Nov 2, 2026'}</span></h2><button type="button" class="btn sec" id="dx">Close</button></div>
   <p class="muted">${esc(r.id)} · ${esc(r.category)} · ${esc(r.country)} (${esc(r.region)})${r.manufacturer?' · '+esc(r.manufacturer):''}</p>
   <p>${esc(r.what_they_make)}</p>
   ${r.relevance?`<p><b>Why it is listed:</b> ${esc(r.relevance)}</p>`:''}
   <p><b>US presence:</b> ${esc(r.us_presence)}</p><p><b>Certs:</b> ${esc(r.certs_note)}</p>
   <p>${KEYS.map((k,i)=>`${LBL[i]}: <b>${r[k]??'–'}</b>`).join(' · ')}</p>
   <p>Weighted score at the current weights: <b>${score(r).toFixed(2)}</b></p>
-  <p class="callout">${esc(r.scores_status||'Preliminary 1-5 desk judgment from public pages on the Nov 2 pass. Not a qualification or a quote.')} Cost, lead time, and geo risk are rubric assumptions. They are not measured prices or shipments, and they are not proof that a non-China supplier is a better fit.</p>
-  ${china?'<p><b>Not established on Nov 6:</b> price, MOQ, and willingness to take HYTORC volumes. This evidence is not the Nov 2 discovery trail.</p>':'<p class="muted">Per-supplier discovery trail was not recorded for the Nov 2 list.</p>'}
+  <p class="callout">${esc(r.scores_status||'Preliminary 1-5 desk judgment from public pages. Not a qualification or a quote.')} Cost, lead time, and geo risk are indicative assumptions. They are not quotations, measured shipments, or a finding that one country is a better source.</p>
+  ${china?'<p><b>Not found in the Nov 6, 2026 sources:</b> price, MOQ, and willingness to take HYTORC volumes.</p>':'<p class="muted">Per-supplier discovery trail was not recorded. Source date Nov 2, 2026.</p>'}
   ${flags?`<ul class="flags">${flags}</ul>`:''}
   ${ev?`<div class="ev">${ev}</div>`:''}
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
-  <a class="btn" href="#/worksheet?s=${encodeURIComponent(r.id)}">${S.user?'Open worksheet':'Sign in to open the worksheet'}</a></div>`;
+  <a class="btn" href="#/worksheet?s=${encodeURIComponent(r.id)}">${S.user?'Open worksheet':'Sign in to open shared notes'}</a></div>`;
 }
 function table(){
   let rows=S.rows.map(r=>({...r,_s:score(r)})).filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
   const so=S.f.sort; rows.sort((a,b)=>so==='score'?b._s-a._s:so==='cost'?(b.cost||0)-(a.cost||0):String(a[so]).localeCompare(b[so]));
   const heads=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US','Cost','Lead','Geo','Score','US presence','Certs','Source'];
   $('#tb').innerHTML=`<colgroup>${WIDTHS.map(w=>`<col style="width:${w}">`).join('')}</colgroup><thead><tr>${heads.map((h,i)=>`<th class="${COLS[i]}">${h}</th>`).join('')}</tr></thead><tbody>`+
-  (rows.length?rows.map((r,n)=>`<tr class="r${r.pass==='2026-11-06'?' china':''}${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${n+1}</td><td class="name"><b>${esc(r.name)}</b>${r.pass==='2026-11-06'?' <span class="tag new">Nov 6</span>':''}</td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${heads.length}">No suppliers match these filters.</td></tr>`)+'</tbody>';
+  (rows.length?rows.map((r,n)=>`<tr class="r${r.pass==='2026-11-06'?' china':''}${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${n+1}</td><td class="name"><b>${esc(r.name)}</b>${r.pass==='2026-11-06'?' <span class="tag new">Nov 6, 2026</span>':''}</td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${heads.length}">No suppliers match these filters.</td></tr>`)+'</tbody>';
   document.querySelectorAll('#tb tr.r').forEach(tr=>tr.onclick=e=>{
     const a=e.target.closest('a'); if(a){log('source_click',tr.dataset.id,{url:a.href});return;}
     if(e.target.closest('button'))return;
@@ -360,12 +360,12 @@ function readForm(){document.querySelectorAll('#wsform [data-gid][data-k]').forE
   if(el.dataset.k==='_status')f.status=el.value;else if(el.dataset.k==='_evidence')f.evidence=el.value;
   else{const def=FSW.fieldsOf(gid==='decision'?FSW.DECISION:FSW.GATES.find(g=>g.id===gid)).find(x=>x.k===el.dataset.k);f.details[el.dataset.k]=def.t==='urls'?FSW.cleanUrls(el.value):el.value;}});}
 async function worksheet(){
-  if(!S.user){signInView('', 'The shared worksheet and its notes are visible only to signed-in editors. Nothing on that worksheet is in the public snapshot.');return;}
+  if(!S.user){signInView('');return;}
   const q=new URLSearchParams(location.hash.split('?')[1]||''); let sel=q.get('s'); if(!S.rows.some(r=>r.id===sel))sel=(S.rows[0]||{}).id;
   if(!sel){app.innerHTML='<div class="card"><p class="muted">No suppliers loaded yet.</p></div>';return;}
   const sup=S.rows.find(r=>r.id===sel);
   const opts=S.rows.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.id)}" ${r.id===sel?'selected':''}>${esc(r.name)} (${esc(r.category)})</option>`).join('');
-  app.innerHTML=`<h1>Supplier Qualification Worksheet</h1><p class="sub">Seven gates from short list to volume, per supplier. This is a shared worksheet: everyone with access sees and can edit the same records, and each gate shows who saved it last.</p>
+  app.innerHTML=`<h1>Supplier Qualification Worksheet</h1><p class="sub">Seven gates from short list to volume, per supplier. Notes and progress are stored in the shared project database for every editor, not in this browser. Each gate shows who saved it last.</p>
   <div class="card wstop"><label for="sup" class="fl">Supplier</label><select id="sup" class="fld" style="max-width:420px">${opts}</select>
   <p class="muted" style="font-size:12px">${esc(sup.category)} · ${esc(sup.country)} · desk scores are preliminary. New fields start as Unknown or blank; nothing is pre-filled from public data.</p></div>
   <div id="wsbanner"></div><div class="card" id="wssum" style="margin:14px 0"></div><div id="wsform"><p class="muted">Loading…</p></div>
