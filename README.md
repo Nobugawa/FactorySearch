@@ -1,4 +1,4 @@
-# FactorySearch v1.1.1
+# FactorySearch v1.2.0
 Password-gated HYTORC supplier scorecard + qualification worksheet (Philos Kim / Teddy Hume). Static site on Netlify, data in Supabase (`fs_*` tables, same project as the job portal).
 
 ## Setup (once)
@@ -20,7 +20,7 @@ Password-gated HYTORC supplier scorecard + qualification worksheet (Philos Kim /
 `select user_email, event_type, count(*), max((detail->>'seconds')::int) from fs_events group by 1,2;`
 
 ## Tests
-`node tests/rebalance.test.js` — weight rebalance invariants (sum 100, locks fixed, clamps, zero-sum, typed input, fuzz).
+`node tests/rebalance.test.js`, `node tests/auth_url.test.js`, `NODE_PATH=<jsdom node_modules> node tests/dom.test.js` — weight rebalance invariants (sum 100, locks fixed, clamps, zero-sum, typed input, fuzz).
 
 ## Usage notice
 The login screen and footer tell users their activity is logged and visible to the owner.
