@@ -23,13 +23,16 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(tb.tHead&&tb.tHead.rows.length===1,'thead present');ok(tb.tBodies[0].rows.length===34,'34 body rows');
  ok(tb.firstElementChild.tagName==='THEAD','thead before tbody');ok(!tb.tBodies[0].querySelector('th'),'no header cells in body');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.2.0','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.2.1','version');
  ok(!L.some(x=>JSON.stringify(x).toLowerCase().includes('password')),'no password in events');
+ ok(tb.querySelectorAll('td.u').length===34&&[...tb.querySelectorAll('td.u a')].every(a=>a.textContent.length>0&&!a.textContent.includes('…')),'full URL text in source cells');
+ const css=fs.readFileSync(R+'style.css','utf8');ok(/footer\{position:static/.test(css)&&/overflow-wrap:anywhere/.test(css)&&/#tb\{min-width:1480px\}/.test(css),'css: footer in flow, wrap, min-width');
+ ok(!/table td\{display:none/.test(css),'no mobile rule hiding table cells');
  w.location.hash='#/study';await tick();D=w.document;const st=D.body.textContent;
  ok(/Capability is catalog fit, not an audit/.test(st),'capability vs audit');ok(/Private label/.test(st)&&/Questions for discussion/.test(st)&&/Qualification method/.test(st),'study sections');
  ok(!/not a lecture/i.test(st)&&!/\$100|\$135|\$120|~25%|20 to 30%/.test(st),'removed unsupported numbers/phrasing');ok(!D.querySelector('#app input[type=range]'),'no duplicate controls');
  w.location.hash='#/sources';await tick();D=w.document;const sr=D.body.textContent;
  ok(/Used in this screening/.test(sr)&&/Planned research channels \(not yet checked\)/.test(sr),'sources split');
  ['importyeti.com','panjiva.com','timtos.com.tw','buykorea.org','ptc-asia.com','emo-hannover.de'].forEach(h=>ok([...D.querySelectorAll('a')].some(a=>a.href.includes(h)),'link '+h));
- ok(D.querySelectorAll('.tblwrap tbody tr').length===34,'34 supplier source rows');
+ ok(D.querySelectorAll('.tblwrap tbody tr').length===34,'34 supplier source rows');ok(D.querySelectorAll('.tblwrap td.u').length===34,'source url cells');
  console.log(n,'checks',f,'failures');process.exit(f?1:0);})();

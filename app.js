@@ -110,7 +110,7 @@ function sources(){
   <div class="card wrap tblwrap"><h2>Per-supplier sources</h2><table class="tbl"><thead><tr><th>Supplier</th><th>Found via</th><th>Company URL</th><th>Original check (Nov 2)</th><th>Re-check (${esc(rc.checked||'—')}, automated)</th><th>What the URL supports</th></tr></thead><tbody>
   ${S.rows.slice().sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})).map(r=>{const x=rc.results[r.url]||'';return `<tr><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td>
   <td>Known industry name + company website. Specific discovery trail not recorded.</td>
-  <td>${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:'—'}</td>
+  <td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:'—'}</td>
   <td>${esc(r.url_check===200?'Site responded':(r.url_check??'not recorded'))}</td><td>${esc(x?(x.split(' ')[0]==='200'?'Site responded':'HTTP '+x.split(' ')[0]+' (likely blocks scripts)'):'not rechecked')}</td>
   <td>Company exists; product family. Homepage only. Not a product, certificate, or customs record.</td></tr>`}).join('')}</tbody></table>
   <p class="muted" style="font-size:12px">Re-check is a later scripted page load showing the site responded. It was not part of the original discovery.</p></div>`;
@@ -196,7 +196,7 @@ function table(){
   let rows=S.rows.map(r=>({...r,_s:score(r)})).filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
   const so=S.f.sort; rows.sort((a,b)=>so==='score'?b._s-a._s:so==='cost'?(b.cost||0)-(a.cost||0):String(a[so]).localeCompare(b[so]));
   $('#tb').innerHTML=`<thead><tr><th>#</th><th>Supplier</th><th>Cat</th><th>Country</th><th>Makes</th>${['Cap','Cert','Scale','US','Cost','Lead','Geo'].map(h=>`<th>${h}</th>`).join('')}<th>Score</th><th>US presence</th><th>Certs</th><th>Source</th></tr></thead><tbody>`+
-  rows.map((r,n)=>`<tr class="r" data-id="${esc(r.id)}"><td>${n+1}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td>${r[k]??''}</td>`).join('')}<td class="sc">${r._s.toFixed(2)}</td><td>${esc(r.us_presence)}</td><td>${esc(r.certs_note)}</td><td>${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:''}</td></tr>`).join('')+'</tbody>';
+  rows.map((r,n)=>`<tr class="r" data-id="${esc(r.id)}"><td>${n+1}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td>${r[k]??''}</td>`).join('')}<td class="sc">${r._s.toFixed(2)}</td><td>${esc(r.us_presence)}</td><td>${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,''))}</a>`:''}</td></tr>`).join('')+'</tbody>';
   document.querySelectorAll('tr.r').forEach(tr=>tr.onclick=e=>{if(e.target.tagName==='A'){log('source_click',tr.dataset.id,{url:e.target.href});return;}detail(tr.dataset.id);});
 }
 function detail(id){const r=S.rows.find(x=>x.id===id);if(!r)return;log('supplier_open',id,{name:r.name});
