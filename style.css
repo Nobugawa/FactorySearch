@@ -92,7 +92,7 @@ footer{display:flex;justify-content:space-between;max-width:1240px;margin:0 auto
 .tbl{width:100%;border-collapse:collapse;font-size:12.5px}.tbl th,.tbl td{padding:6px 7px;border-bottom:1px solid #eef0f5;text-align:left;vertical-align:top}.tbl th{background:#f8f9fc}
 .tbl tr.r:hover{background:#f5f7ff;cursor:pointer}.sc{font-weight:700;color:#2f5bea}.wrap{overflow-x:auto}
 .callout{background:#eef2ff;border-left:4px solid #2f5bea;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px}
-.detail{position:fixed;right:20px;top:80px;width:360px;max-height:80vh;overflow:auto;z-index:9}.gate{display:grid;grid-template-columns:150px 160px 1fr;gap:10px;align-items:center;margin:8px 0}
+.detail{position:static;width:100%;max-height:none;overflow:visible;z-index:1}.gate{display:grid;grid-template-columns:150px 160px 1fr;gap:10px;align-items:center;margin:8px 0}
 @media(max-width:800px){.weights{grid-template-columns:1fr}.gate{grid-template-columns:1fr}}
 
 /* v1.2.0: header fix: thead sticks inside its own scroll box, never offset below row 1 */
@@ -110,12 +110,10 @@ footer{display:flex;justify-content:space-between;max-width:1240px;margin:0 auto
 body{display:flex;flex-direction:column;min-height:100vh}
 main{flex:1 0 auto;width:100%;padding-bottom:28px}
 footer{position:static;width:100%;max-width:none;background:#fff;border-top:1px solid #e5e8ef;padding:10px 28px}
-.tblwrap{max-height:calc(100vh - 150px);overflow:auto;-webkit-overflow-scrolling:touch}
-#tb{min-width:1480px}
-#tb td:nth-child(5){min-width:190px}#tb td:nth-child(14),#tb td:nth-child(15){min-width:160px}
-.tbl td.u{min-width:170px;max-width:240px}
+.tblwrap{max-height:none;overflow:visible}
+#tb{min-width:0;width:100%}
 .tbl td.u a{overflow-wrap:anywhere;word-break:break-word}
-.tblwrap .tbl{min-width:900px}
+.tblwrap .tbl{min-width:0}
 @media(max-width:640px){main{padding:14px 12px 20px}}
 .tbl a{overflow-wrap:anywhere}
 /* v1.3.0 worksheet */
@@ -131,3 +129,37 @@ footer{position:static;width:100%;max-width:none;background:#fff;border-top:1px 
 .callout.warn{background:#fff6e0;border-left-color:#c58a00}
 @media(max-width:900px){.wgrid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.wgrid{grid-template-columns:1fr}.gst{margin-left:0;width:100%}}
 .btn.sm{padding:5px 10px;font-size:12px}.wlocks{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+
+/* v1.4.0 public scorecard: full width, wrapping columns, detail under the selected row */
+:root{--topbar:64px}
+.top{z-index:30}
+main{max-width:none;padding:18px 16px 32px}
+footer{flex-wrap:wrap;gap:6px 18px;align-items:flex-start}
+.wrap{overflow:visible}
+.card.study{max-width:920px}
+.scorewrap{overflow:visible;max-width:100%;padding:0}
+#tb{table-layout:fixed;width:100%;max-width:100%;min-width:0;border-collapse:separate;border-spacing:0}
+#tb th,#tb td{white-space:normal;overflow-wrap:break-word;word-break:normal;padding:6px 5px}
+#tb thead th{position:sticky;top:var(--topbar);z-index:4;background:#f8f9fc;box-shadow:inset 0 -1px 0 #e5e8ef}
+#tb th.num,#tb th.n{white-space:nowrap;letter-spacing:0;padding:6px 2px;font-size:11px}
+#tb td.num{text-align:right;font-variant-numeric:tabular-nums;padding-left:2px;padding-right:2px}
+#tb td.u a,.evitem a,.watchitem a{overflow-wrap:anywhere;word-break:break-word}
+tr.r.china{box-shadow:inset 3px 0 0 #c58a00}
+tr.detailrow>td{padding:0;background:#f7f9ff;border-bottom:1px solid #d9e2ff}
+tr.detailrow .detail{margin:0;border:0;border-radius:0;box-shadow:none;border-top:2px solid #2f5bea}
+.detailhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.detailhead h2{margin:0}
+.tag.new{background:#fff6e0;color:#8a5a00}
+.evitem{margin:8px 0;padding-top:6px;border-top:1px solid #eef0f5}
+.watchitem{padding:10px 0;border-top:1px solid #eef0f5}
+.watchitem h3{margin:0 0 6px;font-size:14px;text-transform:none;letter-spacing:0;color:#1d2433}
+.flags{margin:8px 0 0;padding-left:18px}
+nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:0}
+nav a{display:inline-block}
+nav a[hidden]{display:none}
+@media(max-width:1100px){
+  .top{flex-wrap:wrap;align-items:flex-start}
+  .scorewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  #tb{min-width:980px;table-layout:auto}
+  #tb thead th{top:0}
+}

@@ -1,11 +1,12 @@
 -- FactorySearch schema v1 — paste once in Supabase SQL Editor (same project as job portal).
 -- All tables prefixed fs_ ; job-hunt tables are untouched and stay invisible to Teddy.
--- TO ADD TEDDY: edit the array in fs_allowed() below, e.g.
---   array['philoskim990@gmail.com','teddy@example.com']  then re-run just that function.
+-- fs_allowed() lists the current editors (owner, reviewer, Teddy). Re-running this file
+-- replaces that function with the same three emails. It does not change job-portal tables.
+-- Public scorecard pages do not use anon grants. Do not GRANT anything on fs_* to anon.
 
 create or replace function public.fs_allowed() returns boolean
 language sql stable as $$
-  select lower(coalesce(auth.jwt() ->> 'email','')) = any (array['philoskim990@gmail.com'])
+  select lower(coalesce(auth.jwt() ->> 'email','')) = any (array['philoskim990@gmail.com','philos@greymatterfusion.com','thume@hytorc.com'])
 $$;
 
 create table if not exists public.fs_suppliers (
