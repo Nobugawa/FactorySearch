@@ -19,4 +19,4 @@ for r in csv.DictReader(open(CSV, encoding="utf-8")):
 post("fs_suppliers", rows)
 RC = os.environ.get("FS_RECHECK_JSON", "/workspace/fs_homepage_recheck.json")
 meta_extra = [{"key": "homepage_recheck", "value": open(RC).read()}] if os.path.exists(RC) else []
-post("fs_meta", meta_extra + [{"key": "data_as_of", "value": datetime.date.today().isoformat()}, {"key": "version", "value": "v1.1.0"}])
+post("fs_meta", meta_extra + [{"key": "data_as_of", "value": datetime.date.today().isoformat()}, {"key": "version", "value": "v1.1.1"}])

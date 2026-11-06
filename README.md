@@ -1,4 +1,4 @@
-# FactorySearch v1.1.0
+# FactorySearch v1.1.1
 Password-gated HYTORC supplier scorecard + qualification worksheet (Philos Kim / Teddy Hume). Static site on Netlify, data in Supabase (`fs_*` tables, same project as the job portal).
 
 ## Setup (once)
