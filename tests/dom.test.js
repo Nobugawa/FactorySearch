@@ -25,42 +25,38 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
  ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.4.1','version');
  ok(!/Authorized users only/.test(D.body.textContent)&&!/Private supplier study/.test(D.body.textContent),'mandatory-login warning removed');
- ok(/does not require an account/.test(D.getElementById('notice').textContent)&&/this browser/.test(D.getElementById('notice').textContent),'signed-out notice distinguishes browser weights');
+ ok(!D.getElementById('signin')&&!D.getElementById('logout')&&!/Sign in|linked to this email/.test(D.querySelector('nav').textContent+(D.getElementById('notice').textContent||'')),'no public sign-in control or tracking notice');
  ok(tb.querySelectorAll('td.u').length===38&&[...tb.querySelectorAll('td.u a')].every(a=>a.textContent===a.getAttribute('href')&&/^https?:\/\//.test(a.textContent)&&!a.textContent.includes('…')),'full URL text in source cells');
+ const y0=w.scrollY||0;
  tb.querySelector('tr.r').click();
- const sel=tb.querySelector('tr.r.on');
- ok(sel&&sel.nextElementSibling&&sel.nextElementSibling.classList.contains('detailrow'),'detail row is directly below the selected row');
- ok(sel.nextElementSibling.querySelector('.detail')&&sel.nextElementSibling.cells[0].colSpan===sel.cells.length,'detail spans the table');
+ const sel=tb.querySelector('tr.r.on'), pop=D.getElementById('fspop');
+ ok(sel&&pop&&!tb.querySelector('tr.detailrow'),'detail floats instead of inserting a table row');
+ ok(pop.getAttribute('role')==='dialog'&&pop.querySelector('.detail')&&pop.textContent.includes(sel.querySelector('b').textContent),'popover shows that supplier');
+ ok(pop.querySelector('a[href^="http"]')&&pop.querySelector('#dx'),'popover keeps the source link and a close control');
+ ok((w.scrollY||0)===y0,'opening detail does not jump the page');
+ D.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+ ok(!D.getElementById('fspop'),'escape closes the popover');
  ok(!logged.length&&w.__from.length===0&&!(w.__ups||[]).length,'anon open does not read or write');
  D.getElementById('lkall').click();
  const stored=JSON.parse(w.localStorage.getItem('fs_local_weights_v1'));
  ok(stored&&stored.lk.every(Boolean)&&stored.w.reduce((a,b)=>a+b,0)===100,'anon weights stay local and total 100');
  await new Promise(r=>setTimeout(r,900));
  ok(!(w.__ups||[]).length&&w.__from.length===0,'anon lock does not upsert shared prefs');
- // sign-in form still available, with an accurate notice
- w.location.hash='#/signin';ok(await waitFor(w,'#pw'),'sign-in form');D=w.document;
- const pw=D.getElementById('pw'),tg=D.querySelector('.pwtog[data-for="pw"]');
- ok(pw&&pw.type==='password','pw masked by default');ok(tg&&tg.type==='button','toggle is type=button');ok(tg.getAttribute('aria-pressed')==='false','aria-pressed false');
- ok(D.querySelector('label[for="pw"]')&&D.querySelector('label[for="em"]'),'labels');
- ok(/After you sign in/.test(D.body.textContent)&&/not written to the shared database/.test(D.body.textContent),'sign-in notice matches email-linked activity');
- ok(/shared worksheet notes and progress/.test(D.body.textContent)&&/save your scorecard weights to your account/.test(D.body.textContent)&&/this browser only/.test(D.body.textContent),'sign-in says where notes and weights are stored');
- tg.click();ok(pw.type==='text'&&tg.getAttribute('aria-pressed')==='true'&&tg.textContent==='Hide'&&/^Hide/.test(tg.getAttribute('aria-label')),'toggle shows');
- tg.click();ok(pw.type==='password'&&tg.getAttribute('aria-pressed')==='false','toggle hides');
  w.location.hash='#/worksheet';await tick();await tick();
- ok(/project database/.test(w.document.body.textContent)&&!w.__from.includes('fs_worksheet'),'anon worksheet does not query private rows');
- // setup view toggles
+ ok(/Blank template/.test(w.document.body.textContent)&&w.document.getElementById('f_commercial_moq').disabled&&w.document.getElementById('f_commercial_small_ok').value==='Unknown','worksheet is a blank read-only template');
+ ok(!w.document.getElementById('sv')&&!w.__from.includes('fs_worksheet')&&!/Last saved by/.test(w.document.body.textContent),'blank worksheet does not load or save notes');
+ // password setup remains available for a recovery link, off the public nav
  ({w}=mk({user:{email:'philos@greymatterfusion.com'}},'?setup=1'));ok(await waitFor(w,'#p1'),'setup view');
  ok(w.document.getElementById('p1')&&w.document.querySelectorAll('.pwtog').length===2,'setup has 2 toggles');
- // signed-in scorecard still saves that user's weights only
- let L;({w,logged:L}=mk({user:{email:'thume@hytorc.com'}}));ok(await waitFor(w,'#tb'),'signed-in scorecard');D=w.document;tb=D.getElementById('tb');
- ok([...tb.tBodies[0].rows].filter(r=>r.classList.contains('r')).length===38,'signed-in sees the same 38');
- ok(w.__from.includes('fs_weight_prefs')&&w.__from.includes('fs_events'),'signed-in loads own weights and logs the session');
- ok(!w.__from.includes('fs_suppliers')&&!w.__from.includes('fs_meta')&&!w.__from.includes('fs_worksheet'),'signed-in scorecard does not fetch suppliers, meta, or worksheet');
- ok(/linked to this email/.test(D.getElementById('notice').textContent),'signed-in notice names email-linked activity');
- ok(!L.some(x=>JSON.stringify(x).toLowerCase().includes('password')),'no password in events');
+ const tg=w.document.querySelector('.pwtog'), pw=w.document.getElementById('p1');
+ tg.click();ok(pw.type==='text'&&tg.getAttribute('aria-pressed')==='true','setup toggle shows');
+ // a stored session is not attached on the public page, so private rows are not read
+ let L;({w,logged:L}=mk({user:{email:'thume@hytorc.com'}}));ok(await waitFor(w,'#tb'),'public scorecard even if a session exists');
+ D=w.document;
+ ok(w.__from.length===0&&L.length===0,'public page does not read prefs, events, or worksheets');
  const css=fs.readFileSync(R+'style.css','utf8');
  ok(/footer\{position:static/.test(css)&&/overflow-wrap:anywhere/.test(css),'css: footer in flow, urls wrap');
- ok(!/#tb\{min-width:1480px\}/.test(css)&&/max-width:none/.test(css)&&/tr\.detailrow/.test(css),'css: full width, detail under the row');
+ ok(!/#tb\{min-width:1480px\}/.test(css)&&/max-width:none/.test(css)&&/#tb th\.n,#tb td\.n,#tb th\.num,#tb td\.num\{[^}]*text-align:center/.test(css)&&/\.fspop\{[^}]*position:fixed/.test(css),'css: aligned numeric columns and floating detail');
  ok(/@media\(max-width:1100px\)\{[\s\S]*overflow-x:auto/.test(css),'css: narrow screens may scroll sideways');
  ok(!/\.detail\{[^}]*position:\s*fixed/.test(css),'css: detail is not a fixed side panel');
  ok(!/table td\{display:none/.test(css),'no mobile rule hiding table cells');
@@ -68,7 +64,8 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
   ok(/only check or uncheck the Lock boxes/.test(D.body.textContent),'lock buttons explained');
   D.getElementById('lkall').click();ok(boxes().length===7&&boxes().every(b=>b.checked),'select all locks');ok(JSON.stringify(wts())===JSON.stringify(before)&&wts().reduce((a,b)=>a+b,0)===100,'weights unchanged after select all');
   ok([...D.querySelectorAll('[data-i]')].every(e=>e.disabled),'sliders disabled when all locked');
-  await new Promise(r=>setTimeout(r,900));const lastUp=(w.__ups||[]).filter(x=>x&&x.locked).pop();ok(lastUp&&lastUp.locked.every(Boolean)&&JSON.stringify(lastUp.weights)===JSON.stringify(before),'locks persisted to prefs');
+  await new Promise(r=>setTimeout(r,900));ok(!(w.__ups||[]).length,'locks are not written to the shared database');
+  const kept=JSON.parse(w.localStorage.getItem('fs_local_weights_v1'));ok(kept&&kept.lk.every(Boolean)&&JSON.stringify(kept.w)===JSON.stringify(before),'locks stay in this browser');
   D.getElementById('lknone').click();ok(boxes().every(b=>!b.checked)&&JSON.stringify(wts())===JSON.stringify(before),'unselect all; weights unchanged');
   D.getElementById('lkall').click();D.getElementById('rst').click();ok(boxes().every(b=>!b.checked)&&JSON.stringify(wts())==='[25,15,10,10,20,10,10]','return to defaults unlocks all');
   const vs=new Set([...fs.readFileSync(R+'index.html','utf8').matchAll(/\?v=([0-9.]+)/g)].map(m=>m[1]));ok(vs.size===1&&('v'+[...vs][0])===w.FS_CONFIG.VERSION,'asset cache-bust version matches config');}

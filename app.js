@@ -19,14 +19,8 @@ function secs(){return Math.round((Date.now()-S.t0)/1000);}
 function syncTopbar(){const el=document.querySelector('.top'); if(el&&el.offsetHeight) document.documentElement.style.setProperty('--topbar', el.offsetHeight+'px');}
 function paintChrome(){
   $('#ver').textContent=C.VERSION;
-  const inn=$('#signin'), out=$('#logout'), nav=$('#nav');
-  if(nav) nav.style.display='';
-  if(inn) inn.hidden=!!S.user;
-  if(out) out.hidden=!S.user;
-  const n=$('#notice');
-  if(n) n.textContent=S.user
-    ? 'Signed in as '+S.user+'. Session time, supplier rows opened, source clicks, and worksheet saves are linked to this email and visible to the owner.'
-    : 'Viewing does not require an account. Sign in stores shared worksheet notes and your weights. Unsigned weight changes stay in this browser.';
+  const nav=$('#nav'); if(nav) nav.style.display='';
+  const n=$('#notice'); if(n) n.textContent='';
   syncTopbar();
 }
 function bannerHtml(){return S.banner?`<div class="callout warn" role="status">${esc(S.banner)}</div>`:'';}
@@ -84,9 +78,11 @@ function applyCatalog(){
   return true;
 }
 async function boot(){
+  if(!applyCatalog()){app.innerHTML='<div class="card"><h2>Research snapshot missing</h2><p class="muted">catalog.js did not load. The public pages do not read supplier rows from the database.</p></div>';return;}
+  const authEntry=AUTH0.hasTokens||AUTH0.error||AUTH0.recovery;
+  if(!authEntry){S.user=null; stopSessionLog(); loadLocalW(); paintChrome(); route(); return;}
   const {data:{session}}=await sb.auth.getSession();
   if(AUTH0.hasTokens||AUTH0.error||AUTH0.recovery){cleanUrl(); AUTH0.hasTokens=false;}
-  if(!applyCatalog()){app.innerHTML='<div class="card"><h2>Research snapshot missing</h2><p class="muted">catalog.js did not load. The public pages do not read supplier rows from the database.</p></div>';return;}
   if(AUTH0.error){S.banner='Link problem: '+AUTH0.error+'. Ask the owner for a new setup link.'; AUTH0.error=''; pwSetup=false;}
   let sessionUser=null;
   if(session){
@@ -110,7 +106,7 @@ async function boot(){
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')log('session_ping',null,{seconds:secs(),kind:'hidden'});});
 window.addEventListener('beforeunload',()=>log('session_ping',null,{seconds:secs(),kind:'unload'}));
 window.addEventListener('resize',syncTopbar);
-$('#logout').onclick=async e=>{e.preventDefault();
+const logoutBtn=$('#logout'); if(logoutBtn) logoutBtn.onclick=async e=>{e.preventDefault();
   if(S.wsDirty&&!confirm('You have unsaved worksheet changes. Sign out without saving?'))return;
   log('session_end',null,{seconds:secs()});
   await sb.auth.signOut();
@@ -120,11 +116,9 @@ $('#logout').onclick=async e=>{e.preventDefault();
 let lastHash=location.hash;
 window.addEventListener('hashchange',()=>{if(S.wsDirty&&!confirm('You have unsaved worksheet changes. Leave without saving?')){history.replaceState(null,'',lastHash||'#/worksheet');return;} S.wsDirty=false; lastHash=location.hash; route();});
 window.addEventListener('beforeunload',e=>{if(S.wsDirty){e.preventDefault();e.returnValue='';}});
-function route(){const h=location.hash, v=h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':h.startsWith('#/signin')?'in':'score';
+function route(){const h=location.hash, v=h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':'score';
   document.querySelectorAll('nav a[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
-  if(v==='in'&&S.user){history.replaceState(null,'',location.pathname+'#/'); lastHash='#/'; return scorecard();}
-  if(v==='ws') return S.user?worksheet():signInView('');
-  if(v==='in') return signInView('');
+  if(v==='ws') return worksheet();
   if(v==='src') return sources();
   if(v==='study') return study();
   scorecard();
@@ -198,7 +192,7 @@ function study(){ log('study_open');
   const orig=S.rows.filter(r=>r.pass==='2026-11-02'), add=S.rows.filter(r=>r.pass==='2026-11-06');
   const ncat=(rows,c)=>rows.filter(r=>r.category===c).length;
   const china=S.rows.filter(r=>r.country==='China');
-  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026 and Nov 6, 2026. Live controls are on <a href="#/">Scorecard</a>. Sign in to save shared worksheet notes. Channels are on <a href="#/sources">Sources</a>.</p>
+  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026 and Nov 6, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
   ${bannerHtml()}
   <div class="card study">
   <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: real manufacturers, a scorecard that can be re-weighted, and alternative candidates per part family rather than a single low-cost bet. Three part families that are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized.</p>
@@ -262,7 +256,7 @@ function scorecard(){
   ${bannerHtml()}
   <div class="callout"><b>Assumptions, not measured results.</b> Cost, lead time, and geography are indicative assumptions about tariffs, freight, and concentration. They are not quotes or measured transit times, and they do not show that one country is a better source than another. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
-  <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">${S.user?'These weights are saved to your account. They do not change shared supplier scores or anyone else\'s weights.':'While you are signed out, weight changes stay in this browser only. Sign in to save them to your account.'}</p><div class="weights" id="wts"></div>
+  <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">Weight changes stay in this browser only. They do not change the supplier scores.</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
   <div class="wlocks"><span class="muted">Locks:</span> <button type="button" class="btn sec sm" id="lkall">Select all</button> <button type="button" class="btn sec sm" id="lknone">Unselect all</button> <span class="muted" style="font-size:12px">These buttons only check or uncheck the Lock boxes. Weights stay as they are and still total 100%.</span></div></div>
   <div class="filters"><select id="fc"><option value="">All categories</option>${cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
@@ -308,7 +302,7 @@ function detailInner(r){
   ${flags?`<ul class="flags">${flags}</ul>`:''}
   ${ev?`<div class="ev">${ev}</div>`:''}
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
-  <a class="btn" href="#/worksheet?s=${encodeURIComponent(r.id)}">${S.user?'Open worksheet':'Sign in to open shared notes'}</a></div>`;
+  <a class="btn" href="#/worksheet?s=${encodeURIComponent(r.id)}">Open blank worksheet</a></div>`;
 }
 function table(){
   let rows=S.rows.map(r=>({...r,_s:score(r)})).filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
@@ -319,25 +313,57 @@ function table(){
   document.querySelectorAll('#tb tr.r').forEach(tr=>tr.onclick=e=>{
     const a=e.target.closest('a'); if(a){log('source_click',tr.dataset.id,{url:a.href});return;}
     if(e.target.closest('button'))return;
+    e.stopPropagation();
     openDetail(tr.dataset.id);
   });
-  if(!S.open) return;
-  const tr=[...document.querySelectorAll('#tb tr.r')].find(t=>t.dataset.id===S.open);
-  const r=S.rows.find(x=>x.id===S.open);
-  if(!tr||!r) return;
-  const d=document.createElement('tr'); d.className='detailrow';
-  const td=document.createElement('td'); td.colSpan=tr.cells.length; td.innerHTML=detailInner(r);
-  d.appendChild(td); tr.after(d);
-  td.querySelectorAll('a[href^="http"]').forEach(a=>a.addEventListener('click',()=>log('source_click', r.id, {url:a.href})));
-  const dx=td.querySelector('#dx'); if(dx) dx.onclick=ev=>{ev.stopPropagation(); S.open=null; table();};
+  if(S.open && ![...document.querySelectorAll('#tb tr.r')].some(t=>t.dataset.id===S.open)) closePop();
+  else if(S.open) positionPop();
+}
+function closePop(){
+  S.open=null;
+  const p=document.getElementById('fspop'); if(p) p.remove();
+  document.querySelectorAll('#tb tr.r.on').forEach(tr=>tr.classList.remove('on'));
+}
+function positionPop(){
+  const p=document.getElementById('fspop'), row=document.querySelector('#tb tr.r.on');
+  if(!p||!row) return;
+  const margin=8, width=Math.min(460, window.innerWidth-margin*2);
+  p.style.width=width+'px';
+  const rect=row.getBoundingClientRect();
+  const below=window.innerHeight-margin-(rect.bottom+6), above=rect.top-margin-6;
+  const room=below>=160||below>=above?below:above;
+  p.style.maxHeight=Math.max(160, Math.min(room, Math.round(window.innerHeight*0.7)))+'px';
+  const popH=p.offsetHeight;
+  let left=Math.round(rect.left);
+  if(left+width>window.innerWidth-margin) left=window.innerWidth-margin-width;
+  if(left<margin) left=margin;
+  let top;
+  if(below>=160||below>=above) top=Math.round(rect.bottom+6);
+  else top=Math.max(margin, Math.round(rect.top-6-popH));
+  p.style.left=left+'px'; p.style.top=top+'px';
 }
 function openDetail(id){
-  if(S.open===id){S.open=null; table(); return;}
+  if(S.open===id){closePop(); return;}
+  const r=S.rows.find(x=>x.id===id); if(!r) return;
   S.open=id;
-  const r=S.rows.find(x=>x.id===id);
-  if(r) log('supplier_open', id, {name:r.name});
-  table();
+  log('supplier_open', id, {name:r.name});
+  document.querySelectorAll('#tb tr.r').forEach(tr=>tr.classList.toggle('on', tr.dataset.id===id));
+  let p=document.getElementById('fspop');
+  if(!p){p=document.createElement('div'); p.id='fspop'; p.className='fspop'; p.setAttribute('role','dialog'); p.setAttribute('aria-label','Supplier detail'); document.body.appendChild(p);}
+  p.innerHTML=detailInner(r);
+  p.querySelectorAll('a[href^="http"]').forEach(a=>a.addEventListener('click',()=>log('source_click', r.id, {url:a.href})));
+  const dx=p.querySelector('#dx');
+  if(dx){dx.onclick=ev=>{ev.stopPropagation(); closePop();}; try{dx.focus({preventScroll:true});}catch(e){}}
+  positionPop();
 }
+document.addEventListener('click',e=>{
+  const p=document.getElementById('fspop'); if(!p) return;
+  if(p.contains(e.target)) return;
+  closePop();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.open) closePop();});
+window.addEventListener('scroll',()=>{if(S.open) positionPop();},true);
+window.addEventListener('resize',()=>{if(S.open) positionPop();});
 
 let WS={sel:null,forms:{},loadedAt:{},dirty:false,hasDetails:null};
 function wsSetDirty(v){WS.dirty=v;S.wsDirty=v;const d=$('#wsdirty');if(d){d.textContent=v?'Unsaved changes':'';d.className=v?'dirty':'';}}
@@ -359,8 +385,31 @@ function summaryHtml(){const r=FSW.readiness(WS.forms),c=r.counts;
 function readForm(){document.querySelectorAll('#wsform [data-gid][data-k]').forEach(el=>{const gid=el.dataset.gid,f=WS.forms[gid];
   if(el.dataset.k==='_status')f.status=el.value;else if(el.dataset.k==='_evidence')f.evidence=el.value;
   else{const def=FSW.fieldsOf(gid==='decision'?FSW.DECISION:FSW.GATES.find(g=>g.id===gid)).find(x=>x.k===el.dataset.k);f.details[el.dataset.k]=def.t==='urls'?FSW.cleanUrls(el.value):el.value;}});}
-async function worksheet(){
-  if(!S.user){signInView('');return;}
+function worksheet(){
+  closePop();
+  const q=new URLSearchParams(location.hash.split('?')[1]||''); let sel=q.get('s'); if(!S.rows.some(r=>r.id===sel))sel=(S.rows[0]||{}).id;
+  if(!sel){app.innerHTML='<div class="card"><p class="muted">No suppliers loaded yet.</p></div>';return;}
+  const sup=S.rows.find(r=>r.id===sel);
+  const opts=S.rows.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.id)}" ${r.id===sel?'selected':''}>${esc(r.name)} (${esc(r.category)})</option>`).join('');
+  const forms={}; FSW.GATES.concat([FSW.DECISION]).forEach(g=>{forms[g.id]=FSW.deserialize(g.id);});
+  WS={sel,forms,loadedAt:{},dirty:false,hasDetails:false}; S.wsDirty=false;
+  app.innerHTML=`<h1>Supplier qualification worksheet</h1><p class="sub">Blank template of the fields a qualification review would fill in. Nothing on this page is loaded from saved notes.</p>
+  <div class="card wstop"><label for="sup" class="fl">Supplier</label><select id="sup" class="fld" style="max-width:420px">${opts}</select>
+  <p class="muted" style="font-size:12px">${esc(sup.category)} · ${esc(sup.country)} · every field below starts empty. This is an illustration, not a saved record.</p></div>
+  <div class="card" id="wssum" style="margin:14px 0"></div><div id="wsform"></div>`;
+  $('#sup').onchange=e=>{location.hash='#/worksheet?s='+encodeURIComponent(e.target.value);};
+  $('#wssum').innerHTML=summaryHtml();
+  $('#wsform').innerHTML=FSW.GATES.map(g=>{const f=forms[g.id];return `<details class="card gatecard" open><summary><span class="gn">${g.n}</span> <b>${esc(g.l)}</b> <span class="gs">${esc(f.status)}</span></summary>
+    <p class="muted hint">${esc(g.hint)}</p>
+    <div class="wgrid"><div class="wf"><label for="st_${g.id}">Gate status (required checkpoint)</label><select id="st_${g.id}" class="fld" disabled>${FSW.STATUSES.map(s=>`<option ${s===f.status?'selected':''}>${s}</option>`).join('')}</select></div>
+    ${g.f.map(x=>fieldHtml(g.id,x,f.details[x.k],true)).join('')}</div>
+    <h4>Follow-up</h4><div class="wgrid">${FSW.COMMON.map(x=>fieldHtml(g.id,x,f.details[x.k],true)).join('')}
+    <div class="wf wide"><label for="ev_${g.id}">Notes / evidence summary</label><textarea id="ev_${g.id}" class="fld" rows="2" disabled></textarea></div></div></details>`;}).join('')+
+   `<div class="card gatecard"><h2>Open risks and recommendation</h2><div class="wgrid">${FSW.DECISION.f.map(x=>fieldHtml('decision',x,forms.decision.details[x.k],true)).join('')}</div></div>`;
+}
+// Kept for a future signed-in editor. The public page does not call this, and it is not reachable from the navigation.
+async function worksheetStored(){
+  if(!S.user)return;
   const q=new URLSearchParams(location.hash.split('?')[1]||''); let sel=q.get('s'); if(!S.rows.some(r=>r.id===sel))sel=(S.rows[0]||{}).id;
   if(!sel){app.innerHTML='<div class="card"><p class="muted">No suppliers loaded yet.</p></div>';return;}
   const sup=S.rows.find(r=>r.id===sel);
