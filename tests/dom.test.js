@@ -8,7 +8,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
   const q=(data)=>{const o={select:()=>o,eq:()=>o,maybeSingle:()=>Promise.resolve({data:null}),insert:(x)=>{logged.push(x);return Promise.resolve({})},upsert:(x)=>{w.__ups.push(x);return Promise.resolve({})},then:(res)=>res({data,error:null})};return o;};
   w.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session}}),signOut:async()=>{},signInWithPassword:async()=>({error:{message:'bad'}}),updateUser:async()=>({}),onAuthStateChange:()=>{}},
     from:(t)=>{w.__from.push(t);return q([]);}})};
-  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'catalog.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'quote.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
+  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'catalog.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'quote.js','utf8'));w.eval(fs.readFileSync(R+'sort.js','utf8'));w.eval(fs.readFileSync(R+'sensitivity.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
 (async()=>{
  // public scorecard, no login wall
  let {w,logged}=mk(null);ok(await waitFor(w,'#tb'),'anon scorecard rendered');let D=w.document;let tb=D.getElementById('tb');
@@ -23,8 +23,36 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.5.0','version');
- ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&D.querySelector('label[for="fs"]')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.0','version');
+ ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&!D.querySelector('#fs')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score, without a global sort menu');
+ ok(/China remains a leading sourcing option/.test(D.body.textContent)&&/not verdicts on individual factories/.test(D.body.textContent),'landing states the China comparison in plain language');
+ {const heads=[...tb.tHead.rows[0].cells];
+  ok(heads.every(th=>th.querySelector('button.sortbtn')),'each scored column has its own sort control');
+  const cost=heads.find(th=>/Cost/.test(th.textContent));
+  ok(cost&&cost.querySelector('button').disabled&&/no order/.test(cost.textContent)&&/no order/.test(cost.querySelector('button').getAttribute('aria-label')),'unknown cost column cannot be sorted');
+  const rankOf=id=>tb.querySelector(`tr[data-id="${id}"] td.n`).textContent;
+  const top=tb.querySelector('tbody tr.r'); const topId=top.dataset.id; const topRank=rankOf(topId);
+  tb.querySelector('button[data-sort="name"]').click();
+  ok(rankOf(topId)===topRank&&tb.querySelector('th[aria-sort="ascending"] button[data-sort="name"]'),'sorting by name keeps the weighted rank');
+  const names=[...tb.querySelectorAll('tbody tr.r td.name')].map(td=>td.textContent.trim());
+  ok(names.length===38&&names[0].localeCompare(names[names.length-1])<=0,'name sort runs from A toward Z');
+  tb.querySelector('button[data-sort="country"]').click();
+  tb.querySelector('button[data-sort="country"]').click();
+  ok(tb.querySelector('button[data-sort="country"] .sortmark').textContent.indexOf('desc')>=0,'country sort toggles to descending');
+  const us=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[13].textContent.trim());
+  tb.querySelector('button[data-sort="uspres"]').click();
+  const usAsc=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[13].textContent.trim());
+  tb.querySelector('button[data-sort="uspres"]').click();
+  const usDesc=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[13].textContent.trim());
+  const unk=s=>/^unknown$/i.test(s)||s==='';
+  ok(us.some(unk)&&usAsc.filter(unk).length===us.filter(unk).length&&usAsc.slice(-usAsc.filter(unk).length).every(unk)&&usDesc.slice(-usDesc.filter(unk).length).every(unk),'unknown US presence stays last in both directions');
+  D.getElementById('fc').value='Hydraulics';D.getElementById('fc').dispatchEvent(new w.Event('change',{bubbles:true}));
+  ok([...tb.querySelectorAll('tbody tr.r')].every(tr=>/Hydraulic/.test(tr.cells[2].textContent))&&D.querySelectorAll('#disc tbody tr.r').length>=1,'category filter still limits both tables');
+  const shown=tb.querySelector('tbody tr.r'); const shownRank=shown.querySelector('td.n').textContent;
+  tb.querySelector('button[data-sort="name"]').click();
+  ok(tb.querySelector(`tr[data-id="${shown.dataset.id}"] td.n`).textContent===shownRank,'a filtered sort does not renumber rank');
+  D.getElementById('fc').value='';D.getElementById('fc').dispatchEvent(new w.Event('change',{bubbles:true}));
+ }
  ok(!/China supplier coverage/.test(D.body.textContent),'scorecard has no separate China chapter');
  ok(!/Authorized users only/.test(D.body.textContent)&&!/Private supplier study/.test(D.body.textContent),'mandatory-login warning removed');
  ok(!D.getElementById('signin')&&!D.getElementById('logout')&&!/Sign in|linked to this email/.test(D.querySelector('nav').textContent+(D.getElementById('notice').textContent||'')),'no public sign-in control or tracking notice');
@@ -38,9 +66,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  {const row=w.FS_CATALOG.suppliers.find(r=>r.id==='B2'),ww=[29,19,13,13,0,13,13],keys=['cap','cert','scale','usexp','cost','lead','geo'];
   const exp=keys.reduce((a,k,i)=>a+(k==='cost'?0:row[k]*ww[i]),0)/100;
   ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'displayed score excludes cost');
-  row.cost=1;D.getElementById('fs').value='name';D.getElementById('fs').dispatchEvent(new w.Event('change',{bubbles:true}));
+  row.cost=1;tb.querySelector('button[data-sort="name"]').click();
   ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'a planted cost integer does not change the score');
-  delete row.cost;D.getElementById('fs').value='score';D.getElementById('fs').dispatchEvent(new w.Event('change',{bubbles:true}));}
+  delete row.cost;tb.querySelector('button[data-sort="score"]').click();}
  const y0=w.scrollY||0;
  tb.querySelector('tr.r').click();
  const sel=tb.querySelector('tr.r.on'), pop=D.getElementById('fspop');
@@ -98,13 +126,18 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(D.getElementById('qdraw')&&D.getElementById('qdraw').value===''&&D.getElementById('qqty').value===''&&D.getElementById('qship').value==='','quote form starts blank');
  ok(/A dash is missing, not zero/.test(D.body.textContent)&&/Nothing here is sent or saved/.test(D.body.textContent)&&/no built-in rate/.test(D.body.textContent),'quote page explains local estimates');
  ok(/1 EUR = 1\.08 USD/.test(D.body.textContent)&&/1 quote currency = this many comparison currency/.test(D.body.textContent)&&D.getElementById('qx0').value===''&&!/FX to comparison currency/.test(D.body.textContent),'fx label shows the direction and the example is not filled in');
+ w.location.hash='#/sensitivity';await tick();await tick();D=w.document;
+ ok(/Landed-cost drivers and sensitivity/.test(D.body.textContent)&&/does not turn them into a price curve/.test(D.body.textContent)&&/not converted into dollars/.test(D.body.textContent),'sensitivity explains the question before the form');
+ ok(D.getElementById('syqty')&&D.getElementById('syqty').value===''&&D.getElementById('sbfob').value===''&&!/bell curve|normal curve/i.test(D.body.textContent),'sensitivity starts blank and does not draw a price curve');
+ ok(w.__from.length===0,'sensitivity does not read or write the database');
+ w.location.hash='#/quotes';await tick();await tick();D=w.document;
  D.getElementById('qqty').value='10, 1000';D.getElementById('qqty').dispatchEvent(new w.Event('input',{bubbles:true}));
  ok((D.querySelectorAll('#qout table').length===1)&&!/Quantity 1000/.test(D.getElementById('qout').textContent),'one typed list does not become two quantity tiers');
  ok(!w.__from.includes('fs_worksheet')&&w.__from.length===0,'quote page does not read or write the database');
  w.location.hash='#/study';await tick();await tick();D=w.document;const st=D.body.textContent;
  ok(/Capability is catalog fit, not an audit/.test(st),'capability vs audit');ok(/Private label/.test(st)&&/Questions for discussion/.test(st)&&/Qualification method/.test(st),'study sections');
  ok(/cannot by itself qualify a supplier/.test(st)&&/used earlier, to find and screen candidates/.test(st)&&!/next deepening step/.test(st),'study customs wording');
- ok(/How to read cost, lead time, and geography/.test(st)&&/China stays in the comparison/.test(st)&&/not an exhaustive search/.test(st),'study treats China as part of one list');
+ ok(/How to read cost, lead time, and geography/.test(st)&&/China stays in the comparison/.test(st)&&/not an exhaustive search/.test(st)&&/China remains a leading sourcing option/.test(st),'study treats China as part of one list');
  ok(/indicative assumptions/.test(st)&&/not quotations/.test(st)&&/MOQ/.test(st)&&/Drawing fit/.test(st),'study keeps assumption and verification gaps');
  ok(!/diversification-biased|reincorporat|China was not the main search|light on China|China additions|China supplier coverage|later desk pass|not the Nov 2 discovery trail/i.test(st),'study omits the China chapter and internal backstory');
  ok(/Nov 2, 2026/.test(st)&&/Nov 6, 2026/.test(st),'study keeps both source dates');
