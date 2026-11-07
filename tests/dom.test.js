@@ -8,7 +8,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
   const q=(data)=>{const o={select:()=>o,eq:()=>o,maybeSingle:()=>Promise.resolve({data:null}),insert:(x)=>{logged.push(x);return Promise.resolve({})},upsert:(x)=>{w.__ups.push(x);return Promise.resolve({})},then:(res)=>res({data,error:null})};return o;};
   w.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session}}),signOut:async()=>{},signInWithPassword:async()=>({error:{message:'bad'}}),updateUser:async()=>({}),onAuthStateChange:()=>{}},
     from:(t)=>{w.__from.push(t);return q([]);}})};
-  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'catalog.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
+  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'catalog.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'quote.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
 (async()=>{
  // public scorecard, no login wall
  let {w,logged}=mk(null);ok(await waitFor(w,'#tb'),'anon scorecard rendered');let D=w.document;let tb=D.getElementById('tb');
@@ -18,17 +18,29 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(!tb.querySelector('tr.china')&&!tb.querySelector('.tag.new'),'no afterthought badge on China rows');
  ok(![...tb.querySelectorAll('tr.r')].some(tr=>tr.dataset.id==='B14'||tr.dataset.id==='B15'),'Huade and Taifeng are not ranked');
  ok(/not scored/.test(D.querySelector('.watchcard').textContent)&&/Huade/.test(D.querySelector('.watchcard').textContent)&&/700 bar/.test(D.querySelector('.watchcard').textContent),'watchlist is separate and unscored');
- ok(/Assumptions, not measured results/.test(D.body.textContent)&&/do not show that one country is a better source/.test(D.body.textContent),'score assumptions stay neutral');
+ ok(/Cost is unknown and is not in the score/.test(D.body.textContent)&&/Lead time and geography stay in the score as assumptions/.test(D.body.textContent)&&/Capability is catalog fit, not proven quality/.test(D.body.textContent),'score assumptions stay neutral');
  ok(!/diversif|reincorporat|light on China|China additions|biased/i.test(D.body.textContent),'scorecard omits the internal list backstory');
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.4.2','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.5.0','version');
  ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&D.querySelector('label[for="fs"]')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score');
  ok(!/China supplier coverage/.test(D.body.textContent),'scorecard has no separate China chapter');
  ok(!/Authorized users only/.test(D.body.textContent)&&!/Private supplier study/.test(D.body.textContent),'mandatory-login warning removed');
  ok(!D.getElementById('signin')&&!D.getElementById('logout')&&!/Sign in|linked to this email/.test(D.querySelector('nav').textContent+(D.getElementById('notice').textContent||'')),'no public sign-in control or tracking notice');
  ok(tb.querySelectorAll('td.u').length===38&&[...tb.querySelectorAll('td.u a')].every(a=>a.textContent===a.getAttribute('href')&&/^https?:\/\//.test(a.textContent)&&!a.textContent.includes('…')),'full URL text in source cells');
+ ok([...tb.querySelectorAll('tbody tr.r')].every(tr=>tr.cells[9].textContent==='Unknown'),'cost column is unknown, not a historical integer');
+ ok(D.querySelectorAll('#disc tbody tr.r').length===6&&!D.querySelector('#disc .sc'),'six leads are listed and not scored');
+ D.getElementById('fm').value='5';D.getElementById('fm').dispatchEvent(new w.Event('input',{bubbles:true}));
+ ok([...tb.querySelectorAll('tbody tr.r')].length<38&&D.querySelectorAll('#disc tbody tr.r').length===6,'min score filters scored rows only');
+ D.getElementById('fm').value='';D.getElementById('fm').dispatchEvent(new w.Event('input',{bubbles:true}));
+ ok([...tb.querySelectorAll('tbody tr.r')].length===38,'clearing min score shows the scored list again');
+ {const row=w.FS_CATALOG.suppliers.find(r=>r.id==='B2'),ww=[29,19,13,13,0,13,13],keys=['cap','cert','scale','usexp','cost','lead','geo'];
+  const exp=keys.reduce((a,k,i)=>a+(k==='cost'?0:row[k]*ww[i]),0)/100;
+  ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'displayed score excludes cost');
+  row.cost=1;D.getElementById('fs').value='name';D.getElementById('fs').dispatchEvent(new w.Event('change',{bubbles:true}));
+  ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'a planted cost integer does not change the score');
+  delete row.cost;D.getElementById('fs').value='score';D.getElementById('fs').dispatchEvent(new w.Event('change',{bubbles:true}));}
  const y0=w.scrollY||0;
  tb.querySelector('tr.r').click();
  const sel=tb.querySelector('tr.r.on'), pop=D.getElementById('fspop');
@@ -43,6 +55,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  D.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
  tb.querySelector('tr.r[data-id="B2"]').click();
  ok(/Researched Nov 2, 2026/.test(D.getElementById('fspop').textContent),'detail keeps the Nov 2 source date');
+ D.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+ D.querySelector('#disc tr.r[data-id="CN-M1"]').click();
+ ok(/Researched Nov 7, 2026/.test(D.getElementById('fspop').textContent)&&/Not scored/.test(D.getElementById('fspop').textContent)&&!/Weighted score/.test(D.getElementById('fspop').textContent),'Nov 7 lead stays unscored');
  D.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
  ok(!logged.length&&w.__from.length===0&&!(w.__ups||[]).length,'anon open does not read or write');
  D.getElementById('lkall').click();
@@ -65,7 +80,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  const css=fs.readFileSync(R+'style.css','utf8');
  ok(/footer\{position:static/.test(css)&&/overflow-wrap:anywhere/.test(css),'css: footer in flow, urls wrap');
  ok(!/#tb\{min-width:1480px\}/.test(css)&&/max-width:none/.test(css)&&/#tb th\.n,#tb td\.n,#tb th\.num,#tb td\.num\{[^}]*text-align:center/.test(css)&&/\.fspop\{[^}]*position:fixed/.test(css),'css: aligned numeric columns and floating detail');
- ok(/#tb tbody tr\.r:nth-child\(even\)\{background:#fff9e6\}/.test(css)&&/#tb tbody tr\.r:hover\{background:#e7edff\}/.test(css)&&/#tb tbody tr\.r\.on\{background:#ffe8a3/.test(css),'css: light yellow stripes, distinct hover and selection');
+ ok(/#tb tbody tr\.r:nth-child\(even\)[^{]*\{background:#fff9e6\}/.test(css)&&/#tb tbody tr\.r:hover[^{]*\{background:#e7edff\}/.test(css)&&/#tb tbody tr\.r\.on[^{]*\{background:#ffe8a3/.test(css),'css: light yellow stripes, distinct hover and selection');
  ok(/\.filters select,\.filters input\{[^}]*background:#eef2ff[^}]*border:2px solid #2f5bea/.test(css)&&/\.filters select:focus/.test(css),'css: filters have a visible fill, border, and focus ring');
  ok(/@media\(max-width:1100px\)\{[\s\S]*overflow-x:auto/.test(css),'css: narrow screens may scroll sideways');
  ok(!/\.detail\{[^}]*position:\s*fixed/.test(css),'css: detail is not a fixed side panel');
@@ -76,9 +91,13 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
   ok([...D.querySelectorAll('[data-i]')].every(e=>e.disabled),'sliders disabled when all locked');
   await new Promise(r=>setTimeout(r,900));ok(!(w.__ups||[]).length,'locks are not written to the shared database');
   const kept=JSON.parse(w.localStorage.getItem('fs_local_weights_v1'));ok(kept&&kept.lk.every(Boolean)&&JSON.stringify(kept.w)===JSON.stringify(before),'locks stay in this browser');
-  D.getElementById('lknone').click();ok(boxes().every(b=>!b.checked)&&JSON.stringify(wts())===JSON.stringify(before),'unselect all; weights unchanged');
-  D.getElementById('lkall').click();D.getElementById('rst').click();ok(boxes().every(b=>!b.checked)&&JSON.stringify(wts())==='[25,15,10,10,20,10,10]','return to defaults unlocks all');
+  D.getElementById('lknone').click();ok([...D.querySelectorAll('[data-l]')].filter(b=>b.dataset.l!=='4').every(b=>!b.checked)&&D.querySelector('[data-l="4"]').checked&&JSON.stringify(wts())===JSON.stringify(before),'unselect all leaves cost excluded and weights unchanged');
+  D.getElementById('lkall').click();D.getElementById('rst').click();ok(D.querySelector('[data-l="4"]').checked&&JSON.stringify(wts())==='[29,19,13,13,0,13,13]','return to defaults keeps cost at 0');
   const vs=new Set([...fs.readFileSync(R+'index.html','utf8').matchAll(/\?v=([0-9.]+)/g)].map(m=>m[1]));ok(vs.size===1&&('v'+[...vs][0])===w.FS_CONFIG.VERSION,'asset cache-bust version matches config');}
+ w.location.hash='#/quotes';await tick();await tick();D=w.document;
+ ok(D.getElementById('qdraw')&&D.getElementById('qdraw').value===''&&D.getElementById('qqty').value===''&&D.getElementById('qship').value==='','quote form starts blank');
+ ok(/A dash is missing, not zero/.test(D.body.textContent)&&/Nothing here is sent or saved/.test(D.body.textContent)&&/no built-in rate/.test(D.body.textContent),'quote page explains local estimates');
+ ok(!w.__from.includes('fs_worksheet')&&w.__from.length===0,'quote page does not read or write the database');
  w.location.hash='#/study';await tick();await tick();D=w.document;const st=D.body.textContent;
  ok(/Capability is catalog fit, not an audit/.test(st),'capability vs audit');ok(/Private label/.test(st)&&/Questions for discussion/.test(st)&&/Qualification method/.test(st),'study sections');
  ok(/cannot by itself qualify a supplier/.test(st)&&/used earlier, to find and screen candidates/.test(st)&&!/next deepening step/.test(st),'study customs wording');
@@ -87,7 +106,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(!/diversification-biased|reincorporat|China was not the main search|light on China|China additions|China supplier coverage|later desk pass|not the Nov 2 discovery trail/i.test(st),'study omits the China chapter and internal backstory');
  ok(/Nov 2, 2026/.test(st)&&/Nov 6, 2026/.test(st),'study keeps both source dates');
  ok(/not a verified certificate/.test(st)&&/not verified US shipment history/.test(st),'study keeps certificate and shipment caveats');
- ok(/or a finding that manufacturers in one country are a better source/.test(st)&&/do not establish that suppliers in one country are a better fit/.test(st),'study does not treat one country as confirmed better');
+ ok(/Cost is unknown and is not part of the weighted score/.test(st)&&/do not establish that suppliers in one country are a better fit/.test(st),'study does not treat one country as confirmed better');
  ok(!/not a lecture/i.test(st)&&!/\$100|\$135|\$120|~25%|20 to 30%/.test(st),'removed unsupported numbers/phrasing');ok(!D.querySelector('#app input[type=range]'),'no duplicate controls');
  w.location.hash='#/sources';await tick();await tick();D=w.document;const sr=D.body.textContent;
  ok(/Channels used in the desk research/.test(sr)&&/Planned research channels \(not yet checked\)/.test(sr),'sources split');

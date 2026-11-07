@@ -1,0 +1,17 @@
+const fs=require('fs');
+const s=fs.readFileSync(__dirname+'/../app.js','utf8');
+const a=s.indexOf('function fixSum'), b=s.indexOf('let pt; function savePrefs');
+const {migrateWeights}=new Function(s.slice(a,b)+';return {migrateWeights};')();
+let f=0,n=0;const ok=(c,m)=>{n++;if(!c){f++;console.log('FAIL',m)}};
+const sum=w=>w.reduce((x,y)=>x+y,0);
+let m=migrateWeights([25,15,10,10,20,10,10],Array(7).fill(false));
+ok(m.w[4]===0&&sum(m.w)===100&&m.lk[4]&&JSON.stringify(m.w)==='[29,19,13,13,0,13,13]','default cost weight retires and the rest sum to 100');
+m=migrateWeights([25,15,10,10,20,10,10],[true,false,false,false,false,false,false]);
+ok(m.w[0]===25&&m.w[4]===0&&sum(m.w)===100&&m.lk[0]&&m.lk[4],'a locked capability weight stays put');
+m=migrateWeights([40,10,10,10,20,5,5],[true,true,true,true,true,true,true]);
+ok(m.w[4]===0&&sum(m.w)===100,'all-locked old weights still renormalize with cost at 0');
+m=migrateWeights([29,19,13,13,0,13,13],[false,false,false,false,true,false,false]);
+ok(JSON.stringify(m.w)==='[29,19,13,13,0,13,13]','an already migrated set is left alone');
+m=migrateWeights([1,2,3],[]);
+ok(m.w[4]===0&&sum(m.w)===100,'a broken saved set falls back to the retired-cost default');
+console.log(n,'checks',f,'failures');process.exit(f?1:0);

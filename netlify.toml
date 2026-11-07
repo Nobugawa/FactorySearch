@@ -52,3 +52,8 @@
   to = "/404"
   status = 404
   force = true
+[[redirects]]
+  from = "/archive_cost_historical.json"
+  to = "/404"
+  status = 404
+  force = true

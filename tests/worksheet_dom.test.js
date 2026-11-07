@@ -5,7 +5,7 @@ let f=0,n=0;const ok=(c,m)=>{n++;if(!c){f++;console.log('FAIL',m)}};const tick=(
 function mk(){const dom=new JSDOM(html,{url:'https://factorysearch.netlify.app/#/worksheet?s=B2',runScripts:'outside-only'});const w=dom.window;w.__from=[];
   const q=()=>{const o={select:()=>o,eq:()=>o,maybeSingle:()=>Promise.resolve({data:null}),insert:()=>Promise.resolve({}),upsert:()=>Promise.resolve({error:null}),then:(res)=>res({data:[{supplier_id:'B2',gate_id:'certs',status:'In progress',evidence:'Legacy note kept',updated_by:'philoskim990@gmail.com',updated_at:'2026-11-05T12:00:00Z',details:{v:1,standard:'ISO 9001'}}],error:null})};return o;};
   w.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:{user:{email:'philos@greymatterfusion.com'}}}}),signOut:async()=>{},onAuthStateChange:()=>{}},from:(t)=>{w.__from.push(t);return q();}})};
-  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'catalog.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return w;}
+  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'catalog.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'quote.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return w;}
 (async()=>{
  const w=mk();await tick();await tick();const D=w.document;
  ok(/Blank template/.test(D.body.textContent),'blank template heading');

@@ -1,0 +1,157 @@
+{
+  "note": "Retired 1-5 cost flags. Not prices. Not used in the score.",
+  "suppliers": [
+    {
+      "id": "B1",
+      "cost": 2
+    },
+    {
+      "id": "B10",
+      "cost": 3
+    },
+    {
+      "id": "B11",
+      "cost": 3
+    },
+    {
+      "id": "B12",
+      "cost": 4
+    },
+    {
+      "id": "B13",
+      "cost": 4
+    },
+    {
+      "id": "B2",
+      "cost": 2
+    },
+    {
+      "id": "B3",
+      "cost": 2
+    },
+    {
+      "id": "B4",
+      "cost": 3
+    },
+    {
+      "id": "B5",
+      "cost": 3
+    },
+    {
+      "id": "B6",
+      "cost": 3
+    },
+    {
+      "id": "B7",
+      "cost": 4
+    },
+    {
+      "id": "B8",
+      "cost": 3
+    },
+    {
+      "id": "B9",
+      "cost": 3
+    },
+    {
+      "id": "C1",
+      "cost": 2
+    },
+    {
+      "id": "C10",
+      "cost": 2
+    },
+    {
+      "id": "C11",
+      "cost": 3
+    },
+    {
+      "id": "C12",
+      "cost": 3
+    },
+    {
+      "id": "C2",
+      "cost": 2
+    },
+    {
+      "id": "C3",
+      "cost": 2
+    },
+    {
+      "id": "C4",
+      "cost": 3
+    },
+    {
+      "id": "C5",
+      "cost": 4
+    },
+    {
+      "id": "C6",
+      "cost": 2
+    },
+    {
+      "id": "C7",
+      "cost": 4
+    },
+    {
+      "id": "C8",
+      "cost": 4
+    },
+    {
+      "id": "C9",
+      "cost": 4
+    },
+    {
+      "id": "D1",
+      "cost": 4
+    },
+    {
+      "id": "D2",
+      "cost": 4
+    },
+    {
+      "id": "D3",
+      "cost": 4
+    },
+    {
+      "id": "D4",
+      "cost": 2
+    },
+    {
+      "id": "D5",
+      "cost": 2
+    },
+    {
+      "id": "D6",
+      "cost": 2
+    },
+    {
+      "id": "D7",
+      "cost": 4
+    },
+    {
+      "id": "D8",
+      "cost": 3
+    },
+    {
+      "id": "D9",
+      "cost": 3
+    },
+    {
+      "id": "C13",
+      "cost": 3
+    },
+    {
+      "id": "C14",
+      "cost": 3
+    },
+    {
+      "id": "D10",
+      "cost": 3
+    },
+    {
+      "id": "D11",
+      "cost": 3
+    }
+  ]
+}
