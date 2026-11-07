@@ -1,7 +1,7 @@
 const fs=require('fs');
 const s=fs.readFileSync(__dirname+'/../app.js','utf8');
 const a=s.indexOf('function fixSum'), b=s.indexOf('let pt; function savePrefs');
-const {migrateWeights}=new Function(s.slice(a,b)+';return {migrateWeights};')();
+const {migrateWeights,weightsForSaved}=new Function(s.slice(a,b)+';return {migrateWeights,weightsForSaved};')();
 let f=0,n=0;const ok=(c,m)=>{n++;if(!c){f++;console.log('FAIL',m)}};
 const sum=w=>w.reduce((x,y)=>x+y,0);
 let m=migrateWeights([25,15,10,10,20,10,10],Array(7).fill(false));
@@ -14,4 +14,13 @@ m=migrateWeights([29,19,13,13,0,13,13],[false,false,false,false,true,false,false
 ok(JSON.stringify(m.w)==='[29,19,13,13,0,13,13]','an already migrated set is left alone');
 m=migrateWeights([1,2,3],[]);
 ok(m.w[4]===0&&sum(m.w)===100,'a broken saved set falls back to the retired-cost default');
+const retired=JSON.stringify(weightsForSaved(null).w);
+ok(retired==='[29,19,13,13,0,13,13]'&&weightsForSaved(null).lk[4],'a missing saved row starts from retired cost weights');
+ok(JSON.stringify(weightsForSaved({}).w)===retired&&JSON.stringify(weightsForSaved({weights:[1,2,3],locked:[]}).w)===retired,'an invalid saved row does not restore the old cost weight');
+m=weightsForSaved({weights:[25,15,10,10,20,10,10],locked:[true,false,false,false,false,false,false]});
+ok(m.w[0]===25&&m.w[4]===0&&sum(m.w)===100&&m.lk[4],'a saved locked row still retires cost');
+const boot=s.slice(s.indexOf('async function boot'), s.indexOf("document.addEventListener('visibilitychange'"));
+ok(boot.indexOf('weightsForSaved(null)')>=0&&boot.indexOf('weightsForSaved(null)')<boot.indexOf('getSession'),'boot retires cost before auth or recovery');
+ok(boot.includes('weightsForSaved(p&&p.data)'),'a signed-in path with no valid row does not keep cost at 20');
+ok(boot.indexOf('setPasswordView')>boot.indexOf('weightsForSaved(null)'),'password recovery runs after cost is retired');
 console.log(n,'checks',f,'failures');process.exit(f?1:0);

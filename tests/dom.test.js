@@ -97,6 +97,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  w.location.hash='#/quotes';await tick();await tick();D=w.document;
  ok(D.getElementById('qdraw')&&D.getElementById('qdraw').value===''&&D.getElementById('qqty').value===''&&D.getElementById('qship').value==='','quote form starts blank');
  ok(/A dash is missing, not zero/.test(D.body.textContent)&&/Nothing here is sent or saved/.test(D.body.textContent)&&/no built-in rate/.test(D.body.textContent),'quote page explains local estimates');
+ ok(/1 EUR = 1\.08 USD/.test(D.body.textContent)&&/1 quote currency = this many comparison currency/.test(D.body.textContent)&&D.getElementById('qx0').value===''&&!/FX to comparison currency/.test(D.body.textContent),'fx label shows the direction and the example is not filled in');
+ D.getElementById('qqty').value='10, 1000';D.getElementById('qqty').dispatchEvent(new w.Event('input',{bubbles:true}));
+ ok((D.querySelectorAll('#qout table').length===1)&&!/Quantity 1000/.test(D.getElementById('qout').textContent),'one typed list does not become two quantity tiers');
  ok(!w.__from.includes('fs_worksheet')&&w.__from.length===0,'quote page does not read or write the database');
  w.location.hash='#/study';await tick();await tick();D=w.document;const st=D.body.textContent;
  ok(/Capability is catalog fit, not an audit/.test(st),'capability vs audit');ok(/Private label/.test(st)&&/Questions for discussion/.test(st)&&/Qualification method/.test(st),'study sections');
@@ -107,6 +110,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/Nov 2, 2026/.test(st)&&/Nov 6, 2026/.test(st),'study keeps both source dates');
  ok(/not a verified certificate/.test(st)&&/not verified US shipment history/.test(st),'study keeps certificate and shipment caveats');
  ok(/Cost is unknown and is not part of the weighted score/.test(st)&&/do not establish that suppliers in one country are a better fit/.test(st),'study does not treat one country as confirmed better');
+ ok(!/Cost score is meant/.test(st)&&!/Landed cost ≈/.test(st)&&/There is no cost score/.test(st),'study does not describe a cost score');
  ok(!/not a lecture/i.test(st)&&!/\$100|\$135|\$120|~25%|20 to 30%/.test(st),'removed unsupported numbers/phrasing');ok(!D.querySelector('#app input[type=range]'),'no duplicate controls');
  w.location.hash='#/sources';await tick();await tick();D=w.document;const sr=D.body.textContent;
  ok(/Channels used in the desk research/.test(sr)&&/Planned research channels \(not yet checked\)/.test(sr),'sources split');

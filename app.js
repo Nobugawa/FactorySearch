@@ -11,7 +11,7 @@ const allowed=C.ALLOWED_EMAILS.filter(Boolean).map(e=>e.toLowerCase());
 const KEYS=['cap','cert','scale','usexp','cost','lead','geo'], LBL=['Capability','Certs','Scale','US exp','Cost','Lead time','Geo risk'];
 const DEF=[25,15,10,10,20,10,10];
 const LOCAL_W='fs_local_weights_v1';
-let S={user:null,rows:[],w:DEF.slice(),lk:Array(7).fill(false),f:{cat:'',reg:'',min:0,sort:'score'},t0:Date.now(),open:null,banner:'',logging:false,ping:null};
+let S={user:null,rows:[],w:[29,19,13,13,0,13,13],lk:[false,false,false,false,true,false,false],f:{cat:'',reg:'',min:0,sort:'score'},t0:Date.now(),open:null,banner:'',logging:false,ping:null};
 const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function log(type,sid,detail){ if(!S.user)return; sb.from('fs_events').insert({user_email:S.user,event_type:type,supplier_id:sid||null,detail:detail||{}}).then(()=>{}); }
@@ -82,6 +82,7 @@ function applyCatalog(){
 }
 async function boot(){
   if(!applyCatalog()){app.innerHTML='<div class="card"><h2>Research snapshot missing</h2><p class="muted">catalog.js did not load. The public pages do not read supplier rows from the database.</p></div>';return;}
+  const fresh=weightsForSaved(null); S.w=fresh.w; S.lk=fresh.lk;
   const authEntry=AUTH0.hasTokens||AUTH0.error||AUTH0.recovery;
   if(!authEntry){S.user=null; stopSessionLog(); loadLocalW(); paintChrome(); route(); return;}
   const {data:{session}}=await sb.auth.getSession();
@@ -98,7 +99,7 @@ async function boot(){
   if(sessionUser){
     S.user=sessionUser;
     const p=await sb.from('fs_weight_prefs').select('*').eq('user_email',sessionUser).maybeSingle();
-    if(p.data&&validW(p.data.weights,p.data.locked)){const m=migrateWeights(p.data.weights,p.data.locked); S.w=m.w; S.lk=m.lk;}
+    const m=weightsForSaved(p&&p.data); S.w=m.w; S.lk=m.lk;
     startSessionLog();
   }else{
     S.user=null; stopSessionLog(); loadLocalW();
@@ -165,7 +166,7 @@ function sources(){
   <div class="card" style="margin-bottom:14px"><h2>Channels used in the desk research</h2>
   <table class="tbl"><thead><tr><th>Channel</th><th>How it was used</th><th>Limitation</th></tr></thead><tbody>
   ${CHANNELS.used.map(c=>`<tr><td><b>${esc(c[0])}</b></td><td>${esc(c[1])}</td><td>${esc(c[2])}</td></tr>`).join('')}</tbody></table>
-  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. Which reference first surfaced each individual supplier was not recorded. Cost is unknown and is not a score. Lead time and geography are indicative assumptions, not quotes or measured results.</p></div>
+  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. Which reference first surfaced each individual supplier was not recorded. Cost is unknown and is not a score. Lead time and geography are indicative assumptions, not quotes or measured results. Older 1–5 cost flags remain in the repository history as an audit trail. They are not prices. The published site does not serve that file.</p></div>
   <div class="card" style="margin-bottom:14px"><h2>Planned research channels (not yet checked)</h2>
   <p class="muted" style="margin-top:-6px">Named in the study as the next research step. Customs-data platforms can both find new candidates and screen or validate existing ones; exhibitor lists mainly add candidates. None of these has been searched as a full pass. On Nov 7, 2026 a public ImportYeti HYTORC page was opened only far enough to see that its visible names are a partial sea-freight list synced 2026-11-04. That page does not prove a company is new, and it does not prove HYTORC buys only from China. Links are to the public service or event site (opened Nov 6, 2026).</p>
   <table class="tbl"><thead><tr><th>Channel</th><th>What would be checked</th><th>Limitation</th></tr></thead><tbody>
@@ -191,13 +192,13 @@ const RUBRIC=[ ['Capability','29%','Clear public fit to the part family (e.g. HA
  ['Certs','19%','ISO / IATF / AS9100 named on site for the relevant scope (still unverified)','Quality system mentioned without a named standard','Nothing found'],
  ['Scale','13%','Multi-plant / global footprint visible','Single solid plant or mid-size group','Small or unclear capacity'],
  ['US export','13%','Named US subsidiary or sales office','US presence claimed without a clear office','No US footprint found'],
- ['Landed cost','Excluded','Not in the score. Purchase price is unknown until a comparable quote.','A stored 1–5 flag would not be a price.','Not used.'],
+ ['Cost','Excluded','Not scored.','Not scored.','Not scored.'],
  ['Lead time','13%','Shorter expected door-to-door','Typical ocean from Asia or Europe','Longer or congested lanes expected'],
  ['Geo risk','13%','Lower concentration / tariff / disruption risk','Moderate','Higher; single-country exposure']];
 function study(){ log('study_open');
   const li=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
   const ncat=(rows,c)=>rows.filter(r=>r.category===c).length;
-  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026 and Nov 6, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
+  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
   ${bannerHtml()}
   <div class="card study">
   <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: real manufacturers, a scorecard that can be re-weighted, and alternative candidates per part family rather than a single low-cost bet. Three part families that are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized.</p>
@@ -210,9 +211,7 @@ function study(){ log('study_open');
   <h2>How scores were set</h2><p>Six criteria are 1-5 desk judgments from public websites only: no quotes, plant visits, or certificate downloads. Cost is not one of them. The earlier cost weight was removed and the other default weights were renormalized so they still total 100 (capability 29, certs 19, scale 13, US export 13, lead time 13, geography 13). Those weights can be changed on the Scorecard. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified. A capability score is catalog fit, not proven quality.</p>
   <div class="wrap"><table class="tbl"><thead><tr><th>Criterion</th><th>Default weight</th><th>5 (strong)</th><th>3 (mixed)</th><th>1 (weak)</th></tr></thead><tbody>${RUBRIC.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="callout" style="margin-top:10px"><b>Capability is catalog fit, not an audit.</b> It reflects product and process fit from public material, not plant quality. Certifications are expected from public text, not verified. Quality is established through the qualification steps below.</div>
-  <h2>Landed cost assumption</h2><p>The Cost score is meant to reflect expected landed cost, not factory price alone:</p>
-  <p class="eq">Landed cost ≈ unit price + freight + insurance + duties and any additional tariffs (e.g. Section 301 / 232 where applicable) + broker fees</p>
-  ${li(['The scorecard does not contain a purchase price, an FOB, a freight rate, or a duty rate.','A landed cost needs a quote for the same drawing, quantity, Incoterm, and destination, plus the freight, insurance, duty, and tooling you enter. Blank is missing, not zero.','Steel and aluminum duties can change a landed cost. They are not filled in for you.'])}
+  <h2>Cost is not a score</h2><p>There is no cost score, and the weighted score does not stand in for a landed cost. A comparison belongs on <a href="#/quotes">Quotes</a>: one drawing, one quantity, one ship-to, and the Incoterm and named place from each seller. That page adds only amounts you type. It does not supply a freight rate, a duty rate, or a price break, and a blank is missing rather than zero.</p>
   <h2>Proposed sourcing alternatives</h2><p>Summarized on the Scorecard. Lead and alternative candidates per part family are a starting point. They are not qualified and not interchangeable until drawings, specs and trials confirm fit.</p>
   <h2>Beyond factories: private label and agents</h2>
   ${li(['<b>Private label / white label:</b> buying a ready-made or lightly adapted product under the HYTORC name. Private label usually implies some exclusivity or customization; white label is a generic product many brands rebrand.','<b>Where it fits:</b> standard or near-standard items (hoses, fittings, some valves, C-parts, packaging) more than housings, reaction arms, or compact high-pressure pumps that must match tool geometry.','<b>Industrial distributors</b> with private-label programs can cover the standardized slice; they are a weaker fit for unique hydraulic power packs.','<b>Sourcing agents / trading companies:</b> useful for mapping an industrial district; the risks are markup and an obscured factory. Best used once the part family is defined, with factory identity, capability evidence, and a path to direct dual sourcing.'])}
@@ -264,6 +263,12 @@ function migrateWeights(w,lk){
   free.forEach(j=>{nw[j]=freeCur>0?Math.round(w[j]*room/freeCur):Math.round(room/free.length);});
   locked.forEach(j=>{nw[j]=w[j];});
   nw[4]=0; fixSum(nw,free); return {w:nw,lk:nl};
+}
+function weightsForSaved(data){
+  const w=data&&data.weights, lk=data&&data.locked;
+  const ok=Array.isArray(w)&&w.length===7&&w.every(x=>Number.isInteger(x)&&x>=0&&x<=100)&&w.reduce((a,b)=>a+b,0)===100&&Array.isArray(lk)&&lk.length===7;
+  if(ok) return migrateWeights(w,lk);
+  return migrateWeights([25,15,10,10,20,10,10], Array(7).fill(false));
 }
 let pt; function savePrefs(){
   if(!S.user){
@@ -515,30 +520,33 @@ function quotes(){
   if(!window.FSQ){app.innerHTML='<div class="card"><p>Quote calculator missing.</p></div>';return;}
   const names=S.rows.concat(S.discovery||[]);
   const opts='<option value="">Choose a supplier</option>'+names.map(r=>`<option value="${esc(r.id)}">${esc(r.name)} (${esc(r.country)})</option>`).join('');
-  const incos=Object.keys(FSQ.INCO).map(k=>`<option>${k}</option>`).join('');
+  const incos=FSQ.TERMS.map(k=>`<option>${k}</option>`).join('');
+  const statusOpts='<option value="">Unknown</option><option value="included">Included in the seller price</option><option value="na">Not applicable</option><option value="buyer">Buyer pays</option>';
+  const basisOpts='<option value="">Basis</option><option value="unit">Per piece</option><option value="shipment">Per shipment</option>';
+  const unitOpts='<option value="">Unit</option><option value="days">Days</option><option value="weeks">Weeks</option>';
+  const legRow=(i,key,label)=>`<div class="leg"><label for="ql${i}${key}">${label}</label><select id="ql${i}${key}" class="fld">${statusOpts}</select><input id="qa${i}${key}" class="fld" inputmode="decimal" placeholder="Buyer amount" aria-label="${label} amount in the comparison currency"><select id="qb${i}${key}" class="fld" aria-label="${label} basis">${basisOpts}</select></div>`;
   const block=(i)=>`<div class="card qcard"><h2>Supplier ${i+1}</h2><div class="wgrid">
     <div class="wf"><label for="qs${i}">Supplier</label><select id="qs${i}" class="fld">${opts}</select></div>
     <div class="wf"><label for="qk${i}">What you are typing</label><select id="qk${i}" class="fld"><option value="">Choose</option><option value="estimate">My estimate, not a quote</option><option value="quote">A quote the supplier gave</option></select></div>
     <div class="wf"><label for="qi${i}">Incoterm</label><select id="qi${i}" class="fld"><option value="">Choose</option>${incos}</select></div>
-    <div class="wf"><label for="qp${i}">Named place</label><input id="qp${i}" class="fld" placeholder="Port or place"></div>
-    <div class="wf"><label for="qc${i}">Price currency</label><input id="qc${i}" class="fld" placeholder="USD" maxlength="8"></div>
-    <div class="wf"><label for="qx${i}">FX to comparison currency</label><input id="qx${i}" class="fld" placeholder="Required if currencies differ"></div>
-    <div class="wf"><label for="qu${i}">Unit price</label><input id="qu${i}" class="fld" inputmode="decimal" placeholder="Blank, not 0"></div>
-    <div class="wf"><label for="qt${i}">Tooling / setup (one-time)</label><input id="qt${i}" class="fld" inputmode="decimal" placeholder="Blank, not 0"></div>
-    <div class="wf"><label for="qa${i}">Amortize tooling over quantity</label><input id="qa${i}" class="fld" inputmode="decimal" placeholder="Only if you want tooling in the unit"></div>
-    <div class="wf"><label for="qf${i}">Freight</label><input id="qf${i}" class="fld" inputmode="decimal"></div>
-    <div class="wf"><label for="qn${i}">Insurance</label><input id="qn${i}" class="fld" inputmode="decimal"></div>
-    <div class="wf"><label for="qb${i}">Broker</label><input id="qb${i}" class="fld" inputmode="decimal"></div>
-    <div class="wf"><label for="qg${i}">Packaging</label><input id="qg${i}" class="fld" inputmode="decimal"></div>
-    <div class="wf"><label for="qd${i}">Duties / tariffs</label><input id="qd${i}" class="fld" inputmode="decimal" placeholder="You enter the amount"></div>
+    <div class="wf"><label for="qp${i}">Named place in that Incoterm</label><input id="qp${i}" class="fld" placeholder="The place the term names"></div>
+    <div class="wf"><label for="qc${i}">Price currency</label><input id="qc${i}" class="fld" maxlength="8" placeholder="Code"></div>
+    <div class="wf"><label for="qx${i}" id="qxl${i}">1 quote currency = this many comparison currency</label><input id="qx${i}" class="fld" inputmode="decimal" placeholder="Rate"></div>
+    <div class="wf"><label for="qu${i}">Unit price for this quantity</label><input id="qu${i}" class="fld" inputmode="decimal" placeholder="Per piece, in the price currency"></div>
+    <div class="wf"><label for="qt${i}">Tooling, one-time, in the price currency</label><input id="qt${i}" class="fld" inputmode="decimal" placeholder="Blank, not 0"></div>
+    <div class="wf"><label for="qts${i}"><input id="qts${i}" type="checkbox"> Spread tooling across this order quantity</label></div>
+    <div class="wf"><label for="qmoq${i}">MOQ, pieces</label><input id="qmoq${i}" class="fld" inputmode="numeric"></div>
     <div class="wf"><label for="qdate${i}">Quote date</label><input id="qdate${i}" class="fld" type="date"></div>
     <div class="wf"><label for="qval${i}">Valid until</label><input id="qval${i}" class="fld" type="date"></div>
-    <div class="wf"><label for="qmoq${i}">MOQ on the quote</label><input id="qmoq${i}" class="fld"></div>
-    <div class="wf"><label for="qprod${i}">Production lead</label><input id="qprod${i}" class="fld"></div>
-    <div class="wf"><label for="qtr${i}">Transit lead</label><input id="qtr${i}" class="fld"></div>
-  </div></div>`;
-  app.innerHTML=`<h1>Quote comparison</h1><p class="sub">Same drawing, same quantities, same delivery terms. Tooling stays separate from the unit price. Freight, insurance, and duties have no built-in rate: type the amount in the comparison currency, or leave the box blank. Nothing here is sent or saved. What you type is your estimate or a quote you received, not a price this site collected.</p>
-  <div class="card"><h2>Common request</h2><p class="muted">Leave these blank until you have them. Do not invent a HYTORC drawing number or a volume.</p><div class="wgrid">
+    <div class="wf"><label for="qprod${i}">Production lead</label><input id="qprod${i}" class="fld" inputmode="decimal" placeholder="Number"></div>
+    <div class="wf"><label for="qprodu${i}">Production unit</label><select id="qprodu${i}" class="fld">${unitOpts}</select></div>
+    <div class="wf"><label for="qtr${i}">Transit lead</label><input id="qtr${i}" class="fld" inputmode="decimal" placeholder="Number"></div>
+    <div class="wf"><label for="qtru${i}">Transit unit</label><select id="qtru${i}" class="fld">${unitOpts}</select></div>
+  </div>
+  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD means one euro is 1.08 of the comparison currency. Do not enter the inverse. Buyer-paid amounts below are in the comparison currency. The Incoterm does not fill any of them in. Unknown stays blank and blocks the total. There is no built-in rate.</p>
+  <div class="legs">${FSQ.LEGS.map(([key,label])=>legRow(i,key,label)).join('')}</div></div>`;
+  app.innerHTML=`<h1>Quote comparison</h1><p class="sub">One drawing, one quantity, one ship-to. Estimates stay separate from supplier quotes. The same Incoterm code is not enough: the named place has to match, and each seller's charges have to reach that ship-to. Nothing here is sent or saved.</p>
+  <div class="card"><h2>Common request</h2><p class="muted">Leave these blank until you have them. Do not invent a HYTORC drawing number or a volume. One quantity. This page does not reuse a unit price at a second quantity.</p><div class="wgrid">
     <div class="wf"><label for="qdraw">Drawing</label><input id="qdraw" class="fld"></div>
     <div class="wf"><label for="qrev">Revision</label><input id="qrev" class="fld"></div>
     <div class="wf"><label for="qspec">Spec</label><input id="qspec" class="fld"></div>
@@ -546,37 +554,40 @@ function quotes(){
     <div class="wf"><label for="qtol">Tolerances</label><input id="qtol" class="fld"></div>
     <div class="wf"><label for="qfin">Finish</label><input id="qfin" class="fld"></div>
     <div class="wf"><label for="qins">Inspection</label><input id="qins" class="fld"></div>
-    <div class="wf"><label for="qship">Ship to</label><input id="qship" class="fld" placeholder="Destination"></div>
-    <div class="wf"><label for="qccy">Comparison currency</label><input id="qccy" class="fld" placeholder="USD" maxlength="8"></div>
-    <div class="wf"><label for="qqty">Quantity tiers</label><input id="qqty" class="fld" placeholder="Comma-separated quantities"></div>
+    <div class="wf"><label for="qship">Ship to</label><input id="qship" class="fld" placeholder="Final destination"></div>
+    <div class="wf"><label for="qccy">Comparison currency</label><input id="qccy" class="fld" maxlength="8" placeholder="Code"></div>
+    <div class="wf"><label for="qqty">Quantity, pieces</label><input id="qqty" class="fld" inputmode="numeric" placeholder="One whole number"></div>
   </div></div>
   ${block(0)}${block(1)}
   <div id="qout"></div>`;
-  app.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',paintQuoteOut));
-  app.querySelectorAll('select').forEach(el=>el.addEventListener('change',paintQuoteOut));
+  app.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',paintQuoteOut); el.addEventListener('change',paintQuoteOut);});
   paintQuoteOut();
 }
 function readSupplierQuote(i){
-  const g=id=>$('#'+id+i);
-  return {id:g('qs').value,kind:g('qk').value,incoterm:g('qi').value,namedPlace:g('qp').value,currency:g('qc').value,fx:g('qx').value,unitPrice:g('qu').value,tooling:g('qt').value,amortQty:g('qa').value,freight:g('qf').value,insurance:g('qn').value,broker:g('qb').value,packaging:g('qg').value,duties:g('qd').value,quoteDate:g('qdate').value,validity:g('qval').value,moq:g('qmoq').value,prod:g('qprod').value,transit:g('qtr').value};
+  const g=id=>{const el=$('#'+id); return el?el.value:'';};
+  const legs={};
+  FSQ.LEGS.forEach(([key])=>{legs[key]={status:g('ql'+i+key),amount:g('qa'+i+key),basis:g('qb'+i+key)};});
+  return {id:g('qs'+i),kind:g('qk'+i),incoterm:g('qi'+i),namedPlace:g('qp'+i),currency:g('qc'+i),fx:g('qx'+i),unitPrice:g('qu'+i),tooling:g('qt'+i),spreadTooling:!!$('#qts'+i)&&$('#qts'+i).checked,moq:g('qmoq'+i),quoteDate:g('qdate'+i),validity:g('qval'+i),prodValue:g('qprod'+i),prodUnit:g('qprodu'+i),transitValue:g('qtr'+i),transitUnit:g('qtru'+i),legs};
 }
 function paintQuoteOut(){
   const out=$('#qout'); if(!out||!window.FSQ) return;
+  const cmp=($('#qccy').value||'').trim().toUpperCase();
+  [0,1].forEach(i=>{const q=($('#qc'+i).value||'').trim().toUpperCase(); const lab=$('#qxl'+i); if(lab) lab.textContent='1 '+(q||'quote currency')+' = this many '+(cmp||'comparison currency');});
   const common={drawing:$('#qdraw').value,revision:$('#qrev').value,spec:$('#qspec').value,material:$('#qmat').value,tolerances:$('#qtol').value,finish:$('#qfin').value,inspection:$('#qins').value,shipTo:$('#qship').value,currency:$('#qccy').value};
-  const tiers=String($('#qqty').value||'').split(/[, ]+/).map(s=>s.trim()).filter(Boolean);
-  const useTiers=tiers.length?tiers:[''];
+  const qty=$('#qqty').value;
   const sups=[0,1].map(readSupplierQuote);
-  const lines=[];
-  useTiers.forEach(qty=>{
-    const evals=sups.map(s=>Object.assign({id:s.id,kind:s.kind},FSQ.evaluateQuote(common,s,qty)));
-    const cmp=FSQ.compareSet(evals);
-    lines.push(`<h3>Quantity ${esc(qty||'(blank)')}</h3><p class="muted">${esc(cmp.ok?'Comparable on '+cmp.incoterm+'.':cmp.reason)}</p><table class="tbl"><thead><tr><th>Supplier</th><th>Kind</th><th>Unit price only</th><th>One-time tooling</th><th>Landed unit</th><th>Status</th></tr></thead><tbody>`+
-      evals.map((r,i)=>{const nm=findAny(sups[i].id); const cost=r.landedUnit==null?('Cost incomplete: '+esc((r.gaps||[]).concat(r.flags||[]).join('; ')||'missing')):'Cost complete'; const rfq=(r.rfqGaps||[]).length?('RFQ status incomplete: '+esc(r.rfqGaps.join('; '))):'RFQ status entered'; return `<tr><td>${esc(nm?nm.name:(sups[i].id||'Not chosen'))}</td><td>${esc(sups[i].kind==='estimate'?'Estimate, not a quote':sups[i].kind==='quote'?'Supplier quote':'—')}</td><td class="num">${r.unitRecurring==null?'—':r.unitRecurring.toFixed(2)}</td><td class="num">${r.oneTime==null?'—':r.oneTime.toFixed(2)}</td><td class="num">${r.landedUnit==null?'—':r.landedUnit.toFixed(2)}</td><td>${cost}. ${rfq}.</td></tr>`;}).join('')+
-      '</tbody></table>');
-  });
-  out.innerHTML=`<div class="card"><h2>Result</h2><p class="muted">A dash is missing, not zero. Landed unit excludes one-time tooling unless you enter a quantity to spread it over. Freight, insurance, or duty that the Incoterm already includes blocks the total.</p>${lines.join('')}</div>`;
+  const today=(()=>{const n=new Date(),z=x=>String(x).padStart(2,'0'); return n.getFullYear()+'-'+z(n.getMonth()+1)+'-'+z(n.getDate());})();
+  const evals=sups.map(s=>FSQ.evaluateQuote(common,s,qty,{today}));
+  const cmpSet=FSQ.compareSet(evals);
+  const money=v=>v==null?'—':v.toFixed(2);
+  const rows=evals.map((r,i)=>{const nm=findAny(sups[i].id); const kind=sups[i].kind==='estimate'?'Estimate, not a quote':sups[i].kind==='quote'?'Supplier quote':'—';
+    const state=r.complete?('Cost complete. '+(r.flags||[]).join('; ')):(('Cost incomplete: '+((r.gaps||[]).join('; ')||'missing'))+((r.flags||[]).length?'. '+r.flags.join('; '):''));
+    return `<tr><td>${esc(nm?nm.name:(sups[i].id||'Not chosen'))}</td><td>${esc(kind)}</td><td class="num">${money(r.unitRecurring)}</td><td class="num">${money(r.oneTime)}</td><td class="num">${money(r.shipmentPerUnit)}</td><td class="num">${money(r.landedUnit)}</td><td>${esc(state)}</td></tr>`;}).join('');
+  const request=['drawing '+($('#qdraw').value||'—'),'rev '+($('#qrev').value||'—'),'spec '+($('#qspec').value||'—'),'material '+($('#qmat').value||'—'),'finish '+($('#qfin').value||'—'),'inspection '+($('#qins').value||'—'),'quantity '+($('#qqty').value||'—'),'ship to '+($('#qship').value||'—'),'currency '+(cmp||'—')].join(' · ');
+  out.innerHTML=`<div class="card"><h2>Result</h2><p class="muted">A dash is missing, not zero. There is no built-in rate. A per-shipment amount is divided by this order quantity. A per-piece amount is not. Tooling stays one-time unless you spread it across this quantity. Nothing here is sent or saved.</p><p>${esc(request)}</p><p class="muted">${esc(cmpSet.reason)}</p><table class="tbl"><thead><tr><th>Supplier</th><th>Kind</th><th>Unit price</th><th>One-time tooling</th><th>Other charges per piece</th><th>Landed unit</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 if(C.GA4_MEASUREMENT_ID){const s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id='+C.GA4_MEASUREMENT_ID;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',C.GA4_MEASUREMENT_ID);}
 sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')S.user=null; if(ev==='PASSWORD_RECOVERY')pwSetup=true;});
+{const m=weightsForSaved(null); S.w=m.w; S.lk=m.lk;}
 boot();
 })();
