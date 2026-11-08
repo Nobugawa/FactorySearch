@@ -52,7 +52,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 5,
-      "cost": 2,
       "lead": 4,
       "geo": 5,
       "pass": "2026-11-02"
@@ -72,7 +71,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 4,
-      "cost": 3,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -92,7 +90,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 5,
       "usexp": 4,
-      "cost": 3,
       "lead": 2,
       "geo": 2,
       "pass": "2026-11-02"
@@ -112,7 +109,6 @@ window.FS_CATALOG = {
       "cert": 3,
       "scale": 3,
       "usexp": 3,
-      "cost": 4,
       "lead": 3,
       "geo": 3,
       "pass": "2026-11-02"
@@ -132,7 +128,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 3,
       "usexp": 2,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -152,7 +147,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 4,
       "usexp": 4,
-      "cost": 2,
       "lead": 4,
       "geo": 5,
       "pass": "2026-11-02"
@@ -172,7 +166,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 5,
-      "cost": 2,
       "lead": 4,
       "geo": 5,
       "pass": "2026-11-02"
@@ -192,7 +185,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 3,
-      "cost": 3,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -212,7 +204,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 4,
-      "cost": 3,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -232,7 +223,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 3,
-      "cost": 3,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -252,7 +242,6 @@ window.FS_CATALOG = {
       "cert": 3,
       "scale": 3,
       "usexp": 2,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -272,7 +261,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 4,
       "usexp": 4,
-      "cost": 3,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -292,7 +280,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 5,
-      "cost": 3,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -312,7 +299,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 5,
-      "cost": 2,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -332,7 +318,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 4,
-      "cost": 2,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -352,7 +337,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 5,
       "usexp": 3,
-      "cost": 3,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -372,7 +356,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 5,
       "usexp": 4,
-      "cost": 3,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -392,7 +375,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 4,
-      "cost": 2,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -412,7 +394,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 3,
-      "cost": 2,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -432,7 +413,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 3,
-      "cost": 3,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -452,7 +432,6 @@ window.FS_CATALOG = {
       "cert": 3,
       "scale": 3,
       "usexp": 2,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -472,7 +451,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 3,
       "usexp": 3,
-      "cost": 2,
       "lead": 3,
       "geo": 3,
       "pass": "2026-11-02"
@@ -492,7 +470,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 5,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -512,7 +489,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 4,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -532,7 +508,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 3,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -552,7 +527,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 3,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -572,7 +546,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 4,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -592,7 +565,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 3,
       "usexp": 3,
-      "cost": 4,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -612,7 +584,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 5,
       "usexp": 5,
-      "cost": 2,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -632,7 +603,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 4,
       "usexp": 3,
-      "cost": 2,
       "lead": 3,
       "geo": 5,
       "pass": "2026-11-02"
@@ -652,7 +622,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 3,
       "usexp": 3,
-      "cost": 2,
       "lead": 3,
       "geo": 3,
       "pass": "2026-11-02"
@@ -672,7 +641,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 5,
       "usexp": 5,
-      "cost": 4,
       "lead": 3,
       "geo": 3,
       "pass": "2026-11-02"
@@ -692,7 +660,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 5,
       "usexp": 5,
-      "cost": 3,
       "lead": 4,
       "geo": 4,
       "pass": "2026-11-02"
@@ -712,7 +679,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 5,
       "usexp": 4,
-      "cost": 3,
       "lead": 3,
       "geo": 4,
       "pass": "2026-11-02"
@@ -733,7 +699,6 @@ window.FS_CATALOG = {
       "cert": 5,
       "scale": 4,
       "usexp": 2,
-      "cost": 3,
       "lead": 2,
       "geo": 2,
       "manufacturer": "Manufacturer. Shenzhen-listed, 300258.",
@@ -779,7 +744,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 3,
       "usexp": 2,
-      "cost": 3,
       "lead": 2,
       "geo": 2,
       "manufacturer": "Manufacturer. Private company, two plants.",
@@ -814,7 +778,6 @@ window.FS_CATALOG = {
       "cert": 4,
       "scale": 5,
       "usexp": 4,
-      "cost": 3,
       "lead": 2,
       "geo": 2,
       "manufacturer": "Manufacturer. Shenzhen-listed, 002472.",
@@ -860,7 +823,6 @@ window.FS_CATALOG = {
       "cert": 3,
       "scale": 5,
       "usexp": 5,
-      "cost": 3,
       "lead": 3,
       "geo": 2,
       "manufacturer": "Manufacturer. Shanghai-listed, 603305.",
@@ -907,6 +869,198 @@ window.FS_CATALOG = {
       "url": "http://en.tzyy.com.cn/About_TZYY/Company_Profile.htm",
       "why": "Not scored. Established high-pressure piston pumps, valves, cylinders, and hydraulic castings are described in search snippets, but the profile page was not opened, so this is not a candidate yet.",
       "checked": "Search index only. Direct fetch returned HTTP 500 on 2026-11-06."
+    }
+  ],
+  "discovery_as_of": "2026-11-07",
+  "discovery": [
+    {
+      "id": "CN-M1",
+      "scored": false,
+      "name": "Xiamen Jingbohui (JBH)",
+      "country": "China",
+      "region": "China",
+      "category": "Precision machining",
+      "pass": "2026-11-07",
+      "what_they_make": "Hydraulic manifold blocks, valve bodies, cylinder end caps, and spools. Materials named on the site include 4140, 8620, 17-4PH, 7075-T6, and ductile iron.",
+      "supplier_type": "Contract / build-to-print machining supplier",
+      "claims": "The site says production is typically from 20-50 pieces, and that special blocks can be up to 700 bar. Both are claims. The 700 bar figure is not a tested rating.",
+      "us_presence": "Unknown",
+      "certs_note": "ISO 9001 and EN 10204 3.1 claimed. Certificates not verified.",
+      "url": "https://www.mechanicalleader.com/custom-hydraulic-components/",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
+      "price_note": "",
+      "flags": [
+        "MOQ of 20-50 is a website statement, not a quote.",
+        "700 bar is an unverified capability claim.",
+        "ISO 9001 was not checked in a registry.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.mechanicalleader.com/custom-hydraulic-components/",
+          "Capabilities, tolerances, MOQ, lead times, address (Primary: company site)",
+          "opened; checked 2026-11-07"
+        ]
+      ]
+    },
+    {
+      "id": "CN-F1",
+      "scored": false,
+      "name": "Zhejiang Longrui Forging Co., Ltd.",
+      "country": "China",
+      "region": "China",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-07",
+      "what_they_make": "Closed-die and multi-directional forgings. The site states a part-weight range of 5-520 kg, which may be larger than a typical tool housing.",
+      "supplier_type": "Contract / build-to-print forging supplier",
+      "claims": "Certificate numbers are published (API Spec 20C licence 20C-0051, TUV NORD PED and AD2000). They were not checked in the registries. Smallest economic weight and batch size were not stated.",
+      "us_presence": "Unknown",
+      "certs_note": "API 20C, PED, AD2000, NORSOK, BV, ISO 9001/14001/45001 claimed. Not verified in a registry.",
+      "url": "https://longruiforging.com/",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
+      "price_note": "",
+      "flags": [
+        "Part weights of 5-520 kg may not fit small tool parts.",
+        "Published certificate numbers were not confirmed with API or TUV NORD.",
+        "MOQ was not stated.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://longruiforging.com/",
+          "Address, presses, capacity, certificate numbers, materials (Primary: manufacturer site)",
+          "opened; checked 2026-11-07"
+        ],
+        [
+          "https://longruiforging.com/closed-die-forging/",
+          "Process and part weights 5-520 kg (Primary: manufacturer site)",
+          "opened; checked 2026-11-07"
+        ]
+      ]
+    },
+    {
+      "id": "CN-H1",
+      "scored": false,
+      "name": "Hangzhou WREN Hydraulic Equipment Manufacturing Co., Ltd.",
+      "country": "China",
+      "region": "China",
+      "category": "Hydraulics",
+      "pass": "2026-11-07",
+      "what_they_make": "Electric torque-wrench pumps (LP3, DHP), hydraulic torque wrenches, cylinders, and power packs. Own-brand product maker that also offers OEM/ODM.",
+      "supplier_type": "Product OEM (own brand) that offers OEM/ODM",
+      "claims": "Manufacturer site describes LP3 pumps as 70-700 bar torque-wrench pumps. A marketplace lists prices and MOQ 1. Incoterm is not stated.",
+      "us_presence": "Unknown",
+      "certs_note": "ISO 9001:2015 and TUV Rheinland / CE claimed. Certificate number was not checked.",
+      "url": "https://www.wrenchina.com/en/products/detail/LP3-Z4%20Hydraulic%20Torque%20Wrench%20Electric%20Pump",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
+      "price_note": "A Made-in-China page lists LP3-2 at US$2,100 (1-19) and US$1,800 (20+), and DHP at US$3,300 (1-9) and US$3,100 (10+). Incoterm is not stated. This is a list price, not a quote, and it is not used in the score or in any landed-cost total.",
+      "flags": [
+        "Sells its own hydraulic torque wrenches: a direct competitor. An OEM pump supply would need IP, NDA, and non-compete terms.",
+        "Marketplace price is not a quote and has no Incoterm.",
+        "Certificates were not checked in a registry.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.wrenchina.com/en/products/detail/LP3-Z4%20Hydraulic%20Torque%20Wrench%20Electric%20Pump",
+          "700 bar pump specs, TUV/CE claim, address (Primary: manufacturer site)",
+          "opened; checked 2026-11-07"
+        ],
+        [
+          "https://wrenchina.en.made-in-china.com/product/mvGQUXqbRnRf/China-WREN-High-quality-LP3-2-Series-Special-Pump-for-Hydraulic-Torque-Wrench-700bar.html",
+          "List price, MOQ, staff, plant area, ISO 9001 claim (Secondary: B2B marketplace self-report)",
+          "opened; checked 2026-11-07"
+        ]
+      ]
+    },
+    {
+      "id": "HU-F1",
+      "scored": false,
+      "name": "Flansch-Tech Kft.",
+      "country": "Hungary",
+      "region": "Europe",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-07",
+      "what_they_make": "Steel die forgings. The site says 0.5-12 kg at Csepel and Erd, and 0.5-20 kg in smaller batches at Zalaegerszeg, with in-house dies, heat treatment, and machining.",
+      "supplier_type": "Contract die-forging and machining supplier",
+      "claims": "Smaller batches are described for Zalaegerszeg. No batch quantity is given. Alloy grades for this use were not confirmed.",
+      "us_presence": "Unknown",
+      "certs_note": "IATF 16949 claimed for Csepel and ISO 9001 for Zalaegerszeg. Not verified.",
+      "url": "https://flansch-tech.hu/en/steel-forging/",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
+      "price_note": "",
+      "flags": [
+        "Smaller-batch wording has no quantity.",
+        "Alloy grades such as 4140 or 4340 were not confirmed.",
+        "Certificates were not checked in a registry.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://flansch-tech.hu/en/steel-forging/",
+          "Sites, weight ranges, cert claims, in-house dies and machining (Primary: company site)",
+          "opened; checked 2026-11-07"
+        ]
+      ]
+    },
+    {
+      "id": "HU-F2",
+      "scored": false,
+      "name": "Angstrom TruForge Ltd. (Eger)",
+      "country": "Hungary",
+      "region": "Europe",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-07",
+      "what_they_make": "Carbon and alloy steel die forgings with CNC machining. Six press lines. The site says the plant is built for custom-designed mass production.",
+      "supplier_type": "Contract die-forging and CNC machining supplier",
+      "claims": "The site says the company sells to North America. Willingness to take a low volume was not stated. Certificates were not listed on the page opened.",
+      "us_presence": "North American sales are claimed. A US shipment history for a HYTORC part was not checked.",
+      "certs_note": "Not listed on the page opened. Not verified.",
+      "url": "https://angstrom-truforge.com/en/home/",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
+      "price_note": "",
+      "flags": [
+        "Low-volume willingness is unknown. The site describes mass production.",
+        "Owner is described as Angstrom Automotive Group (United States) since 2019. That was not checked in a registry.",
+        "Certificates were not on the page opened.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://angstrom-truforge.com/en/home/",
+          "History, about 50 staff, 6 press lines, sales to North America (Primary: company site)",
+          "opened; checked 2026-11-07"
+        ]
+      ]
+    },
+    {
+      "id": "HU-M1",
+      "scored": false,
+      "name": "VIDEOTON Holding Zrt. (Szekesfehervar)",
+      "country": "Hungary",
+      "region": "Europe",
+      "category": "Precision machining",
+      "pass": "2026-11-07",
+      "what_they_make": "Contract machining of metal stock and castings, surface treatment, and mechanical assembly for automotive and industrial work.",
+      "supplier_type": "Contract manufacturer",
+      "claims": "Certificate standards are named on the site. They were not pulled from a registrar. MOQ was not stated.",
+      "us_presence": "Unknown",
+      "certs_note": "IATF 16949:2016, ISO 9001:2015, ISO 14001:2015, and ISO 50001 claimed. Not verified.",
+      "url": "https://www.videoton.hu/core-activities/components-production/machining/?lang=en",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
+      "price_note": "",
+      "flags": [
+        "MOQ is unknown.",
+        "Certificates were not checked in a registry.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.videoton.hu/core-activities/components-production/machining/?lang=en",
+          "Contract machining scope and certificate claims (Primary: company site)",
+          "opened; checked 2026-11-07"
+        ]
+      ]
     }
   ]
 };

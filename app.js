@@ -11,7 +11,7 @@ const allowed=C.ALLOWED_EMAILS.filter(Boolean).map(e=>e.toLowerCase());
 const KEYS=['cap','cert','scale','usexp','cost','lead','geo'], LBL=['Capability','Certs','Scale','US exp','Cost','Lead time','Geo risk'];
 const DEF=[25,15,10,10,20,10,10];
 const LOCAL_W='fs_local_weights_v1';
-let S={user:null,rows:[],w:DEF.slice(),lk:Array(7).fill(false),f:{cat:'',reg:'',min:0,sort:'score'},t0:Date.now(),open:null,banner:'',logging:false,ping:null};
+let S={user:null,rows:[],w:[29,19,13,13,0,13,13],lk:[false,false,false,false,true,false,false],f:{cat:'',reg:'',min:0,sort:'score',dsort:{key:'name',dir:'asc'}},t0:Date.now(),open:null,banner:'',logging:false,ping:null};
 const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function log(type,sid,detail){ if(!S.user)return; sb.from('fs_events').insert({user_email:S.user,event_type:type,supplier_id:sid||null,detail:detail||{}}).then(()=>{}); }
@@ -25,7 +25,9 @@ function paintChrome(){
 }
 function bannerHtml(){return S.banner?`<div class="callout warn" role="status">${esc(S.banner)}</div>`:'';}
 function loadLocalW(){
-  try{const o=JSON.parse(localStorage.getItem(LOCAL_W)||''); if(validW(o.w,o.lk)){S.w=o.w; S.lk=o.lk.map(Boolean);}}catch(e){}
+  let raw=null; try{raw=JSON.parse(localStorage.getItem(LOCAL_W)||'null');}catch(e){raw=null;}
+  const m=migrateWeights(raw&&raw.w, raw&&raw.lk);
+  S.w=m.w; S.lk=m.lk;
 }
 function startSessionLog(){
   if(S.logging||!S.user) return;
@@ -74,11 +76,13 @@ function applyCatalog(){
   S.rows=cat.suppliers.slice();
   S.recheck=cat.recheck||{results:{}};
   const asof=$('#asof');
-  if(asof) asof.textContent='Desk research dated '+cat.original_as_of+' and '+cat.china_as_of;
+  if(asof) asof.textContent='Desk research dated '+cat.original_as_of+', '+cat.china_as_of+', and '+(cat.discovery_as_of||'2026-11-07');
+  S.discovery=Array.isArray(cat.discovery)?cat.discovery:[];
   return true;
 }
 async function boot(){
   if(!applyCatalog()){app.innerHTML='<div class="card"><h2>Research snapshot missing</h2><p class="muted">catalog.js did not load. The public pages do not read supplier rows from the database.</p></div>';return;}
+  const fresh=weightsForSaved(null); S.w=fresh.w; S.lk=fresh.lk;
   const authEntry=AUTH0.hasTokens||AUTH0.error||AUTH0.recovery;
   if(!authEntry){S.user=null; stopSessionLog(); loadLocalW(); paintChrome(); route(); return;}
   const {data:{session}}=await sb.auth.getSession();
@@ -95,7 +99,7 @@ async function boot(){
   if(sessionUser){
     S.user=sessionUser;
     const p=await sb.from('fs_weight_prefs').select('*').eq('user_email',sessionUser).maybeSingle();
-    if(p.data&&validW(p.data.weights,p.data.locked)){S.w=p.data.weights; S.lk=p.data.locked.map(Boolean);}
+    const m=weightsForSaved(p&&p.data); S.w=m.w; S.lk=m.lk;
     startSessionLog();
   }else{
     S.user=null; stopSessionLog(); loadLocalW();
@@ -116,9 +120,11 @@ const logoutBtn=$('#logout'); if(logoutBtn) logoutBtn.onclick=async e=>{e.preven
 let lastHash=location.hash;
 window.addEventListener('hashchange',()=>{if(S.wsDirty&&!confirm('You have unsaved worksheet changes. Leave without saving?')){history.replaceState(null,'',lastHash||'#/worksheet');return;} S.wsDirty=false; lastHash=location.hash; route();});
 window.addEventListener('beforeunload',e=>{if(S.wsDirty){e.preventDefault();e.returnValue='';}});
-function route(){const h=location.hash, v=h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':'score';
+function route(){const h=location.hash, v=h.startsWith('#/sensitivity')?'sens':h.startsWith('#/quotes')?'q':h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':'score';
   if(v!=='score') closePop();
   document.querySelectorAll('nav a[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+  if(v==='sens') return sensitivity();
+  if(v==='q') return quotes();
   if(v==='ws') return worksheet();
   if(v==='src') return sources();
   if(v==='study') return study();
@@ -156,55 +162,58 @@ function evidenceHtml(r){return (r.evidence||[]).map(e=>safeUrl(e[0])?`<div clas
 function sources(){
   const rc=S.recheck||{results:{}}; log('sources_open');
   const cat=window.FS_CATALOG||{};
-  app.innerHTML=`<h1>Sources</h1><p class="sub">Research channels for this short list, and what each link does and does not prove. Source dates are Nov 2, 2026 and Nov 6, 2026. See <a href="#/study">Study</a> for the method.</p>
+  app.innerHTML=`<h1>Sources</h1><p class="sub">Research channels for this short list, and what each link does and does not prove. Source dates are Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. See <a href="#/study">Study</a> for the method.</p>
   ${bannerHtml()}
   <div class="card" style="margin-bottom:14px"><h2>Channels used in the desk research</h2>
   <table class="tbl"><thead><tr><th>Channel</th><th>How it was used</th><th>Limitation</th></tr></thead><tbody>
   ${CHANNELS.used.map(c=>`<tr><td><b>${esc(c[0])}</b></td><td>${esc(c[1])}</td><td>${esc(c[2])}</td></tr>`).join('')}</tbody></table>
-  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. Which reference first surfaced each individual supplier was not recorded. Cost, lead time, and geography scores are indicative assumptions, not quotes or measured results.</p></div>
+  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. The reference that first surfaced each supplier was not recorded. Cost is unknown and is not a score. Lead time and geography are indicative assumptions, not quotes or measured results.</p></div>
   <div class="card" style="margin-bottom:14px"><h2>Planned research channels (not yet checked)</h2>
-  <p class="muted" style="margin-top:-6px">Named in the study as the next research step. Customs-data platforms can both find new candidates and screen or validate existing ones; exhibitor lists mainly add candidates. None of these has been searched for any supplier yet. Links are to the public service or event site (opened Nov 6, 2026).</p>
+  <p class="muted" style="margin-top:-6px">These are the next checks, not sources already used for the scores. None of these has been searched as a full pass. On Nov 7, 2026 the visible names on ImportYeti’s public HYTORC page were reviewed (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered. Links are the public service or event sites, opened Nov 6, 2026.</p>
   <table class="tbl"><thead><tr><th>Channel</th><th>What would be checked</th><th>Limitation</th></tr></thead><tbody>
   ${CHANNELS.planned.map(c=>`<tr><td><b>${esc(c[0])}</b><br><a href="${esc(c[1])}" target="_blank" rel="noopener">${esc(c[1])}</a></td><td>${c[2]}</td><td>${esc(c[3])}</td></tr>`).join('')}</tbody></table></div>
-  <div class="card tblwrap"><h2>Per-supplier sources</h2><table class="tbl"><thead><tr><th>Supplier</th><th>Source date</th><th>Found via</th><th>Company URL</th><th>URL check</th><th>Re-check (${esc(rc.checked||'—')}, automated)</th><th>What the URL supports</th></tr></thead><tbody>
+  <div class="card tblwrap"><h2>Per-supplier sources</h2><table class="tbl"><thead><tr><th>Supplier</th><th>Source date</th><th>Found via</th><th>Company URL</th><th>URL check</th><th>Homepage check (${esc(rc.checked||'—')})</th><th>What the URL supports</th></tr></thead><tbody>
   ${S.rows.slice().sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})).map(r=>{const x=rc.results[r.url]||''; const china=r.pass==='2026-11-06';
     const check=r.url_check===200?(china?'Opened Nov 6, 2026 (HTTP 200)':'Site responded'):(r.url_check==null?'not recorded':esc(r.url_check));
     return `<tr><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.pass||'')}</td>
-  <td>${china?evidenceHtml(r)+'<p class="muted">Sources dated Nov 6, 2026.</p>':'Known industry name + company website. Specific discovery trail was not recorded. Source date Nov 2, 2026.'}</td>
+  <td>${china?evidenceHtml(r)+'<p class="muted">Sources dated Nov 6, 2026.</p>':'Known industry name and company website. The reference that first surfaced this supplier was not recorded. Source date Nov 2, 2026.'}</td>
   <td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:'—'}</td>
-  <td>${check}</td><td>${china?'Not part of the Nov 5 recheck.':esc(x?(x.split(' ')[0]==='200'?'Site responded':'HTTP '+x.split(' ')[0]+' (likely blocks scripts)'):'not rechecked')}</td>
+  <td>${check}</td><td>${china?'Opened on Nov 6, 2026, outside the Nov 2 homepage check.':esc(x?(x.split(' ')[0]==='200'?'Site responded':'Did not return a normal page response'):'not checked')}</td>
   <td>${china?'Pages opened on Nov 6, 2026 support the product family and the claims in the evidence column. They do not prove price, MOQ, volume willingness, customs shipments, or a current certificate.':'Company exists; product family. Homepage only. Not a product, certificate, or customs record.'}</td></tr>`;}).join('')}</tbody></table>
-  <p class="muted" style="font-size:12px">The Nov 5 recheck is a scripted page load of homepages whose source date is Nov 2, 2026. It shows whether those sites responded. Names whose own sources are dated Nov 6, 2026 were not in that recheck. Each row keeps its own source date.</p></div>
+  <p class="muted" style="font-size:12px">The homepage check shows whether Nov 2 source sites still responded. It is not a qualification. Sources dated Nov 6, 2026 and Nov 7, 2026 were opened on those dates. Each supplier keeps its own source date.</p></div>
+  <div class="card"><h2>Nov 7, 2026 leads, not scored</h2><p class="muted">These six names are in the same candidate list and are not ranked. Claims below are what the pages said. They were not verified, and no 1–5 score was assigned.</p>
+  <table class="tbl"><thead><tr><th>Name</th><th>Source date</th><th>What the page supports</th><th>URL</th></tr></thead><tbody>
+  ${(S.discovery||[]).map(r=>`<tr><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)} · not scored</span></td><td>${esc(r.pass||'')}</td><td>${evidenceHtml(r)||'—'}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:'—'}</td></tr>`).join('')}
+  </tbody></table></div>
   <div class="card watchcard"><h2>Watchlist sources, not scored</h2>
   ${(cat.watchlist||[]).map(w=>`<article class="watchitem"><h3>${esc(w.name)} <span class="tag alt2">${esc(w.id)}</span></h3><p>${esc(w.why)}</p><p class="muted">${esc(w.checked)}</p>${safeUrl(w.url)?`<p class="u"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>`:''}</article>`).join('')}
   </div>`;
 }
-const RUBRIC=[['Capability','25%','Clear public fit to the part family (e.g. HAWE compact ~700 bar packs)','Makes related products; fit to HYTORC geometry unproven from the site','Wrong category or no public evidence of the process'],
- ['Certs','15%','ISO / IATF / AS9100 named on site for the relevant scope (still unverified)','Quality system mentioned without a named standard','Nothing found'],
- ['Scale','10%','Multi-plant / global footprint visible','Single solid plant or mid-size group','Small or unclear capacity'],
- ['US export','10%','Named US subsidiary or sales office','US presence claimed without a clear office','No US footprint found'],
- ['Landed cost','20%','Lower expected total landed cost','Mid; Europe often here on unit price','Higher expected landed cost (EU precision, or higher-tariff origins)'],
- ['Lead time','10%','Shorter expected door-to-door','Typical ocean from Asia or Europe','Longer or congested lanes expected'],
- ['Geo risk','10%','Lower concentration / tariff / disruption risk','Moderate','Higher; single-country exposure']];
+const RUBRIC=[ ['Capability','29%','Clear public fit to the part family (e.g. HAWE compact ~700 bar packs)','Makes related products; fit to HYTORC geometry unproven from the site','Wrong category or no public evidence of the process'],
+ ['Certs','19%','ISO / IATF / AS9100 named on site for the relevant scope (still unverified)','Quality system mentioned without a named standard','Nothing found'],
+ ['Scale','13%','Multi-plant / global footprint visible','Single solid plant or mid-size group','Small or unclear capacity'],
+ ['US export','13%','Named US subsidiary or sales office','US presence claimed without a clear office','No US footprint found'],
+ ['Cost','Excluded','Not scored.','Not scored.','Not scored.'],
+ ['Lead time','13%','Shorter expected door-to-door','Typical ocean from Asia or Europe','Longer or congested lanes expected'],
+ ['Geo risk','13%','Lower concentration / tariff / disruption risk','Moderate','Higher; single-country exposure']];
 function study(){ log('study_open');
   const li=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
   const ncat=(rows,c)=>rows.filter(r=>r.category===c).length;
-  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026 and Nov 6, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
+  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
   ${bannerHtml()}
   <div class="card study">
-  <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: real manufacturers, a scorecard that can be re-weighted, and alternative candidates per part family rather than a single low-cost bet. Three part families that are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized.</p>
-  <p>The scorecard is one list of ${S.rows.length} manufacturers (${ncat(S.rows,'Hydraulics')} hydraulics, ${ncat(S.rows,'Forgings/Castings')} forgings and castings, ${ncat(S.rows,'Precision machining')} precision machining) in China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, the Czech Republic, and Israel). Chinese and non-Chinese factories are scored the same way. The practical question is where a second source could sit if HYTORC does not want China to be the only source. China stays in the comparison. The scores do not pick a winning country.</p>
-  <p>This is not an exhaustive search, and it is not an evenly balanced survey of every producing country. It is a preliminary desk list of manufacturers already visible in these part families. Desk research is dated Nov 2, 2026 and Nov 6, 2026. Each name keeps its own source date on <a href="#/sources">Sources</a> and in its detail card.</p>
+  <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
+  <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: manufacturers with a public record in the part family, a scorecard that can be re-weighted, and a lead and an alternative in each family. Three families are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized. <a href="#/sensitivity">Landed-cost sensitivity</a> is where freight and duty assumptions can be tested before a quote is in hand.</p>
+  <p>The scored list has ${S.rows.length} manufacturers (${ncat(S.rows,'Hydraulics')} hydraulics, ${ncat(S.rows,'Forgings/Castings')} forgings and castings, ${ncat(S.rows,'Precision machining')} precision machining) in China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, the Czech Republic, and Israel), plus ${(S.discovery||[]).length} names dated Nov 7, 2026 that are not scored. Scored names use the same criteria. The Nov 7 names are leads for follow-up, not a ranked result.</p>
+  <p>This is not an exhaustive search, and it is not an evenly balanced survey of every producing country. It is a preliminary desk list of manufacturers already visible in these part families. Desk research is dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Each name keeps its own source date on <a href="#/sources">Sources</a> and in its detail card.</p>
   <h2>How to read cost, lead time, and geography</h2>
-  <p>This is a preliminary desk assessment across those geographies. Cost, lead time, and geography are indicative assumptions: expected tariffs and landed cost, typical freight time, and concentration in one country. They are not quotations, measured door-to-door times, or a finding that manufacturers in one country are a better source than manufacturers in another. Drawing fit, verified quality, US shipment history, MOQ, and willingness to take HYTORC volumes are still open. Changing the weights reorders these assumptions. It does not add factory evidence.</p>
+  <p>Cost is unknown and is not part of the weighted score. No supplier purchase price was collected. Lead time and geography remain in the score only as assumptions: typical freight time and concentration in one country. They are not measured transit times. Capability is catalog fit, not proven quality. Drawing fit, verified quality, US shipment history, MOQ, and willingness to take HYTORC volumes are still open.</p>
   <p>A US office, a US manufacturing claim, or an export sentence is not verified US shipment history. A certificate named on a website, or a registrar row whose expiry was not checked, is not a verified certificate. Price, MOQ, and willingness to take HYTORC volumes were not found.</p>
   <p>Beijing Huade, Shandong Taifeng, and TZ Yuci are on the watchlist, not in the ranked list. A ~700 bar bolting-pump line was not confirmed for Huade or Taifeng, so they are not qualified bolting-pump matches. TZ Yuci's profile page was not opened.</p>
-  <h2>How scores were set</h2><p>Each of the seven scores is a 1-5 desk judgment from public websites only: no quotes, plant visits, or certificate downloads. Default weights total 100 and can be changed on the Scorecard. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified.</p>
+  <h2>How scores were set</h2><p>Six criteria are 1-5 desk judgments from public websites only: no quotes, plant visits, or certificate downloads. Cost is not one of them. Default weights total 100 (capability 29, certs 19, scale 13, US export 13, lead time 13, geography 13) and can be changed on the Scorecard. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified. A capability score is catalog fit, not proven quality.</p>
   <div class="wrap"><table class="tbl"><thead><tr><th>Criterion</th><th>Default weight</th><th>5 (strong)</th><th>3 (mixed)</th><th>1 (weak)</th></tr></thead><tbody>${RUBRIC.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="callout" style="margin-top:10px"><b>Capability is catalog fit, not an audit.</b> It reflects product and process fit from public material, not plant quality. Certifications are expected from public text, not verified. Quality is established through the qualification steps below.</div>
-  <h2>Landed cost assumption</h2><p>The Cost score is meant to reflect expected landed cost, not factory price alone:</p>
-  <p class="eq">Landed cost ≈ unit price + freight + insurance + duties and any additional tariffs (e.g. Section 301 / 232 where applicable) + broker fees</p>
-  ${li(['Tariff treatment varies by HTS line, origin and date, and has changed often. Rates were not verified line by line; each Cost cell is a starting flag, not a quote.','Europe often scores lower on Cost, on the assumption of a higher unit price, and higher on Capability and Geo risk. The weights can change that mix. These scores are not measured prices or transit times.','Steel and aluminum content can shift forging and casting costs where metal tariffs apply.'])}
+  <h2>Cost is not a score</h2><p>There is no cost score, and the weighted score is not a landed cost. A comparison of one drawing, one quantity, and one ship-to belongs on <a href="#/quotes">Quote entry</a> once a seller has quoted, or on <a href="#/sensitivity">Landed-cost sensitivity</a> while the figures are still assumptions. Neither page supplies a freight rate, a duty rate, or a price break. A blank is missing rather than zero.</p>
   <h2>Proposed sourcing alternatives</h2><p>Summarized on the Scorecard. Lead and alternative candidates per part family are a starting point. They are not qualified and not interchangeable until drawings, specs and trials confirm fit.</p>
   <h2>Beyond factories: private label and agents</h2>
   ${li(['<b>Private label / white label:</b> buying a ready-made or lightly adapted product under the HYTORC name. Private label usually implies some exclusivity or customization; white label is a generic product many brands rebrand.','<b>Where it fits:</b> standard or near-standard items (hoses, fittings, some valves, C-parts, packaging) more than housings, reaction arms, or compact high-pressure pumps that must match tool geometry.','<b>Industrial distributors</b> with private-label programs can cover the standardized slice; they are a weaker fit for unique hydraulic power packs.','<b>Sourcing agents / trading companies:</b> useful for mapping an industrial district; the risks are markup and an obscured factory. Best used once the part family is defined, with factory identity, capability evidence, and a path to direct dual sourcing.'])}
@@ -213,7 +222,7 @@ function study(){ log('study_open');
   <h2>Questions for discussion</h2>
   ${li(['Which category (hydraulics, forgings/castings, machining) is the biggest drag today on quality, lead time, or cost?','Which part numbers, volumes, and alloy grades should drive the next pass?','Are there factories already trusted or ruled out, so the list does not duplicate them?'])}
   <h2>Limitations and next checks</h2>
-  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, volume willingness, drawing fit, and verified quality are unknown across the list.','Cost, lead time, and geography are indicative assumptions, not quotations or measured outcomes. They do not establish that suppliers in one country are a better fit than suppliers in another.','Customs records (ImportYeti, Panjiva) and trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','The list is not an exhaustive world search. Vietnam and Thailand are not yet covered; Taiwan and Korea are thin.','HYTORC part lists, volumes and alloy grades are not in the model; scores should change once those are known.'])}
+  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, volume willingness, drawing fit, and verified quality are unknown across the list.','Cost is unknown and is not in the score. Lead time and geography are indicative assumptions, not quotations or measured outcomes. They do not establish that suppliers in one country are a better fit than suppliers in another.','On Nov 7, 2026 the visible names on ImportYeti’s public HYTORC page were reviewed. The page lists some sea-freight names only. Panjiva and the trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','The list is not an exhaustive world search. Vietnam and Thailand are not yet covered; Taiwan and Korea are thin. The Nov 7 names are not scored.','HYTORC part lists, volumes, and alloy grades are not in this review. Scores should be revisited once those are known.'])}
   </div>`;
 }
 
@@ -233,7 +242,36 @@ function rebalance(w,lk,i,v){ // pure: returns new weights summing to 100; locke
 }
 const setLocks=(lk,v)=>lk.map(()=>!!v); // lock state only; never touches weights
 const validW=(w,lk)=>Array.isArray(w)&&w.length===7&&w.every(x=>Number.isInteger(x)&&x>=0&&x<=100)&&w.reduce((a,b)=>a+b,0)===100&&Array.isArray(lk)&&lk.length===7;
-function setW(i,v){S.w=rebalance(S.w,S.lk,i,v);savePrefs();}
+function setW(i,v){if(i===4)return; S.lk[4]=true; S.w[4]=0; S.w=rebalance(S.w,S.lk,i,v); S.w[4]=0; S.lk[4]=true; if(S.w.reduce((a,b)=>a+b,0)!==100){const m=migrateWeights(S.w,S.lk); S.w=m.w; S.lk=m.lk;} savePrefs();}
+function fixSum(w,idxs){let diff=100-w.reduce((a,b)=>a+b,0),g=0; while(diff&&g<200){const pool=diff>0?idxs:idxs.filter(j=>w[j]>0); if(!pool.length)break; const j=pool.reduce((b,k)=>w[k]>w[b]?k:b,pool[0]); const step=diff>0?1:-1; w[j]+=step; diff-=step; g++;}}
+function migrateWeights(w,lk){
+  const base=[25,15,10,10,20,10,10];
+  w=(Array.isArray(w)&&w.length===7)?w.map(Number):base.slice();
+  lk=(Array.isArray(lk)&&lk.length===7)?lk.map(Boolean):Array(7).fill(false);
+  if(w.some(x=>!Number.isInteger(x)||x<0||x>100)||w.reduce((a,b)=>a+b,0)!==100){w=base.slice(); lk=Array(7).fill(false);}
+  const nw=w.slice(), nl=lk.slice(); nl[4]=true;
+  if(w[4]===0){nw[4]=0; return {w:nw,lk:nl};}
+  const retired=w[4]; nw[4]=0;
+  const locked=nw.map((_,j)=>j).filter(j=>j!==4&&nl[j]);
+  const free=nw.map((_,j)=>j).filter(j=>j!==4&&!nl[j]);
+  const lockedSum=locked.reduce((a,j)=>a+w[j],0);
+  if(!free.length||lockedSum>100){
+    const idxs=nw.map((_,j)=>j).filter(j=>j!==4);
+    const s=idxs.reduce((a,j)=>a+w[j],0);
+    idxs.forEach(j=>{nw[j]=s>0?Math.round(w[j]*100/s):0;});
+    fixSum(nw,idxs); nw[4]=0; return {w:nw,lk:nl};
+  }
+  const freeCur=free.reduce((a,j)=>a+w[j],0), room=100-lockedSum;
+  free.forEach(j=>{nw[j]=freeCur>0?Math.round(w[j]*room/freeCur):Math.round(room/free.length);});
+  locked.forEach(j=>{nw[j]=w[j];});
+  nw[4]=0; fixSum(nw,free); return {w:nw,lk:nl};
+}
+function weightsForSaved(data){
+  const w=data&&data.weights, lk=data&&data.locked;
+  const ok=Array.isArray(w)&&w.length===7&&w.every(x=>Number.isInteger(x)&&x>=0&&x<=100)&&w.reduce((a,b)=>a+b,0)===100&&Array.isArray(lk)&&lk.length===7;
+  if(ok) return migrateWeights(w,lk);
+  return migrateWeights([25,15,10,10,20,10,10], Array(7).fill(false));
+}
 let pt; function savePrefs(){
   if(!S.user){
     try{localStorage.setItem(LOCAL_W, JSON.stringify({w:S.w,lk:S.lk}));}catch(e){}
@@ -241,15 +279,17 @@ let pt; function savePrefs(){
   }
   clearTimeout(pt);pt=setTimeout(()=>sb.from('fs_weight_prefs').upsert({user_email:S.user,weights:S.w,locked:S.lk,updated_at:new Date().toISOString()}).then(()=>{}),800);
 }
-const score=r=>KEYS.reduce((a,k,i)=>a+(r[k]||0)*S.w[i],0)/100;
+const score=r=>{if(!r||r.scored===false||r.cap==null)return null; return KEYS.reduce((a,k,i)=>a+(k==='cost'?0:(Number(r[k])||0)*S.w[i]),0)/100;};
 const COLS=['n','name','cat','country','makes','num','num','num','num','num','num','num','num','uspres','certs','src'];
 const WIDTHS=['3%','10.5%','7%','6.5%','13%','3.4%','3.4%','3.6%','3.2%','3.4%','3.4%','3.3%','4.3%','10.5%','11.2%','10.3%'];
 
 function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
-  app.innerHTML=`<h1>Supplier scorecard</h1><p class="sub">${S.rows.length} manufacturers in one list, in China and in other countries. The comparison is for alternatives to relying on China alone. China stays in the set, and the scores do not pick a winning country. Desk research dated Nov 2, 2026 and Nov 6, 2026. Suggested 1-5 scores are preliminary judgments, not qualifications or quotes. <a href="#/study">How to read the scores</a></p>
+  app.innerHTML=`<h1>Supplier scorecard</h1>
+  <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
+  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/study">How the scores were set</a> · <a href="#/sensitivity">Landed-cost sensitivity</a></p>
   ${bannerHtml()}
-  <div class="callout"><b>Assumptions, not measured results.</b> Cost, lead time, and geography are indicative assumptions about tariffs, freight, and concentration. They are not quotes or measured transit times, and they do not show that one country is a better source than another. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
+  <div class="callout"><b>Cost is unknown and is not in the score.</b> No purchase price, FOB, freight rate, or duty was collected, so cost is not a rank. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
   <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">Weight changes stay in this browser only. They do not change the supplier scores.</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
@@ -257,14 +297,16 @@ function scorecard(){
   <div class="filters"><label for="fc">Category <select id="fc"><option value="">All categories</option>${cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>
   <label for="fr">Region <select id="fr"><option value="">All regions</option>${regs.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>
   <label for="fm">Min score <input id="fm" type="number" inputmode="decimal" step="0.1" min="0" max="5" aria-describedby="fmhint"></label>
-  <span id="fmhint">0 to 5. Leave blank to show every row at or above 0.</span>
-  <label for="fs">Sort <select id="fs"><option value="score">Sort: score</option><option value="name">Sort: name</option><option value="country">Sort: country</option><option value="cost">Sort: cost</option></select></label></div>
-  <div class="card scorewrap"><table class="tbl" id="tb"></table></div>${watchlistHtml()}`;
-  $('#fc').value=S.f.cat;$('#fr').value=S.f.reg;$('#fm').value=S.f.min||'';$('#fs').value=S.f.sort;
-  [['#fc','cat'],['#fr','reg'],['#fs','sort']].forEach(([s,k])=>$(s).onchange=e=>{S.f[k]=e.target.value;table();});
+  <span id="fmhint">0 to 5. Leave blank to show every row at or above 0. Sort from the column headers. The rank column stays the weighted-score rank.</span></div>
+  <p class="muted" id="counts"></p>
+  <div class="card scorewrap"><table class="tbl" id="tb"></table></div>
+  <div class="card" id="discover"></div>
+  ${watchlistHtml()}`;
+  $('#fc').value=S.f.cat;$('#fr').value=S.f.reg;$('#fm').value=S.f.min||'';
+  [['#fc','cat'],['#fr','reg']].forEach(([s,k])=>$(s).onchange=e=>{S.f[k]=e.target.value;table();});
   $('#fm').oninput=e=>{S.f.min=+e.target.value||0;table();};
-  $('#rst').onclick=()=>{S.w=DEF.slice();S.lk=Array(7).fill(false);savePrefs();weights();table();};
-  const setAllLocks=v=>{S.lk=setLocks(S.lk,v);savePrefs();weights();};$('#lkall').onclick=()=>setAllLocks(true);$('#lknone').onclick=()=>setAllLocks(false);
+  $('#rst').onclick=()=>{const m=migrateWeights(DEF,Array(7).fill(false)); S.w=m.w; S.lk=m.lk; savePrefs(); weights(); table();};
+  const setAllLocks=v=>{S.lk=setLocks(S.lk,v); S.lk[4]=true; S.w[4]=0; savePrefs(); weights();};$('#lkall').onclick=()=>setAllLocks(true);$('#lknone').onclick=()=>setAllLocks(false);
   weights();table();syncTopbar();
 }
 function watchlistHtml(){
@@ -275,53 +317,128 @@ function watchlistHtml(){
   </div>`;
 }
 function weights(){
-  $('#wts').innerHTML=KEYS.map((k,i)=>`<div class="w"><span>${LBL[i]}</span><input type="range" min="0" max="100" value="${S.w[i]}" data-i="${i}" ${S.lk[i]?'disabled':''}>
-  <input type="number" min="0" max="100" value="${S.w[i]}" data-n="${i}" ${S.lk[i]?'disabled':''}><label><input type="checkbox" data-l="${i}" ${S.lk[i]?'checked':''}> Lock</label></div>`).join('');
+  $('#wts').innerHTML=KEYS.map((k,i)=>{const cost=k==='cost', proxy=k==='lead'||k==='geo';
+    return `<div class="w"><span>${LBL[i]}${cost?' — unknown':''}${proxy?' *':''}</span><input type="range" min="0" max="100" value="${S.w[i]}" data-i="${i}" ${S.lk[i]||cost?'disabled':''}>
+  <input type="number" min="0" max="100" value="${S.w[i]}" data-n="${i}" ${S.lk[i]||cost?'disabled':''}><label><input type="checkbox" data-l="${i}" ${S.lk[i]?'checked':''} ${cost?'disabled':''}> ${cost?'Excluded':'Lock'}</label></div>`;}).join('')+'<p class="muted" style="margin:8px 0 0">* Lead and Geo are assumptions, not a measured transit time or a proven risk score. Cost is excluded. The weights still total 100.</p>';
   $('#tot').textContent='Total: '+S.w.reduce((a,b)=>a+b,0)+'%';
   const sync=()=>{KEYS.forEach((_,j)=>{$(`[data-i="${j}"]`).value=S.w[j];const n=$(`[data-n="${j}"]`);if(document.activeElement!==n)n.value=S.w[j];});table();};
   document.querySelectorAll('[data-i]').forEach(el=>el.oninput=()=>{setW(+el.dataset.i,+el.value);sync();});
   document.querySelectorAll('[data-n]').forEach(el=>el.onchange=()=>{setW(+el.dataset.n,+el.value);el.value=S.w[+el.dataset.n];sync();});
-  document.querySelectorAll('[data-l]').forEach(el=>el.onchange=()=>{S.lk[+el.dataset.l]=el.checked;savePrefs();weights();});
+  document.querySelectorAll('[data-l]').forEach(el=>el.onchange=()=>{if(+el.dataset.l===4){el.checked=true;return;} S.lk[+el.dataset.l]=el.checked; S.lk[4]=true; S.w[4]=0; savePrefs(); weights();});
 }
+function dateLabel(r){return r.pass==='2026-11-07'?'Researched Nov 7, 2026':r.pass==='2026-11-06'?'Researched Nov 6, 2026':'Researched Nov 2, 2026';}
+function findAny(id){return S.rows.find(x=>x.id===id)||(S.discovery||[]).find(x=>x.id===id);}
 function detailInner(r){
-  const china=r.pass==='2026-11-06';
   const ev=evidenceHtml(r), flags=(r.flags||[]).map(f=>`<li>${esc(f)}</li>`).join('');
-  return `<div class="detail"><div class="detailhead"><h2>${esc(r.name)} <span class="tag">${china?'Researched Nov 6, 2026':'Researched Nov 2, 2026'}</span></h2><button type="button" class="btn sec" id="dx">Close</button></div>
-  <p class="muted">${esc(r.id)} · ${esc(r.category)} · ${esc(r.country)} (${esc(r.region)})${r.manufacturer?' · '+esc(r.manufacturer):''}</p>
+  const scored=r.cap!=null&&r.scored!==false;
+  const sc=score(r);
+  return `<div class="detail"><div class="detailhead"><h2>${esc(r.name)} <span class="tag">${dateLabel(r)}</span></h2><button type="button" class="btn sec" id="dx">Close</button></div>
+  <p class="muted">${esc(r.id)} · ${esc(r.category)} · ${esc(r.country)} (${esc(r.region)})${r.supplier_type?' · '+esc(r.supplier_type):''}</p>
   <p>${esc(r.what_they_make)}</p>
   ${r.relevance?`<p><b>Why it is listed:</b> ${esc(r.relevance)}</p>`:''}
-  <p><b>US presence:</b> ${esc(r.us_presence)}</p><p><b>Certs:</b> ${esc(r.certs_note)}</p>
-  <p>${KEYS.map((k,i)=>`${LBL[i]}: <b>${r[k]??'–'}</b>`).join(' · ')}</p>
-  <p>Weighted score at the current weights: <b>${score(r).toFixed(2)}</b></p>
-  <p class="callout">${esc(r.scores_status||'Preliminary 1-5 desk judgment from public pages. Not a qualification or a quote.')} Cost, lead time, and geo risk are indicative assumptions. They are not quotations, measured shipments, or a finding that one country is a better source.</p>
-  ${china?'<p><b>Not found in the Nov 6, 2026 sources:</b> price, MOQ, and willingness to take HYTORC volumes.</p>':'<p class="muted">Per-supplier discovery trail was not recorded. Source date Nov 2, 2026.</p>'}
+  ${r.claims?`<p><b>Claims, not verified:</b> ${esc(r.claims)}</p>`:''}
+  <p><b>US presence:</b> ${esc(r.us_presence||'Unknown')}</p><p><b>Certs:</b> ${esc(r.certs_note||'Unknown')}</p>
+  <p><b>HYTORC relationship:</b> ${esc(r.hytorc_relationship||'Unknown. Customs history has not been matched to this name.')}</p>
+  <p><b>Cost:</b> Unknown. Not a quote and not part of the score.</p>
+  ${scored?`<p>${KEYS.filter(k=>k!=='cost').map((k,i)=>`${LBL[KEYS.indexOf(k)]}: <b>${r[k]??'–'}</b>`).join(' · ')}</p>
+  <p>Weighted score, cost excluded: <b>${sc==null?'—':sc.toFixed(2)}</b></p>
+  <p class="callout">${esc(r.scores_status||'Preliminary 1-5 desk judgment from public pages. Not a qualification or a quote.')} Lead and Geo are assumptions. Capability is catalog fit, not proven quality. The score does not include a cost.</p>`:`<p class="callout">Not scored. No 1–5 technical scores were assigned, so this name is not ranked against the scored list. Cost is unknown.</p>`}
+  ${r.pass==='2026-11-02'?'<p class="muted">Per-supplier discovery trail was not recorded. Source date Nov 2, 2026.</p>':''}
+  ${r.price_note?`<p><b>Public price note, not a quote:</b> ${esc(r.price_note)}</p>`:''}
   ${flags?`<ul class="flags">${flags}</ul>`:''}
   ${ev?`<div class="ev">${ev}</div>`:''}
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
-  <a class="btn" href="#/worksheet?s=${encodeURIComponent(r.id)}">Open blank worksheet</a></div>`;
+  <a class="btn" href="#/sensitivity">Landed-cost drivers</a> <a class="btn sec" href="#/quotes">Quote entry</a></div>`;
+}
+const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','cost','lead','geo','score','uspres','certs','source'];
+const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US','Cost','Lead','Geo','Score','US presence','Certs','Source'];
+const DISC_KEYS=['name','category','country','status','cost','source'];
+const DISC_LABELS=['Name','Category','Country','Status','Cost','Source'];
+function rowValue(row,key){
+  if(key==='rank') return row._rank;
+  if(key==='score') return row._s;
+  if(key==='name') return row.name;
+  if(key==='category') return row.category;
+  if(key==='country') return row.country;
+  if(key==='makes') return row.what_they_make;
+  if(key==='cap'||key==='cert'||key==='scale'||key==='usexp'||key==='lead'||key==='geo') return row[key];
+  if(key==='uspres') return row.us_presence;
+  if(key==='certs') return row.certs_note;
+  if(key==='source') return row.url||'';
+  if(key==='status') return 'Not scored';
+  return null;
+}
+function sortLabel(name,on,dir,off){
+  if(off) return name+'. '+off;
+  if(!on) return 'Sort by '+name;
+  const now=dir==='asc'?'ascending':'descending', next=dir==='asc'?'descending':'ascending';
+  return name+', sorted '+now+'. Activate to sort '+next;
+}
+function sortHeads(tableId,keys,labels,classes,blocked){
+  const allowed=keys.filter(k=>!blocked[k]);
+  const cur=tableId==='disc'?FSS.migrateSort(S.f.dsort,allowed):FSS.migrateSort(S.f.sort,allowed);
+  if(tableId==='disc') S.f.dsort=cur; else S.f.sort=cur;
+  return keys.map((key,i)=>{
+    const off=blocked[key]||'';
+    const on=!off&&cur.key===key;
+    const aria=on?(cur.dir==='asc'?'ascending':'descending'):'none';
+    const mark=off?'<span class="sortmark">no order</span>':on?`<span class="sortmark">${cur.dir==='asc'?'▲ asc':'▼ desc'}</span>`:'';
+    return `<th class="${classes[i]||''}" aria-sort="${aria}"><button type="button" class="sortbtn" data-sort="${key}" data-table="${tableId}" ${off?'disabled':''} aria-label="${esc(sortLabel(labels[i],on,cur.dir,off))}">${labels[i]}${mark}</button></th>`;
+  }).join('');
+}
+function bindSort(tableId){
+  document.querySelectorAll('#'+tableId+' .sortbtn').forEach(btn=>btn.onclick=e=>{
+    e.stopPropagation();
+    if(btn.disabled) return;
+    const key=btn.dataset.sort;
+    const prefer=key!=='rank'&&['cap','cert','scale','usexp','lead','geo','score'].indexOf(key)>=0;
+    if(tableId==='disc') S.f.dsort=FSS.nextSort(S.f.dsort,key,false);
+    else S.f.sort=FSS.nextSort(S.f.sort,key,prefer);
+    table();
+  });
 }
 function table(){
-  let rows=S.rows.map(r=>({...r,_s:score(r)})).filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
-  const so=S.f.sort; rows.sort((a,b)=>so==='score'?b._s-a._s:so==='cost'?(b.cost||0)-(a.cost||0):String(a[so]).localeCompare(b[so]));
-  const heads=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US','Cost','Lead','Geo','Score','US presence','Certs','Source'];
-  $('#tb').innerHTML=`<colgroup>${WIDTHS.map(w=>`<col style="width:${w}">`).join('')}</colgroup><thead><tr>${heads.map((h,i)=>`<th class="${COLS[i]}">${h}</th>`).join('')}</tr></thead><tbody>`+
-  (rows.length?rows.map((r,n)=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${n+1}</td><td class="name"><b>${esc(r.name)}</b></td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${heads.length}">No suppliers match these filters.</td></tr>`)+'</tbody>';
+  if(!window.FSS) return;
+  const ranked=S.rows.map(r=>({...r,_s:score(r)})).filter(r=>r._s!=null);
+  FSS.sortRows(ranked,'score','desc',rowValue).forEach((r,i)=>{r._rank=i+1;});
+  const cur=FSS.migrateSort(S.f.sort,SCORE_KEYS.filter(k=>k!=='cost'));
+  S.f.sort=cur;
+  let rows=ranked.filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
+  rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);
+  const blocked={cost:'Cost is unknown for every supplier, so this column has no order.'};
+  $('#tb').innerHTML=`<colgroup>${WIDTHS.map(w=>`<col style="width:${w}">`).join('')}</colgroup><thead><tr>${sortHeads('tb',SCORE_KEYS,SCORE_LABELS,COLS,blocked)}</tr></thead><tbody>`+
+  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${r._rank}</td><td class="name"><b>${esc(r.name)}</b></td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${k==='cost'?'Unknown':(r[k]??'')}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${SCORE_KEYS.length}">No scored suppliers match these filters.</td></tr>`)+'</tbody>';
+  paintDiscovery();
+  bindSort('tb'); bindSort('disc');
   document.querySelectorAll('#tb tr.r').forEach(tr=>tr.onclick=e=>{
     const a=e.target.closest('a'); if(a){log('source_click',tr.dataset.id,{url:a.href});return;}
     if(e.target.closest('button'))return;
     e.stopPropagation();
     openDetail(tr.dataset.id);
   });
-  if(S.open && ![...document.querySelectorAll('#tb tr.r')].some(t=>t.dataset.id===S.open)) closePop();
+  if(S.open && ![...document.querySelectorAll('#tb tr.r, #discover tr.r')].some(t=>t.dataset.id===S.open)) closePop();
   else if(S.open) positionPop();
 }
 function closePop(){
   S.open=null;
   const p=document.getElementById('fspop'); if(p) p.remove();
-  document.querySelectorAll('#tb tr.r.on').forEach(tr=>tr.classList.remove('on'));
+  document.querySelectorAll('#tb tr.r.on, #discover tr.r.on').forEach(tr=>tr.classList.remove('on'));
+}
+function paintDiscovery(){
+  const box=$('#discover'); if(!box) return;
+  let rows=(S.discovery||[]).filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg));
+  if(window.FSS){const cur=FSS.migrateSort(S.f.dsort,['name','category','country','source']); S.f.dsort=cur; rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);}
+  const scored=document.querySelectorAll('#tb tbody tr.r').length;
+  const c=$('#counts'); if(c) c.textContent=scored+' scored in this view · '+rows.length+' not scored in this view. Min score applies only to scored rows. Not-scored names have no rank.';
+  const blocked={cost:'Cost is unknown for every name here, so this column has no order.',status:'Every row is not scored. This column is not a rank.'};
+  box.innerHTML=`<h2>Not scored</h2><p class="muted">Public pages reviewed Nov 7, 2026. No 1–5 scores were assigned, so these names are not ranked with the scored list. Cost is unknown. Where a customs check was made, it used only the visible names on ImportYeti’s public HYTORC page.</p>
+  <div class="scorewrap"><table class="tbl" id="disc"><thead><tr>${sortHeads('disc',DISC_KEYS,DISC_LABELS,DISC_KEYS.map(()=>''),blocked)}</tr></thead><tbody>`+
+  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>Not scored</td><td>Unknown</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):'<tr><td colspan="6">No unscored names match this category and region.</td></tr>')+
+  '</tbody></table></div>';
+  box.querySelectorAll('tr.r').forEach(tr=>tr.onclick=e=>{if(e.target.closest('a'))return; e.stopPropagation(); openDetail(tr.dataset.id);});
 }
 function positionPop(){
-  const p=document.getElementById('fspop'), row=document.querySelector('#tb tr.r.on');
+  const p=document.getElementById('fspop'), row=document.querySelector('#tb tr.r.on, #discover tr.r.on');
   if(!p||!row) return;
   const margin=8, width=Math.min(460, window.innerWidth-margin*2);
   p.style.width=width+'px';
@@ -340,10 +457,10 @@ function positionPop(){
 }
 function openDetail(id){
   if(S.open===id){closePop(); return;}
-  const r=S.rows.find(x=>x.id===id); if(!r) return;
+  const r=findAny(id); if(!r) return;
   S.open=id;
   log('supplier_open', id, {name:r.name});
-  document.querySelectorAll('#tb tr.r').forEach(tr=>tr.classList.toggle('on', tr.dataset.id===id));
+  document.querySelectorAll('#tb tr.r, #discover tr.r').forEach(tr=>tr.classList.toggle('on', tr.dataset.id===id));
   let p=document.getElementById('fspop');
   if(!p){p=document.createElement('div'); p.id='fspop'; p.className='fspop'; p.setAttribute('role','dialog'); p.setAttribute('aria-label','Supplier detail'); document.body.appendChild(p);}
   p.innerHTML=detailInner(r);
@@ -389,9 +506,9 @@ function worksheet(){
   const opts=S.rows.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.id)}" ${r.id===sel?'selected':''}>${esc(r.name)} (${esc(r.category)})</option>`).join('');
   const forms={}; FSW.GATES.concat([FSW.DECISION]).forEach(g=>{forms[g.id]=FSW.deserialize(g.id);});
   WS={sel,forms,loadedAt:{},dirty:false,hasDetails:false}; S.wsDirty=false;
-  app.innerHTML=`<h1>Supplier qualification worksheet</h1><p class="sub">Blank template of the fields a qualification review would fill in. Nothing on this page is loaded from saved notes.</p>
+  app.innerHTML=`<h1>Supplier qualification worksheet</h1><p class="sub">Blank template. These are the fields a qualification review would fill in after a drawing, a quote, and a certificate check. Nothing on this page is loaded from saved notes.</p>
   <div class="card wstop"><label for="sup" class="fl">Supplier</label><select id="sup" class="fld" style="max-width:420px">${opts}</select>
-  <p class="muted" style="font-size:12px">${esc(sup.category)} · ${esc(sup.country)} · every field below starts empty. This is an illustration, not a saved record.</p></div>
+  <p class="muted" style="font-size:12px">${esc(sup.category)} · ${esc(sup.country)} · every field below starts empty. This is not a completed qualification.</p></div>
   <div class="card" id="wssum" style="margin:14px 0"></div><div id="wsform"></div>`;
   $('#sup').onchange=e=>{location.hash='#/worksheet?s='+encodeURIComponent(e.target.value);};
   $('#wssum').innerHTML=summaryHtml();
@@ -456,7 +573,147 @@ async function worksheetStored(){
     $('#sv').disabled=false;};
 }
 
+function partyFields(prefix,title){
+  const basis='<option value="">Basis</option><option value="unit">Per piece</option><option value="shipment">Per shipment</option>';
+  const scope='<option value="">Which base</option><option value="fob">FOB only</option><option value="fob_freight">FOB + freight</option><option value="fob_freight_insurance">FOB + freight + insurance</option>';
+  return `<div class="card"><h2>${title}</h2><p class="muted">Your assumption for this side. Type 0 when a charge is none. Leave a box blank when you do not know it. Blank is not zero.</p><div class="wgrid">
+    <div class="wf"><label for="${prefix}fob">FOB unit price</label><input id="${prefix}fob" class="fld" inputmode="decimal" placeholder="In the price currency"></div>
+    <div class="wf"><label for="${prefix}ccy">Price currency</label><input id="${prefix}ccy" class="fld" maxlength="8" placeholder="Code"></div>
+    <div class="wf"><label for="${prefix}fx" id="${prefix}fxl">1 price currency = this many comparison currency</label><input id="${prefix}fx" class="fld" inputmode="decimal" placeholder="Rate"></div>
+    <div class="wf"><label for="${prefix}fr">Freight, in the comparison currency</label><input id="${prefix}fr" class="fld" inputmode="decimal"></div>
+    <div class="wf"><label for="${prefix}frb">Freight basis</label><select id="${prefix}frb" class="fld">${basis}</select></div>
+    <div class="wf"><label for="${prefix}in">Insurance, in the comparison currency</label><input id="${prefix}in" class="fld" inputmode="decimal"></div>
+    <div class="wf"><label for="${prefix}inb">Insurance basis</label><select id="${prefix}inb" class="fld">${basis}</select></div>
+    <div class="wf"><label for="${prefix}ot">Other quantified charges, in the comparison currency</label><input id="${prefix}ot" class="fld" inputmode="decimal"></div>
+    <div class="wf"><label for="${prefix}otb">Other-charges basis</label><select id="${prefix}otb" class="fld">${basis}</select></div>
+    <div class="wf"><label for="${prefix}du">Duty percent</label><input id="${prefix}du" class="fld" inputmode="decimal" placeholder="Your percent, not a tariff schedule"></div>
+    <div class="wf"><label for="${prefix}ds">Duty applies to</label><select id="${prefix}ds" class="fld">${scope}</select></div>
+  </div></div>`;
+}
+function readParty(prefix){
+  const v=id=>{const el=$('#'+id); return el?el.value:'';};
+  return {fob:v(prefix+'fob'),currency:v(prefix+'ccy'),fx:v(prefix+'fx'),freight:v(prefix+'fr'),freightBasis:v(prefix+'frb'),insurance:v(prefix+'in'),insuranceBasis:v(prefix+'inb'),other:v(prefix+'ot'),otherBasis:v(prefix+'otb'),dutyPercent:v(prefix+'du'),dutyScope:v(prefix+'ds'),fobLow:v(prefix+'lo'),fobHigh:v(prefix+'hi')};
+}
+function sensitivity(){
+  closePop();
+  if(!window.FSN){app.innerHTML='<div class="card"><p>Sensitivity calculator missing.</p></div>';return;}
+  app.innerHTML=`<h1>Landed-cost drivers and sensitivity</h1>
+  <div class="callout"><p>${esc(FSN.COPY.purpose)}</p><p>${esc(FSN.COPY.intro)}</p></div>
+  <div class="card"><h2>What this can and cannot show</h2>
+  <p>${esc(FSN.COPY.noCurve)}</p>
+  <p>${esc(FSN.COPY.qualitative)}</p>
+  <p class="eq">${esc(FSN.formulaText())}</p>
+  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD. Do not enter the inverse. Same currency uses a rate of 1. A real supplier quote is entered separately on <a href="#/quotes">Quote entry</a>. These assumptions are not copied there.</p></div>
+  <div class="card"><h2>Same item, quantity, and destination</h2><div class="wgrid">
+    <div class="wf"><label for="syitem">Item label</label><input id="syitem" class="fld" placeholder="Optional. Not a drawing number"></div>
+    <div class="wf"><label for="sydest">Destination</label><input id="sydest" class="fld" placeholder="Final destination"></div>
+    <div class="wf"><label for="syccy">Comparison currency</label><input id="syccy" class="fld" maxlength="8" placeholder="Code"></div>
+    <div class="wf"><label for="syqty">Quantity, pieces</label><input id="syqty" class="fld" inputmode="numeric" placeholder="One whole number"></div>
+  </div></div>
+  <div class="sensgrid">${partyFields('sb','Baseline assumption')}${partyFields('sc','Candidate assumption')}</div>
+  <div class="card"><h2>Optional candidate FOB range</h2><p class="muted">Only if you want to test a low and a high you are assuming, in the candidate’s price currency. This is not an observed range and it is not a curve.</p><div class="wgrid">
+    <div class="wf"><label for="sclo">Assumed low FOB</label><input id="sclo" class="fld" inputmode="decimal"></div>
+    <div class="wf"><label for="schi">Assumed high FOB</label><input id="schi" class="fld" inputmode="decimal"></div>
+  </div></div>
+  <div id="syout"></div>`;
+  app.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',paintSensitivity); el.addEventListener('change',paintSensitivity);});
+  paintSensitivity();
+}
+function paintSensitivity(){
+  const out=$('#syout'); if(!out||!window.FSN) return;
+  const cmp=($('#syccy').value||'').trim().toUpperCase();
+  ['sb','sc'].forEach(p=>{const q=($('#'+p+'ccy').value||'').trim().toUpperCase(); const lab=$('#'+p+'fxl'); if(lab) lab.textContent='1 '+(q||'price currency')+' = this many '+(cmp||'comparison currency');});
+  const common={item:$('#syitem').value,destination:$('#sydest').value,currency:$('#syccy').value,quantity:$('#syqty').value};
+  const res=FSN.evaluateSensitivity(common,readParty('sb'),readParty('sc'));
+  const money=v=>v==null?'—':v.toFixed(2);
+  const line=(name,a,b)=>`<tr><td>${name}</td><td class="num">${money(a)}</td><td class="num">${money(b)}</td></tr>`;
+  const b=res.baseline, c=res.candidate;
+  const be=res.breakEven;
+  let verdict='Enter the baseline and the candidate charges to see a break-even. Nothing is assumed for you.';
+  if(be){
+    const room=be.feasible?(be.premiumComparison>0?`The candidate FOB can be ${be.premiumComparison.toFixed(2)} ${esc(cmp||'')} higher per piece and still match the baseline landed cost.`:(be.premiumComparison<0?`No higher-FOB room. The candidate FOB would need to be ${Math.abs(be.premiumComparison).toFixed(2)} ${esc(cmp||'')} lower per piece to match. That negative premium is not reset to zero.`:'The FOB prices match once the other charges are included. The premium is zero.')):`No feasible FOB. The solved candidate FOB is ${be.fobComparison.toFixed(2)} ${esc(cmp||'')} per piece, which is below zero, so it is not a price. It is not reset to zero.`;
+    const who={freight:'freight',insurance:'insurance',other:'other charges',dutyRate:'the duty percent',none:'no non-FOB difference'}[be.driver]||be.driver;
+    verdict=room+` The largest effect on that premium is ${who}. Break-even candidate FOB is ${be.fobComparison.toFixed(2)} in the comparison currency (${be.fobPriceCurrency.toFixed(2)} in the candidate price currency).`;
+  }
+  const range=res.range?`Your assumed candidate range is ${res.range.lowCmp.toFixed(2)} to ${res.range.highCmp.toFixed(2)} in the comparison currency. This is your assumption, not an observed distribution. It ${res.range.overlapsBreakEven?'reaches':'does not reach'} the break-even FOB. That statement is only about the numbers typed here.`:'No assumed FOB range is entered.';
+  out.innerHTML=`<div class="card"><h2>Result, assumptions only</h2><p>${verdict}</p><p>${range}</p><p class="muted">${res.gaps.length?('Still open: '+esc(res.gaps.join('; '))):'The required assumption fields are filled. This is still not a supplier quote.'}</p>
+  <div class="scorewrap"><table class="tbl"><thead><tr><th>Per piece, comparison currency</th><th class="num">Baseline</th><th class="num">Candidate</th></tr></thead><tbody>
+  ${line('FOB',b&&b.fob,c&&c.fob)}${line('Freight',b&&b.freight,c&&c.freight)}${line('Insurance',b&&b.insurance,c&&c.insurance)}${line('Other charges',b&&b.other,c&&c.other)}${line('Duty',b&&b.duty,c&&c.duty)}${line('Landed unit',b&&b.landed,c&&c.landed)}
+  </tbody></table></div></div>`;
+}
+function quotes(){
+  closePop();
+  if(!window.FSQ){app.innerHTML='<div class="card"><p>Quote calculator missing.</p></div>';return;}
+  const names=S.rows.concat(S.discovery||[]);
+  const opts='<option value="">Choose a supplier</option>'+names.map(r=>`<option value="${esc(r.id)}">${esc(r.name)} (${esc(r.country)})</option>`).join('');
+  const incos=FSQ.TERMS.map(k=>`<option>${k}</option>`).join('');
+  const statusOpts='<option value="">Unknown</option><option value="included">Included in the seller price</option><option value="na">Not applicable</option><option value="buyer">Buyer pays</option>';
+  const basisOpts='<option value="">Basis</option><option value="unit">Per piece</option><option value="shipment">Per shipment</option>';
+  const unitOpts='<option value="">Unit</option><option value="days">Days</option><option value="weeks">Weeks</option>';
+  const legRow=(i,key,label)=>`<div class="leg"><label for="ql${i}${key}">${label}</label><select id="ql${i}${key}" class="fld">${statusOpts}</select><input id="qa${i}${key}" class="fld" inputmode="decimal" placeholder="Buyer amount" aria-label="${label} amount in the comparison currency"><select id="qb${i}${key}" class="fld" aria-label="${label} basis">${basisOpts}</select></div>`;
+  const block=(i)=>`<div class="card qcard"><h2>Supplier ${i+1}</h2><div class="wgrid">
+    <div class="wf"><label for="qs${i}">Supplier</label><select id="qs${i}" class="fld">${opts}</select></div>
+    <div class="wf"><label for="qk${i}">What you are typing</label><select id="qk${i}" class="fld"><option value="">Choose</option><option value="estimate">My estimate, not a quote</option><option value="quote">A quote the supplier gave</option></select></div>
+    <div class="wf"><label for="qi${i}">Incoterm</label><select id="qi${i}" class="fld"><option value="">Choose</option>${incos}</select></div>
+    <div class="wf"><label for="qp${i}">Named place in that Incoterm</label><input id="qp${i}" class="fld" placeholder="The place the term names"></div>
+    <div class="wf"><label for="qc${i}">Price currency</label><input id="qc${i}" class="fld" maxlength="8" placeholder="Code"></div>
+    <div class="wf"><label for="qx${i}" id="qxl${i}">1 quote currency = this many comparison currency</label><input id="qx${i}" class="fld" inputmode="decimal" placeholder="Rate"></div>
+    <div class="wf"><label for="qu${i}">Unit price for this quantity</label><input id="qu${i}" class="fld" inputmode="decimal" placeholder="Per piece, in the price currency"></div>
+    <div class="wf"><label for="qt${i}">Tooling, one-time, in the price currency</label><input id="qt${i}" class="fld" inputmode="decimal" placeholder="Blank, not 0"></div>
+    <div class="wf"><label for="qts${i}"><input id="qts${i}" type="checkbox"> Spread tooling across this order quantity</label></div>
+    <div class="wf"><label for="qmoq${i}">MOQ, pieces</label><input id="qmoq${i}" class="fld" inputmode="numeric"></div>
+    <div class="wf"><label for="qdate${i}">Quote date</label><input id="qdate${i}" class="fld" type="date"></div>
+    <div class="wf"><label for="qval${i}">Valid until</label><input id="qval${i}" class="fld" type="date"></div>
+    <div class="wf"><label for="qprod${i}">Production lead</label><input id="qprod${i}" class="fld" inputmode="decimal" placeholder="Number"></div>
+    <div class="wf"><label for="qprodu${i}">Production unit</label><select id="qprodu${i}" class="fld">${unitOpts}</select></div>
+    <div class="wf"><label for="qtr${i}">Transit lead</label><input id="qtr${i}" class="fld" inputmode="decimal" placeholder="Number"></div>
+    <div class="wf"><label for="qtru${i}">Transit unit</label><select id="qtru${i}" class="fld">${unitOpts}</select></div>
+  </div>
+  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD means one euro is 1.08 of the comparison currency. Do not enter the inverse. Buyer-paid amounts below are in the comparison currency. The Incoterm does not fill any of them in. Unknown stays blank and blocks the total. There is no built-in rate.</p>
+  <div class="legs">${FSQ.LEGS.map(([key,label])=>legRow(i,key,label)).join('')}</div></div>`;
+  app.innerHTML=`<h1>Quote entry</h1><p class="sub">For a quote a supplier has given, or for an estimate kept separate from a quote. Freight and duty assumptions, before a quote is in hand, belong on <a href="#/sensitivity">Landed-cost sensitivity</a>. One drawing, one quantity, one ship-to. No drawing number or volume is on file, so the fields start empty. Nothing here is sent or saved.</p>
+  <div class="card"><h2>Common request</h2><p class="muted">Leave these blank until the drawing and the quantity are known. One quantity. A unit price is not reused at a second quantity.</p><div class="wgrid">
+    <div class="wf"><label for="qdraw">Drawing</label><input id="qdraw" class="fld"></div>
+    <div class="wf"><label for="qrev">Revision</label><input id="qrev" class="fld"></div>
+    <div class="wf"><label for="qspec">Spec</label><input id="qspec" class="fld"></div>
+    <div class="wf"><label for="qmat">Material</label><input id="qmat" class="fld"></div>
+    <div class="wf"><label for="qtol">Tolerances</label><input id="qtol" class="fld"></div>
+    <div class="wf"><label for="qfin">Finish</label><input id="qfin" class="fld"></div>
+    <div class="wf"><label for="qins">Inspection</label><input id="qins" class="fld"></div>
+    <div class="wf"><label for="qship">Ship to</label><input id="qship" class="fld" placeholder="Final destination"></div>
+    <div class="wf"><label for="qccy">Comparison currency</label><input id="qccy" class="fld" maxlength="8" placeholder="Code"></div>
+    <div class="wf"><label for="qqty">Quantity, pieces</label><input id="qqty" class="fld" inputmode="numeric" placeholder="One whole number"></div>
+  </div></div>
+  ${block(0)}${block(1)}
+  <div id="qout"></div>`;
+  app.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',paintQuoteOut); el.addEventListener('change',paintQuoteOut);});
+  paintQuoteOut();
+}
+function readSupplierQuote(i){
+  const g=id=>{const el=$('#'+id); return el?el.value:'';};
+  const legs={};
+  FSQ.LEGS.forEach(([key])=>{legs[key]={status:g('ql'+i+key),amount:g('qa'+i+key),basis:g('qb'+i+key)};});
+  return {id:g('qs'+i),kind:g('qk'+i),incoterm:g('qi'+i),namedPlace:g('qp'+i),currency:g('qc'+i),fx:g('qx'+i),unitPrice:g('qu'+i),tooling:g('qt'+i),spreadTooling:!!$('#qts'+i)&&$('#qts'+i).checked,moq:g('qmoq'+i),quoteDate:g('qdate'+i),validity:g('qval'+i),prodValue:g('qprod'+i),prodUnit:g('qprodu'+i),transitValue:g('qtr'+i),transitUnit:g('qtru'+i),legs};
+}
+function paintQuoteOut(){
+  const out=$('#qout'); if(!out||!window.FSQ) return;
+  const cmp=($('#qccy').value||'').trim().toUpperCase();
+  [0,1].forEach(i=>{const q=($('#qc'+i).value||'').trim().toUpperCase(); const lab=$('#qxl'+i); if(lab) lab.textContent='1 '+(q||'quote currency')+' = this many '+(cmp||'comparison currency');});
+  const common={drawing:$('#qdraw').value,revision:$('#qrev').value,spec:$('#qspec').value,material:$('#qmat').value,tolerances:$('#qtol').value,finish:$('#qfin').value,inspection:$('#qins').value,shipTo:$('#qship').value,currency:$('#qccy').value};
+  const qty=$('#qqty').value;
+  const sups=[0,1].map(readSupplierQuote);
+  const today=(()=>{const n=new Date(),z=x=>String(x).padStart(2,'0'); return n.getFullYear()+'-'+z(n.getMonth()+1)+'-'+z(n.getDate());})();
+  const evals=sups.map(s=>FSQ.evaluateQuote(common,s,qty,{today}));
+  const cmpSet=FSQ.compareSet(evals);
+  const money=v=>v==null?'—':v.toFixed(2);
+  const rows=evals.map((r,i)=>{const nm=findAny(sups[i].id); const kind=sups[i].kind==='estimate'?'Estimate, not a quote':sups[i].kind==='quote'?'Supplier quote':'—';
+    const state=r.complete?('Cost complete. '+(r.flags||[]).join('; ')):(('Cost incomplete: '+((r.gaps||[]).join('; ')||'missing'))+((r.flags||[]).length?'. '+r.flags.join('; '):''));
+    return `<tr><td>${esc(nm?nm.name:(sups[i].id||'Not chosen'))}</td><td>${esc(kind)}</td><td class="num">${money(r.unitRecurring)}</td><td class="num">${money(r.oneTime)}</td><td class="num">${money(r.shipmentPerUnit)}</td><td class="num">${money(r.landedUnit)}</td><td>${esc(state)}</td></tr>`;}).join('');
+  const request=['drawing '+($('#qdraw').value||'—'),'rev '+($('#qrev').value||'—'),'spec '+($('#qspec').value||'—'),'material '+($('#qmat').value||'—'),'finish '+($('#qfin').value||'—'),'inspection '+($('#qins').value||'—'),'quantity '+($('#qqty').value||'—'),'ship to '+($('#qship').value||'—'),'currency '+(cmp||'—')].join(' · ');
+  out.innerHTML=`<div class="card"><h2>Result</h2><p class="muted">A dash is missing, not zero. There is no built-in rate. A per-shipment amount is divided by this order quantity. A per-piece amount is not. Tooling stays one-time unless you spread it across this quantity. Nothing here is sent or saved.</p><p>${esc(request)}</p><p class="muted">${esc(cmpSet.reason)}</p><table class="tbl"><thead><tr><th>Supplier</th><th>Kind</th><th>Unit price</th><th>One-time tooling</th><th>Other charges per piece</th><th>Landed unit</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
 if(C.GA4_MEASUREMENT_ID){const s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id='+C.GA4_MEASUREMENT_ID;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',C.GA4_MEASUREMENT_ID);}
 sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')S.user=null; if(ev==='PASSWORD_RECOVERY')pwSetup=true;});
+{const m=weightsForSaved(null); S.w=m.w; S.lk=m.lk;}
 boot();
 })();

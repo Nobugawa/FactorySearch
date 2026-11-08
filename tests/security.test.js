@@ -7,18 +7,22 @@ const config=fs.readFileSync(R+'/config.js','utf8');
 const html=fs.readFileSync(R+'/index.html','utf8');
 const sql=fs.readFileSync(R+'/migration_fs_v1_5_china_candidates.sql','utf8');
 const cat=JSON.parse(fs.readFileSync(R+'/catalog.js','utf8').replace(/^window\.FS_CATALOG\s*=\s*/,'').replace(/;\s*$/,''));
+const archive=JSON.parse(fs.readFileSync(R+'/archive_cost_historical.json','utf8'));
+const costById=Object.fromEntries(archive.suppliers.map(r=>[r.id,r.cost]));
 const keys=['id','category','name','country','region','what_they_make','us_presence','certs_note','url','url_check','cap','cert','scale','usexp','cost','lead','geo'];
-const core=cat.suppliers.filter(r=>r.pass==='2026-11-02').map(r=>{const o={};keys.forEach(k=>o[k]=r[k]??null);return o;}).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
-ok(crypto.createHash('sha256').update(JSON.stringify(core)).digest('hex')==='96e51d23034cc6de859856f89d2e05a86064af200206d2328a63ba73fd92db0d','original 34 rows unchanged');
+ok(!cat.suppliers.some(r=>Object.prototype.hasOwnProperty.call(r,'cost')),'public catalog does not carry cost integers');
+const core=cat.suppliers.filter(r=>r.pass==='2026-11-02').map(r=>{const o={};keys.forEach(k=>{o[k]=k==='cost'?costById[r.id]:(r[k]??null);});return o;}).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
+ok(crypto.createHash('sha256').update(JSON.stringify(core)).digest('hex')==='96e51d23034cc6de859856f89d2e05a86064af200206d2328a63ba73fd92db0d','original 34 rows unchanged, with cost kept only in the archive');
 ok(cat.suppliers.length===38&&cat.suppliers.filter(r=>r.pass==='2026-11-06').map(r=>r.id).join()==='C13,C14,D10,D11','four Nov 6 additions');
 ok(!cat.suppliers.some(r=>r.id==='B14'||r.id==='B15'),'Huade and Taifeng are not scored suppliers');
 ok(cat.watchlist.map(w=>w.id).join()==='B14,B15,WL-TZ','watchlist is separate');
 const def=[25,15,10,10,20,10,10];
 for(const [id,exp] of [['C13',3.35],['C14',3.1],['D10',3.5],['D11',3.3]]){
   const r=cat.suppliers.find(x=>x.id===id);
-  const sc=['cap','cert','scale','usexp','cost','lead','geo'].reduce((a,k,i)=>a+r[k]*def[i],0)/100;
-  ok(Math.abs(sc-exp)<1e-9, id+' default score '+sc);
+  const sc=['cap','cert','scale','usexp','cost','lead','geo'].reduce((a,k,i)=>a+(k==='cost'?costById[r.id]:r[k])*def[i],0)/100;
+  ok(Math.abs(sc-exp)<1e-9, id+' archived historical score '+sc);
 }
+ok((cat.discovery||[]).length===6&&(cat.discovery||[]).every(r=>r.scored===false&&r.cap==null),'six leads have no fabricated scores');
 const blob=JSON.stringify(cat);
 for(const bad of ['user_email','fs_events','fs_worksheet','fs_weight_prefs','service_role','sb_secret','@gmail','thume@','philos']) ok(!blob.includes(bad),'catalog has no '+bad);
 ok(/GA4_MEASUREMENT_ID:\s*""/.test(config),'GA4 disabled');

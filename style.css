@@ -143,10 +143,24 @@ footer{flex-wrap:wrap;gap:6px 18px;align-items:flex-start}
 #tb thead th{position:sticky;top:var(--topbar);z-index:4;background:#f8f9fc;box-shadow:inset 0 -1px 0 #e5e8ef}
 #tb th.n,#tb td.n,#tb th.num,#tb td.num{text-align:center;padding:6px 3px;font-size:12.5px;letter-spacing:0;white-space:nowrap;font-variant-numeric:tabular-nums}
 #tb td.u a,.evitem a,.watchitem a{overflow-wrap:anywhere;word-break:break-word}
-#tb tbody tr.r:nth-child(even){background:#fff9e6}
-#tb tbody tr.r:hover{background:#e7edff}
-#tb tbody tr.r.on{background:#ffe8a3;box-shadow:inset 3px 0 0 #2f5bea}
-#tb tbody tr.r.on:hover{background:#ffd56a}
+#disc,#qout .tbl{table-layout:fixed;width:100%;max-width:100%}
+#disc th,#disc td,#qout .tbl th,#qout .tbl td{white-space:normal;overflow-wrap:anywhere}
+#qout .tbl th.num,#qout .tbl td.num,#syout .tbl th.num,#syout .tbl td.num{text-align:center;font-variant-numeric:tabular-nums}
+.sensgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sortbtn{white-space:normal;font:inherit;font-weight:700;background:transparent;border:0;padding:0;margin:0;color:inherit;cursor:pointer;width:100%;text-align:inherit}
+#tb th.num .sortbtn,#tb th.n .sortbtn{text-align:center}
+.sortbtn:focus-visible{outline:2px solid #2f5bea;outline-offset:2px}
+.sortbtn:disabled{cursor:not-allowed;color:#4a5263}
+.sortmark{display:block;font-size:10px;line-height:1.2;font-weight:650;color:#2f5bea}
+@media(max-width:900px){.sensgrid{grid-template-columns:1fr}}
+.legs{margin-top:10px}
+.leg{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,.8fr) minmax(0,.8fr);gap:6px 8px;align-items:end;margin-top:6px}
+.leg label{font-size:12px;color:#4a5263}
+@media(max-width:800px){.leg{grid-template-columns:1fr}}
+#tb tbody tr.r:nth-child(even), #discover tbody tr.r:nth-child(even){background:#fff9e6}
+#tb tbody tr.r:hover, #discover tbody tr.r:hover{background:#e7edff}
+#tb tbody tr.r.on, #discover tbody tr.r.on{background:#ffe8a3;box-shadow:inset 3px 0 0 #2f5bea}
+#tb tbody tr.r.on:hover, #discover tbody tr.r.on:hover{background:#ffd56a}
 .filters{background:#f8f9fc;border:1px solid #d9e2ff;border-radius:12px;padding:10px 12px}
 .filters label{display:inline-flex;align-items:center;gap:8px;font-weight:650;color:#1d2433}
 .filters select,.filters input{background:#eef2ff;color:#1d2433;border:2px solid #2f5bea;border-radius:8px;padding:8px 12px;font-weight:600;min-height:40px}
