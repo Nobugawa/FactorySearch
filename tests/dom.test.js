@@ -23,9 +23,11 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.0','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.1','version');
  ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&!D.querySelector('#fs')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score, without a global sort menu');
- ok(/China remains a leading sourcing option/.test(D.body.textContent)&&/not verdicts on individual factories/.test(D.body.textContent),'landing states the China comparison in plain language');
+ const banned=/keeps China in the comparison|China stays in the (comparison|set)|buys only from China|not a finding that HYTORC|repository history|scripted page load|likely blocks scripts/i;
+ ok(/established manufacturing clusters/.test(D.body.textContent)&&/promising suppliers for further qualification/.test(D.body.textContent)&&/equivalent specifications and quoted terms/.test(D.body.textContent),'approved opening on the scorecard');
+ ok(!banned.test(D.body.textContent),'scorecard does not explain the edit history');
  {const heads=[...tb.tHead.rows[0].cells];
   ok(heads.every(th=>th.querySelector('button.sortbtn')),'each scored column has its own sort control');
   const cost=heads.find(th=>/Cost/.test(th.textContent));
@@ -95,6 +97,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(!(w.__ups||[]).length&&w.__from.length===0,'anon lock does not upsert shared prefs');
  w.location.hash='#/worksheet';await tick();await tick();
  ok(/Blank template/.test(w.document.body.textContent)&&w.document.getElementById('f_commercial_moq').disabled&&w.document.getElementById('f_commercial_small_ok').value==='Unknown','worksheet is a blank read-only template');
+ ok(!banned.test(w.document.body.textContent),'worksheet does not explain the edit history');
  ok(!w.document.getElementById('sv')&&!w.__from.includes('fs_worksheet')&&!/Last saved by/.test(w.document.body.textContent),'blank worksheet does not load or save notes');
  // password setup remains available for a recovery link, off the public nav
  ({w}=mk({user:{email:'philos@greymatterfusion.com'}},'?setup=1'));ok(await waitFor(w,'#p1'),'setup view');
@@ -130,14 +133,17 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/Landed-cost drivers and sensitivity/.test(D.body.textContent)&&/does not turn them into a price curve/.test(D.body.textContent)&&/not converted into dollars/.test(D.body.textContent),'sensitivity explains the question before the form');
  ok(D.getElementById('syqty')&&D.getElementById('syqty').value===''&&D.getElementById('sbfob').value===''&&!/bell curve|normal curve/i.test(D.body.textContent),'sensitivity starts blank and does not draw a price curve');
  ok(w.__from.length===0,'sensitivity does not read or write the database');
+ ok(!banned.test(D.body.textContent)&&/established manufacturing clusters/.test(D.body.textContent),'sensitivity uses the approved opening');
  w.location.hash='#/quotes';await tick();await tick();D=w.document;
  D.getElementById('qqty').value='10, 1000';D.getElementById('qqty').dispatchEvent(new w.Event('input',{bubbles:true}));
  ok((D.querySelectorAll('#qout table').length===1)&&!/Quantity 1000/.test(D.getElementById('qout').textContent),'one typed list does not become two quantity tiers');
  ok(!w.__from.includes('fs_worksheet')&&w.__from.length===0,'quote page does not read or write the database');
+ ok(!banned.test(D.body.textContent),'quote entry does not explain the edit history');
  w.location.hash='#/study';await tick();await tick();D=w.document;const st=D.body.textContent;
  ok(/Capability is catalog fit, not an audit/.test(st),'capability vs audit');ok(/Private label/.test(st)&&/Questions for discussion/.test(st)&&/Qualification method/.test(st),'study sections');
  ok(/cannot by itself qualify a supplier/.test(st)&&/used earlier, to find and screen candidates/.test(st)&&!/next deepening step/.test(st),'study customs wording');
- ok(/How to read cost, lead time, and geography/.test(st)&&/China stays in the comparison/.test(st)&&/not an exhaustive search/.test(st)&&/China remains a leading sourcing option/.test(st),'study treats China as part of one list');
+ ok(/How to read cost, lead time, and geography/.test(st)&&/not an exhaustive search/.test(st)&&/established manufacturing clusters/.test(st)&&/Prepared for Teddy Hume by Philos Kim/.test(st),'study is addressed to Teddy and keeps the search limit');
+ ok(!banned.test(st),'study does not explain the edit history');
  ok(/indicative assumptions/.test(st)&&/not quotations/.test(st)&&/MOQ/.test(st)&&/Drawing fit/.test(st),'study keeps assumption and verification gaps');
  ok(!/diversification-biased|reincorporat|China was not the main search|light on China|China additions|China supplier coverage|later desk pass|not the Nov 2 discovery trail/i.test(st),'study omits the China chapter and internal backstory');
  ok(/Nov 2, 2026/.test(st)&&/Nov 6, 2026/.test(st),'study keeps both source dates');
@@ -155,4 +161,5 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/ppforging\.com/.test(sr)&&/gearsnet\.com/.test(sr)&&/leapmachine\.com/.test(sr)&&/nbxus\.com/.test(sr),'Nov 6 evidence links');
  ok(/Sources dated Nov 6, 2026/.test(sr)&&/Source date Nov 2, 2026/.test(sr)&&/2026-11-02/.test(sr)&&/2026-11-06/.test(sr),'each supplier keeps its own source date');
  ok(!/not the Nov 2 discovery trail|diversification-biased|China additions|China supplier coverage/i.test(sr),'source dates stay without a China chapter');
+ ok(!banned.test(sr)&&/was not recorded/.test(sr),'sources keep the missing-trail limit without the edit history');
  console.log(n,'checks',f,'failures');process.exit(f?1:0);})();

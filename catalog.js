@@ -887,7 +887,7 @@ window.FS_CATALOG = {
       "us_presence": "Unknown",
       "certs_note": "ISO 9001 and EN 10204 3.1 claimed. Certificates not verified.",
       "url": "https://www.mechanicalleader.com/custom-hydraulic-components/",
-      "hytorc_relationship": "Not seen on the visible names of a public ImportYeti HYTORC page (CBP sea data synced 2026-11-04). That page is only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered. Relationship UNKNOWN. Absence is not proof this company is new to HYTORC, and it is not proof HYTORC buys only from China.",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
       "price_note": "",
       "flags": [
         "MOQ of 20-50 is a website statement, not a quote.",
@@ -917,7 +917,7 @@ window.FS_CATALOG = {
       "us_presence": "Unknown",
       "certs_note": "API 20C, PED, AD2000, NORSOK, BV, ISO 9001/14001/45001 claimed. Not verified in a registry.",
       "url": "https://longruiforging.com/",
-      "hytorc_relationship": "Not seen on the visible names of a public ImportYeti HYTORC page (CBP sea data synced 2026-11-04). That page is only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered. Relationship UNKNOWN. Absence is not proof this company is new to HYTORC, and it is not proof HYTORC buys only from China.",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
       "price_note": "",
       "flags": [
         "Part weights of 5-520 kg may not fit small tool parts.",
@@ -952,7 +952,7 @@ window.FS_CATALOG = {
       "us_presence": "Unknown",
       "certs_note": "ISO 9001:2015 and TUV Rheinland / CE claimed. Certificate number was not checked.",
       "url": "https://www.wrenchina.com/en/products/detail/LP3-Z4%20Hydraulic%20Torque%20Wrench%20Electric%20Pump",
-      "hytorc_relationship": "Not seen on the visible names of a public ImportYeti HYTORC page (CBP sea data synced 2026-11-04). That page is only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered. Relationship UNKNOWN. Absence is not proof this company is new to HYTORC, and it is not proof HYTORC buys only from China.",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
       "price_note": "A Made-in-China page lists LP3-2 at US$2,100 (1-19) and US$1,800 (20+), and DHP at US$3,300 (1-9) and US$3,100 (10+). Incoterm is not stated. This is a list price, not a quote, and it is not used in the score or in any landed-cost total.",
       "flags": [
         "Sells its own hydraulic torque wrenches: a direct competitor. An OEM pump supply would need IP, NDA, and non-compete terms.",
@@ -987,7 +987,7 @@ window.FS_CATALOG = {
       "us_presence": "Unknown",
       "certs_note": "IATF 16949 claimed for Csepel and ISO 9001 for Zalaegerszeg. Not verified.",
       "url": "https://flansch-tech.hu/en/steel-forging/",
-      "hytorc_relationship": "Not seen on the visible names of a public ImportYeti HYTORC page (CBP sea data synced 2026-11-04). That page is only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered. Relationship UNKNOWN. Absence is not proof this company is new to HYTORC, and it is not proof HYTORC buys only from China.",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
       "price_note": "",
       "flags": [
         "Smaller-batch wording has no quantity.",
@@ -1017,7 +1017,7 @@ window.FS_CATALOG = {
       "us_presence": "North American sales are claimed. A US shipment history for a HYTORC part was not checked.",
       "certs_note": "Not listed on the page opened. Not verified.",
       "url": "https://angstrom-truforge.com/en/home/",
-      "hytorc_relationship": "Not seen on the visible names of a public ImportYeti HYTORC page (CBP sea data synced 2026-11-04). That page is only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered. Relationship UNKNOWN. Absence is not proof this company is new to HYTORC, and it is not proof HYTORC buys only from China.",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
       "price_note": "",
       "flags": [
         "Low-volume willingness is unknown. The site describes mass production.",
@@ -1047,7 +1047,7 @@ window.FS_CATALOG = {
       "us_presence": "Unknown",
       "certs_note": "IATF 16949:2016, ISO 9001:2015, ISO 14001:2015, and ISO 50001 claimed. Not verified.",
       "url": "https://www.videoton.hu/core-activities/components-production/machining/?lang=en",
-      "hytorc_relationship": "Not seen on the visible names of a public ImportYeti HYTORC page (CBP sea data synced 2026-11-04). That page is only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered. Relationship UNKNOWN. Absence is not proof this company is new to HYTORC, and it is not proof HYTORC buys only from China.",
+      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
       "price_note": "",
       "flags": [
         "MOQ is unknown.",

@@ -38,6 +38,6 @@ r=evaluateSensitivity(common,party(),party({fobLow:'20',fobHigh:'10'}));
 ok(!r.range&&r.gaps.some(g=>/reversed/.test(g))&&r.breakEven,'a reversed range does not remove the break-even');
 r=evaluateSensitivity(Object.assign({},common,{quantity:'10, 1000'}),party(),party());
 ok(!r.ok&&r.gaps.some(g=>/one positive whole number/.test(g)),'one quantity is not split into tiers');
-ok(/not verdicts on individual factories/.test(COPY.intro)&&/does not turn them into a price curve/.test(COPY.noCurve)&&/not converted into dollars/.test(COPY.qualitative),'the explanation keeps overlap conditional and keeps capability out of the dollars');
+ok(/established manufacturing clusters/.test(COPY.intro)&&/promising suppliers for further qualification/.test(COPY.intro)&&/does not turn them into a price curve/.test(COPY.noCurve)&&/not converted into dollars/.test(COPY.qualitative),'the opening is the approved paragraph, and capability stays out of the dollars');
 ok(!/bell|normal curve|observed distribution/i.test(COPY.purpose+COPY.noCurve),'the copy does not present a curve as evidence');
 console.log(n,'checks',f,'failures');process.exit(f?1:0);
