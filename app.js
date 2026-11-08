@@ -8,7 +8,7 @@ const sb=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_PUBLISHABLE_KEY,{auth:{
 const cleanUrl=()=>history.replaceState(null,'',location.pathname+(location.hash||'').split('?')[0].replace(/^#access_token.*$/,'').replace(/^#error.*$/,''));
 const $=s=>document.querySelector(s), app=$('#app'); if($('#ver')) $('#ver').textContent=C.VERSION;
 const allowed=C.ALLOWED_EMAILS.filter(Boolean).map(e=>e.toLowerCase());
-const KEYS=['cap','cert','scale','usexp','cost','lead','geo'], LBL=['Capability','Certs','Scale','US exp','Cost','Lead time','Geo risk'];
+const KEYS=['cap','cert','scale','usexp','cost','lead','geo'], LBL=['Capability','Certs','Scale','US footprint','Cost','Lead time','Geo risk'];
 const DEF=[25,15,10,10,20,10,10];
 const LOCAL_W='fs_local_weights_v1';
 let S={user:null,rows:[],w:[29,19,13,13,0,13,13],lk:[false,false,false,false,true,false,false],f:{cat:'',reg:'',min:0,sort:'score',dsort:{key:'name',dir:'asc'}},t0:Date.now(),open:null,banner:'',logging:false,ping:null};
@@ -150,7 +150,7 @@ const CHANNELS={
  used:[
   ['Known industry names','Desk research from manufacturers known in each part family (hydraulics, forgings/castings, precision machining).','Not a systematic search; the list can miss smaller or regional suppliers.'],
   ['Public company websites and product pages','What each supplier makes, footprint, and certification claims. Homepage linked per supplier on the Sources table below.','Marketing content. Certifications are listed as expected, not verified.'],
-  ['Known US subsidiaries / sales offices','Used as the US-export signal in the "US" score.','A US office shows US presence. It does not verify customs volume, which parts ship, or to whom.']],
+  ['Known US subsidiaries / sales offices','Used as the US footprint score: a named US office or a claimed US presence on a public page.','A US office is not verified shipment history. It does not show customs volume, which parts ship, or to whom.']],
  planned:[
   ['ImportYeti','https://www.importyeti.com/','US customs bill-of-lading records, useful at three stages. <b>Discovery:</b> search by product description or by the suppliers of similar US buyers to find candidates not on this list. <b>Screening:</b> shipment patterns (frequency, volume, recency) and US customers as an early read on real US export experience. <b>Validation:</b> cross-check a supplier\'s claimed US customers and export history.','Records can be incomplete, delayed, or filed under a parent company, trading company, or forwarder. Shipment data does not prove quality, drawing fit, capacity, MOQ, or pricing.'],
   ['Panjiva (S&P Global)','https://panjiva.com/','Same discovery, screening and validation uses with broader coverage and filters (subscription service).','Paid; same limitations as above.'],
@@ -192,7 +192,7 @@ function sources(){
 const RUBRIC=[ ['Capability','29%','Clear public fit to the part family (e.g. HAWE compact ~700 bar packs)','Makes related products; fit to HYTORC geometry unproven from the site','Wrong category or no public evidence of the process'],
  ['Certs','19%','ISO / IATF / AS9100 named on site for the relevant scope (still unverified)','Quality system mentioned without a named standard','Nothing found'],
  ['Scale','13%','Multi-plant / global footprint visible','Single solid plant or mid-size group','Small or unclear capacity'],
- ['US export','13%','Named US subsidiary or sales office','US presence claimed without a clear office','No US footprint found'],
+ ['US footprint','13%','Named US subsidiary or sales office on a public page','US presence claimed without a clear office','No US footprint found'],
  ['Cost','Excluded','Not scored.','Not scored.','Not scored.'],
  ['Lead time','13%','Shorter expected door-to-door','Typical ocean from Asia or Europe','Longer or congested lanes expected'],
  ['Geo risk','13%','Lower concentration / tariff / disruption risk','Moderate','Higher; single-country exposure']];
@@ -210,7 +210,7 @@ function study(){ log('study_open');
   <p>Cost is unknown and is not part of the weighted score. No supplier purchase price was collected. Lead time and geography remain in the score only as assumptions: typical freight time and concentration in one country. They are not measured transit times. Capability is catalog fit, not proven quality. Drawing fit, verified quality, US shipment history, MOQ, and willingness to take HYTORC volumes are still open.</p>
   <p>A US office, a US manufacturing claim, or an export sentence is not verified US shipment history. A certificate named on a website, or a registrar row whose expiry was not checked, is not a verified certificate. Price, MOQ, and willingness to take HYTORC volumes were not found.</p>
   <p>Beijing Huade, Shandong Taifeng, and TZ Yuci are on the watchlist, not in the ranked list. A ~700 bar bolting-pump line was not confirmed for Huade or Taifeng, so they are not qualified bolting-pump matches. TZ Yuci's profile page was not opened.</p>
-  <h2>How scores were set</h2><p>Six criteria are 1-5 desk judgments from public websites only: no quotes, plant visits, or certificate downloads. Cost is not one of them. Default weights total 100 (capability 29, certs 19, scale 13, US export 13, lead time 13, geography 13) and can be changed on the Scorecard. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified. A capability score is catalog fit, not proven quality.</p>
+  <h2>How scores were set</h2><p>Six criteria are 1-5 desk judgments from public websites only: no quotes, plant visits, or certificate downloads. Cost is not one of them. Default weights total 100 (capability 29, certs 19, scale 13, US footprint 13, lead time 13, geography 13) and can be changed on the Scorecard. US footprint scores a named US office or a claimed US presence. It is not verified shipment history, and customs records were not used to set it. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified. A capability score is catalog fit, not proven quality.</p>
   <div class="wrap"><table class="tbl"><thead><tr><th>Criterion</th><th>Default weight</th><th>5 (strong)</th><th>3 (mixed)</th><th>1 (weak)</th></tr></thead><tbody>${RUBRIC.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="callout" style="margin-top:10px"><b>Capability is catalog fit, not an audit.</b> It reflects product and process fit from public material, not plant quality. Certifications are expected from public text, not verified. Quality is established through the qualification steps below.</div>
   <h2>Cost is not a score</h2><p>There is no cost score, and the weighted score is not a landed cost. A comparison of one drawing, one quantity, and one ship-to belongs on <a href="#/quotes">Quote entry</a> once a seller has quoted, or on <a href="#/sensitivity">Landed-cost sensitivity</a> while the figures are still assumptions. Neither page supplies a freight rate, a duty rate, or a price break. A blank is missing rather than zero.</p>
@@ -280,8 +280,8 @@ let pt; function savePrefs(){
   clearTimeout(pt);pt=setTimeout(()=>sb.from('fs_weight_prefs').upsert({user_email:S.user,weights:S.w,locked:S.lk,updated_at:new Date().toISOString()}).then(()=>{}),800);
 }
 const score=r=>{if(!r||r.scored===false||r.cap==null)return null; return KEYS.reduce((a,k,i)=>a+(k==='cost'?0:(Number(r[k])||0)*S.w[i]),0)/100;};
-const COLS=['n','name','cat','country','makes','num','num','num','num','num','num','num','num','uspres','certs','src'];
-const WIDTHS=['3%','10.5%','7%','6.5%','13%','3.4%','3.4%','3.6%','3.2%','3.4%','3.4%','3.3%','4.3%','10.5%','11.2%','10.3%'];
+const COLS=['n','name','cat','country','makes','num','num','num','num','num','num','num','uspres','certs','src'];
+const WIDTHS=['3%','11%','7%','6.5%','12%','3.6%','3.6%','3.8%','7.2%','3.6%','3.6%','4.6%','11%','10.5%','9%'];
 
 function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
@@ -289,7 +289,7 @@ function scorecard(){
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
   <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/study">How the scores were set</a> · <a href="#/sensitivity">Landed-cost sensitivity</a></p>
   ${bannerHtml()}
-  <div class="callout"><b>Cost is unknown and is not in the score.</b> No purchase price, FOB, freight rate, or duty was collected, so cost is not a rank. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
+  <div class="callout"><b>Cost is unknown and is not in the score.</b> No purchase price, FOB, freight rate, or duty was collected, so cost is not a rank and it is not a column. Freight and duty belong on <a href="#/sensitivity">Landed-cost sensitivity</a> when you enter them, or on <a href="#/quotes">Quote entry</a> when a supplier has quoted. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
   <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">Weight changes stay in this browser only. They do not change the supplier scores.</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
@@ -297,7 +297,9 @@ function scorecard(){
   <div class="filters"><label for="fc">Category <select id="fc"><option value="">All categories</option>${cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>
   <label for="fr">Region <select id="fr"><option value="">All regions</option>${regs.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>
   <label for="fm">Min score <input id="fm" type="number" inputmode="decimal" step="0.1" min="0" max="5" aria-describedby="fmhint"></label>
-  <span id="fmhint">0 to 5. Leave blank to show every row at or above 0. Sort from the column headers. The rank column stays the weighted-score rank.</span></div>
+  <span id="fmhint">0 to 5. Leave blank to show every row at or above 0.</span></div>
+  <p class="sortnote" id="sortnote">Each column title has an up button and a down button. Up sorts ascending. Down sorts descending. The rank number stays the weighted-score rank.</p>
+  <p class="uslegend" id="uslegend"><b>US footprint</b> is a 1–5 desk score for a US office, subsidiary, or claimed US presence on a public page. A named office is the strong end of the scale. A claim without a clear office is the middle. No US footprint found is the weak end. It is not verified shipment history, and customs records were not used. <b>US note</b> is the sentence kept with that score. For many names dated Nov 2, 2026 the sentence was not recorded, so the note says unknown even though a score is shown.</p>
   <p class="muted" id="counts"></p>
   <div class="card scorewrap"><table class="tbl" id="tb"></table></div>
   <div class="card" id="discover"></div>
@@ -350,10 +352,11 @@ function detailInner(r){
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
   <a class="btn" href="#/sensitivity">Landed-cost drivers</a> <a class="btn sec" href="#/quotes">Quote entry</a></div>`;
 }
-const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','cost','lead','geo','score','uspres','certs','source'];
-const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US','Cost','Lead','Geo','Score','US presence','Certs','Source'];
-const DISC_KEYS=['name','category','country','status','cost','source'];
-const DISC_LABELS=['Name','Category','Country','Status','Cost','Source'];
+const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','lead','geo','score','uspres','certs','source'];
+const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US footprint','Lead','Geo','Score','US note','Certs','Source'];
+const SCORE_TIPS={usexp:'US footprint: 1–5 desk score for a public US office or claimed US presence. Not verified shipment history.'};
+const DISC_KEYS=['name','category','country','status','source'];
+const DISC_LABELS=['Name','Category','Country','Status','Source'];
 function rowValue(row,key){
   if(key==='rank') return row._rank;
   if(key==='score') return row._s;
@@ -374,26 +377,26 @@ function sortLabel(name,on,dir,off){
   const now=dir==='asc'?'ascending':'descending', next=dir==='asc'?'descending':'ascending';
   return name+', sorted '+now+'. Activate to sort '+next;
 }
-function sortHeads(tableId,keys,labels,classes,blocked){
-  const allowed=keys.filter(k=>!blocked[k]);
-  const cur=tableId==='disc'?FSS.migrateSort(S.f.dsort,allowed):FSS.migrateSort(S.f.sort,allowed);
+function sortHeads(tableId,keys,labels,classes){
+  const cur=tableId==='disc'?FSS.migrateSort(S.f.dsort,keys):FSS.migrateSort(S.f.sort,keys);
   if(tableId==='disc') S.f.dsort=cur; else S.f.sort=cur;
   return keys.map((key,i)=>{
-    const off=blocked[key]||'';
-    const on=!off&&cur.key===key;
+    const on=cur.key===key;
     const aria=on?(cur.dir==='asc'?'ascending':'descending'):'none';
-    const mark=off?'<span class="sortmark">no order</span>':on?`<span class="sortmark">${cur.dir==='asc'?'▲ asc':'▼ desc'}</span>`:'';
-    return `<th class="${classes[i]||''}" aria-sort="${aria}"><button type="button" class="sortbtn" data-sort="${key}" data-table="${tableId}" ${off?'disabled':''} aria-label="${esc(sortLabel(labels[i],on,cur.dir,off))}">${labels[i]}${mark}</button></th>`;
+    const tip=SCORE_TIPS[key]?` title="${esc(SCORE_TIPS[key])}"`:'';
+    const btn=(dir,glyph)=>{
+      const pressed=on&&cur.dir===dir;
+      const word=dir==='asc'?'ascending':'descending';
+      return `<button type="button" class="sortdir" data-sort="${key}" data-dir="${dir}" data-table="${tableId}" aria-pressed="${pressed?'true':'false'}" aria-label="${esc(labels[i]+', sort '+word)}">${glyph}</button>`;
+    };
+    return `<th class="${classes[i]||''}" aria-sort="${aria}"><div class="sortwrap"${tip}><span class="thlab">${labels[i]}</span><span class="sortpair">${btn('asc','↑')}${btn('desc','↓')}</span></div></th>`;
   }).join('');
 }
 function bindSort(tableId){
-  document.querySelectorAll('#'+tableId+' .sortbtn').forEach(btn=>btn.onclick=e=>{
+  document.querySelectorAll('#'+tableId+' .sortdir').forEach(btn=>btn.onclick=e=>{
     e.stopPropagation();
-    if(btn.disabled) return;
-    const key=btn.dataset.sort;
-    const prefer=key!=='rank'&&['cap','cert','scale','usexp','lead','geo','score'].indexOf(key)>=0;
-    if(tableId==='disc') S.f.dsort=FSS.nextSort(S.f.dsort,key,false);
-    else S.f.sort=FSS.nextSort(S.f.sort,key,prefer);
+    const next={key:btn.dataset.sort,dir:btn.dataset.dir};
+    if(tableId==='disc') S.f.dsort=next; else S.f.sort=next;
     table();
   });
 }
@@ -401,13 +404,13 @@ function table(){
   if(!window.FSS) return;
   const ranked=S.rows.map(r=>({...r,_s:score(r)})).filter(r=>r._s!=null);
   FSS.sortRows(ranked,'score','desc',rowValue).forEach((r,i)=>{r._rank=i+1;});
-  const cur=FSS.migrateSort(S.f.sort,SCORE_KEYS.filter(k=>k!=='cost'));
+  const cur=FSS.migrateSort(S.f.sort,SCORE_KEYS);
   S.f.sort=cur;
   let rows=ranked.filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
   rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);
-  const blocked={cost:'Cost is unknown for every supplier, so this column has no order.'};
-  $('#tb').innerHTML=`<colgroup>${WIDTHS.map(w=>`<col style="width:${w}">`).join('')}</colgroup><thead><tr>${sortHeads('tb',SCORE_KEYS,SCORE_LABELS,COLS,blocked)}</tr></thead><tbody>`+
-  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${r._rank}</td><td class="name"><b>${esc(r.name)}</b></td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${k==='cost'?'Unknown':(r[k]??'')}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${SCORE_KEYS.length}">No scored suppliers match these filters.</td></tr>`)+'</tbody>';
+  const shown=KEYS.filter(k=>k!=='cost');
+  $('#tb').innerHTML=`<colgroup>${WIDTHS.map(w=>`<col style="width:${w}">`).join('')}</colgroup><thead><tr>${sortHeads('tb',SCORE_KEYS,SCORE_LABELS,COLS)}</tr></thead><tbody>`+
+  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${r._rank}</td><td class="name"><b>${esc(r.name)}</b></td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${shown.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${SCORE_KEYS.length}">No scored suppliers match these filters.</td></tr>`)+'</tbody>';
   paintDiscovery();
   bindSort('tb'); bindSort('disc');
   document.querySelectorAll('#tb tr.r').forEach(tr=>tr.onclick=e=>{
@@ -430,10 +433,9 @@ function paintDiscovery(){
   if(window.FSS){const cur=FSS.migrateSort(S.f.dsort,['name','category','country','source']); S.f.dsort=cur; rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);}
   const scored=document.querySelectorAll('#tb tbody tr.r').length;
   const c=$('#counts'); if(c) c.textContent=scored+' scored in this view · '+rows.length+' not scored in this view. Min score applies only to scored rows. Not-scored names have no rank.';
-  const blocked={cost:'Cost is unknown for every name here, so this column has no order.',status:'Every row is not scored. This column is not a rank.'};
-  box.innerHTML=`<h2>Not scored</h2><p class="muted">Public pages reviewed Nov 7, 2026. No 1–5 scores were assigned, so these names are not ranked with the scored list. Cost is unknown. Where a customs check was made, it used only the visible names on ImportYeti’s public HYTORC page.</p>
-  <div class="scorewrap"><table class="tbl" id="disc"><thead><tr>${sortHeads('disc',DISC_KEYS,DISC_LABELS,DISC_KEYS.map(()=>''),blocked)}</tr></thead><tbody>`+
-  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>Not scored</td><td>Unknown</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):'<tr><td colspan="6">No unscored names match this category and region.</td></tr>')+
+  box.innerHTML=`<h2>Not scored</h2><p class="muted">Public pages reviewed Nov 7, 2026. No 1–5 scores were assigned, so these names are not ranked with the scored list. Cost is unknown and is not a column here either. Where a customs check was made, it used only the visible names on ImportYeti’s public HYTORC page.</p>
+  <div class="scorewrap"><table class="tbl" id="disc"><thead><tr>${sortHeads('disc',DISC_KEYS,DISC_LABELS,DISC_KEYS.map(()=>''))}</tr></thead><tbody>`+
+  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>Not scored</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):'<tr><td colspan="5">No unscored names match this category and region.</td></tr>')+
   '</tbody></table></div>';
   box.querySelectorAll('tr.r').forEach(tr=>tr.onclick=e=>{if(e.target.closest('a'))return; e.stopPropagation(); openDetail(tr.dataset.id);});
 }
@@ -594,6 +596,31 @@ function readParty(prefix){
   const v=id=>{const el=$('#'+id); return el?el.value:'';};
   return {fob:v(prefix+'fob'),currency:v(prefix+'ccy'),fx:v(prefix+'fx'),freight:v(prefix+'fr'),freightBasis:v(prefix+'frb'),insurance:v(prefix+'in'),insuranceBasis:v(prefix+'inb'),other:v(prefix+'ot'),otherBasis:v(prefix+'otb'),dutyPercent:v(prefix+'du'),dutyScope:v(prefix+'ds'),fobLow:v(prefix+'lo'),fobHigh:v(prefix+'hi')};
 }
+function referenceHtml(){
+  if(!window.FSR) return '';
+  const R=FSR;
+  const lanes=R.freight.lanes.map(l=>`<tr><td>${esc(l.name)}</td><td class="num">${l.usd40ft.toLocaleString('en-US')}</td><td>${esc(l.note||'')}</td></tr>`).join('');
+  const lines=R.hts.map(h=>`<tr><td>${esc(h.code)}</td><td>${esc(h.lineDescription)}</td><td>${esc(h.general)}</td><td>${esc(h.special)}</td><td>${esc(h.column2)}</td><td>Not returned. Not zero.</td></tr>`).join('');
+  return `<div class="card" id="pubref"><h2>Public references, not a supplier cost</h2>
+  <p>${esc(R.intro)}</p>
+  <h3>Column 1 of the HTS, example lines only</h3>
+  <p class="muted">${esc(R.htsNote)}</p>
+  <div class="scorewrap"><table class="tbl"><thead><tr><th>HTS</th><th>Line description returned</th><th>General</th><th>Special column</th><th>Column 2</th><th>Chapter 99 / 232 / 301</th></tr></thead><tbody>${lines}</tbody></table></div>
+  <p class="muted">${esc(R.unconfirmed)}</p>
+  <h3>Drewry World Container Index, ${esc(R.freight.assessed)}</h3>
+  <p class="muted">${esc(R.freight.note)}</p>
+  <div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th class="num">USD per 40-ft container</th><th>What Drewry said</th></tr></thead><tbody>${lanes}</tbody></table></div>
+  <p class="muted">Source: <a href="${esc(R.freight.source)}" target="_blank" rel="noopener">${esc(R.freight.source)}</a>. Checked ${esc(R.checked)}.</p>
+  <p id="feuout" class="muted">Pieces in one 40-ft container, if you know them for a port-to-port illustration only: <input id="feupieces" class="fld" style="max-width:8rem" inputmode="numeric" placeholder="Blank"> <span id="feuresult">No per-piece figure until that number is entered. Inland freight is not in this index.</span></p>
+  </div>`;
+}
+function paintFeu(){
+  const el=$('#feuresult'); if(!el||!window.FSR) return;
+  const raw=$('#feupieces')&&$('#feupieces').value;
+  const lane=FSR.freight.lanes.find(l=>l.id==='sha-ny');
+  const n=FSR.perPiece(lane&&lane.usd40ft, raw);
+  el.textContent=n==null?'No per-piece figure until that number is entered. Inland freight is not in this index.':('Shanghai to New York, '+lane.usd40ft.toLocaleString('en-US')+' USD divided by '+n.pieces+' pieces = '+n.perPiece.toFixed(2)+' USD per piece, port to port only. This is not written into the comparison above.');
+}
 function sensitivity(){
   closePop();
   if(!window.FSN){app.innerHTML='<div class="card"><p>Sensitivity calculator missing.</p></div>';return;}
@@ -602,8 +629,10 @@ function sensitivity(){
   <div class="card"><h2>What this can and cannot show</h2>
   <p>${esc(FSN.COPY.noCurve)}</p>
   <p>${esc(FSN.COPY.qualitative)}</p>
+  <p>${esc(FSN.COPY.noRate)}</p>
   <p class="eq">${esc(FSN.formulaText())}</p>
   <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD. Do not enter the inverse. Same currency uses a rate of 1. A real supplier quote is entered separately on <a href="#/quotes">Quote entry</a>. These assumptions are not copied there.</p></div>
+  ${referenceHtml()}
   <div class="card"><h2>Same item, quantity, and destination</h2><div class="wgrid">
     <div class="wf"><label for="syitem">Item label</label><input id="syitem" class="fld" placeholder="Optional. Not a drawing number"></div>
     <div class="wf"><label for="sydest">Destination</label><input id="sydest" class="fld" placeholder="Final destination"></div>
@@ -617,7 +646,9 @@ function sensitivity(){
   </div></div>
   <div id="syout"></div>`;
   app.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',paintSensitivity); el.addEventListener('change',paintSensitivity);});
+  const feu=$('#feupieces'); if(feu){feu.addEventListener('input',paintFeu); feu.addEventListener('change',paintFeu);}
   paintSensitivity();
+  paintFeu();
 }
 function paintSensitivity(){
   const out=$('#syout'); if(!out||!window.FSN) return;
