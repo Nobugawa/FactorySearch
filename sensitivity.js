@@ -11,7 +11,8 @@ const COPY={
   intro:'China’s established manufacturing clusters offer significant advantages in component availability, specialist processes and supplier coordination. This study explores where manufacturers in other regions could complement those strengths through competitive landed costs, technical capabilities or supply resilience. The objective is to identify promising suppliers for further qualification, with commercial comparisons ultimately based on equivalent specifications and quoted terms.',
   purpose:'This page shows how much higher a candidate FOB can be before the freight, duty, and other charges you enter stop offsetting a baseline. Every figure is an assumption for the same item, the same quantity, and the same destination. It is not a supplier quote and not a factory price.',
   noCurve:'Public import records that were reviewed give customs unit values, which mix products in a shipment. They are not comparable factory FOB prices, and this page does not turn them into a price curve. A low and a high you type are your assumed range only. Overlap with the break-even price is conditional on those assumptions. It is not a result for the factories on the scorecard.',
-  qualitative:'Capability, a nearby manufacturing ecosystem, and reliability are not converted into dollars here. A landed-cost gap is not a verdict on a factory.'
+  qualitative:'Capability, a nearby manufacturing ecosystem, and reliability are not converted into dollars here. A landed-cost gap is not a verdict on a factory.',
+  noRate:'No freight rate or tariff for these parts is on file. A published figure belongs in the fields only when you enter it with the product, origin, destination, and date it applies to. A country name is not a duty rate, and a blank is not zero.'
 };
 function cents(n){return Math.round((n+Number.EPSILON)*100)/100;}
 function money(v){

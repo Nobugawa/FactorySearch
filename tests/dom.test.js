@@ -8,7 +8,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
   const q=(data)=>{const o={select:()=>o,eq:()=>o,maybeSingle:()=>Promise.resolve({data:null}),insert:(x)=>{logged.push(x);return Promise.resolve({})},upsert:(x)=>{w.__ups.push(x);return Promise.resolve({})},then:(res)=>res({data,error:null})};return o;};
   w.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session}}),signOut:async()=>{},signInWithPassword:async()=>({error:{message:'bad'}}),updateUser:async()=>({}),onAuthStateChange:()=>{}},
     from:(t)=>{w.__from.push(t);return q([]);}})};
-  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'catalog.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'quote.js','utf8'));w.eval(fs.readFileSync(R+'sort.js','utf8'));w.eval(fs.readFileSync(R+'sensitivity.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
+  w.history.replaceState=()=>{};w.eval(fs.readFileSync(R+'config.js','utf8'));w.eval(fs.readFileSync(R+'catalog.js','utf8'));w.eval(fs.readFileSync(R+'worksheet.js','utf8'));w.eval(fs.readFileSync(R+'quote.js','utf8'));w.eval(fs.readFileSync(R+'sort.js','utf8'));w.eval(fs.readFileSync(R+'sensitivity.js','utf8'));w.eval(fs.readFileSync(R+'reference.js','utf8'));w.eval(fs.readFileSync(R+'app.js','utf8'));return {w,logged};}
 (async()=>{
  // public scorecard, no login wall
  let {w,logged}=mk(null);ok(await waitFor(w,'#tb'),'anon scorecard rendered');let D=w.document;let tb=D.getElementById('tb');
@@ -23,35 +23,35 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.1','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.2','version');
  ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&!D.querySelector('#fs')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score, without a global sort menu');
  const banned=/keeps China in the comparison|China stays in the (comparison|set)|buys only from China|not a finding that HYTORC|repository history|scripted page load|likely blocks scripts/i;
  ok(/established manufacturing clusters/.test(D.body.textContent)&&/promising suppliers for further qualification/.test(D.body.textContent)&&/equivalent specifications and quoted terms/.test(D.body.textContent),'approved opening on the scorecard');
  ok(!banned.test(D.body.textContent),'scorecard does not explain the edit history');
  {const heads=[...tb.tHead.rows[0].cells];
-  ok(heads.every(th=>th.querySelector('button.sortbtn')),'each scored column has its own sort control');
-  const cost=heads.find(th=>/Cost/.test(th.textContent));
-  ok(cost&&cost.querySelector('button').disabled&&/no order/.test(cost.textContent)&&/no order/.test(cost.querySelector('button').getAttribute('aria-label')),'unknown cost column cannot be sorted');
+  ok(heads.every(th=>th.querySelectorAll('button.sortdir').length===2),'each scored column has up and down controls');
+  ok(!tb.querySelector('button[data-sort="cost"]')&&!/\\bCost\\b/.test([...heads].map(th=>th.querySelector('.thlab').textContent).join(' ')),'the all-unknown cost column is gone');
+  const ush=heads.find(th=>th.querySelector('.thlab').textContent==='US footprint');
+  ok(ush&&/not verified shipment history/i.test(ush.querySelector('.sortwrap').title)&&/Up sorts ascending/.test(D.getElementById('sortnote').textContent),'US footprint is named and the sort buttons are explained');
   const rankOf=id=>tb.querySelector(`tr[data-id="${id}"] td.n`).textContent;
   const top=tb.querySelector('tbody tr.r'); const topId=top.dataset.id; const topRank=rankOf(topId);
-  tb.querySelector('button[data-sort="name"]').click();
-  ok(rankOf(topId)===topRank&&tb.querySelector('th[aria-sort="ascending"] button[data-sort="name"]'),'sorting by name keeps the weighted rank');
+  tb.querySelector('button[data-sort="name"][data-dir="asc"]').click();
+  ok(rankOf(topId)===topRank&&tb.querySelector('th[aria-sort="ascending"] button[data-sort="name"][aria-pressed="true"]'),'sorting by name keeps the weighted rank');
   const names=[...tb.querySelectorAll('tbody tr.r td.name')].map(td=>td.textContent.trim());
   ok(names.length===38&&names[0].localeCompare(names[names.length-1])<=0,'name sort runs from A toward Z');
-  tb.querySelector('button[data-sort="country"]').click();
-  tb.querySelector('button[data-sort="country"]').click();
-  ok(tb.querySelector('button[data-sort="country"] .sortmark').textContent.indexOf('desc')>=0,'country sort toggles to descending');
-  const us=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[13].textContent.trim());
-  tb.querySelector('button[data-sort="uspres"]').click();
-  const usAsc=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[13].textContent.trim());
-  tb.querySelector('button[data-sort="uspres"]').click();
-  const usDesc=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[13].textContent.trim());
+  tb.querySelector('button[data-sort="country"][data-dir="desc"]').click();
+  ok(tb.querySelector('th[aria-sort="descending"] button[data-sort="country"][data-dir="desc"][aria-pressed="true"]'),'the down button sorts descending');
+  const us=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[12].textContent.trim());
+  tb.querySelector('button[data-sort="uspres"][data-dir="asc"]').click();
+  const usAsc=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[12].textContent.trim());
+  tb.querySelector('button[data-sort="uspres"][data-dir="desc"]').click();
+  const usDesc=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[12].textContent.trim());
   const unk=s=>/^unknown$/i.test(s)||s==='';
   ok(us.some(unk)&&usAsc.filter(unk).length===us.filter(unk).length&&usAsc.slice(-usAsc.filter(unk).length).every(unk)&&usDesc.slice(-usDesc.filter(unk).length).every(unk),'unknown US presence stays last in both directions');
   D.getElementById('fc').value='Hydraulics';D.getElementById('fc').dispatchEvent(new w.Event('change',{bubbles:true}));
   ok([...tb.querySelectorAll('tbody tr.r')].every(tr=>/Hydraulic/.test(tr.cells[2].textContent))&&D.querySelectorAll('#disc tbody tr.r').length>=1,'category filter still limits both tables');
   const shown=tb.querySelector('tbody tr.r'); const shownRank=shown.querySelector('td.n').textContent;
-  tb.querySelector('button[data-sort="name"]').click();
+  tb.querySelector('button[data-sort="name"][data-dir="asc"]').click();
   ok(tb.querySelector(`tr[data-id="${shown.dataset.id}"] td.n`).textContent===shownRank,'a filtered sort does not renumber rank');
   D.getElementById('fc').value='';D.getElementById('fc').dispatchEvent(new w.Event('change',{bubbles:true}));
  }
@@ -59,7 +59,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(!/Authorized users only/.test(D.body.textContent)&&!/Private supplier study/.test(D.body.textContent),'mandatory-login warning removed');
  ok(!D.getElementById('signin')&&!D.getElementById('logout')&&!/Sign in|linked to this email/.test(D.querySelector('nav').textContent+(D.getElementById('notice').textContent||'')),'no public sign-in control or tracking notice');
  ok(tb.querySelectorAll('td.u').length===38&&[...tb.querySelectorAll('td.u a')].every(a=>a.textContent===a.getAttribute('href')&&/^https?:\/\//.test(a.textContent)&&!a.textContent.includes('…')),'full URL text in source cells');
- ok([...tb.querySelectorAll('tbody tr.r')].every(tr=>tr.cells[9].textContent==='Unknown'),'cost column is unknown, not a historical integer');
+ ok(![...tb.querySelectorAll('tbody tr.r')].some(tr=>[...tr.cells].some(td=>td.textContent==='Unknown'&&td.classList.contains('num'))),'scored numbers are not an unknown cost column');
  ok(D.querySelectorAll('#disc tbody tr.r').length===6&&!D.querySelector('#disc .sc'),'six leads are listed and not scored');
  D.getElementById('fm').value='5';D.getElementById('fm').dispatchEvent(new w.Event('input',{bubbles:true}));
  ok([...tb.querySelectorAll('tbody tr.r')].length<38&&D.querySelectorAll('#disc tbody tr.r').length===6,'min score filters scored rows only');
@@ -68,9 +68,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  {const row=w.FS_CATALOG.suppliers.find(r=>r.id==='B2'),ww=[29,19,13,13,0,13,13],keys=['cap','cert','scale','usexp','cost','lead','geo'];
   const exp=keys.reduce((a,k,i)=>a+(k==='cost'?0:row[k]*ww[i]),0)/100;
   ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'displayed score excludes cost');
-  row.cost=1;tb.querySelector('button[data-sort="name"]').click();
+  row.cost=1;tb.querySelector('button[data-sort="name"][data-dir="asc"]').click();
   ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'a planted cost integer does not change the score');
-  delete row.cost;tb.querySelector('button[data-sort="score"]').click();}
+  delete row.cost;tb.querySelector('button[data-sort="score"][data-dir="desc"]').click();}
  const y0=w.scrollY||0;
  tb.querySelector('tr.r').click();
  const sel=tb.querySelector('tr.r.on'), pop=D.getElementById('fspop');
@@ -131,7 +131,8 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/1 EUR = 1\.08 USD/.test(D.body.textContent)&&/1 quote currency = this many comparison currency/.test(D.body.textContent)&&D.getElementById('qx0').value===''&&!/FX to comparison currency/.test(D.body.textContent),'fx label shows the direction and the example is not filled in');
  w.location.hash='#/sensitivity';await tick();await tick();D=w.document;
  ok(/Landed-cost drivers and sensitivity/.test(D.body.textContent)&&/does not turn them into a price curve/.test(D.body.textContent)&&/not converted into dollars/.test(D.body.textContent),'sensitivity explains the question before the form');
- ok(D.getElementById('syqty')&&D.getElementById('syqty').value===''&&D.getElementById('sbfob').value===''&&!/bell curve|normal curve/i.test(D.body.textContent),'sensitivity starts blank and does not draw a price curve');
+ ok(D.getElementById('syqty')&&D.getElementById('syqty').value===''&&D.getElementById('sbfob').value===''&&D.getElementById('sbfr').value===''&&!/bell curve|normal curve/i.test(D.body.textContent),'sensitivity starts blank and does not draw a price curve');
+ ok(/Shanghai to New York/.test(D.body.textContent)&&/9,303/.test(D.body.textContent)&&/Not returned\. Not zero/.test(D.body.textContent)&&!/3,062|3062/.test(D.body.textContent),'a checked container index is shown and is not written into the freight box');
  ok(w.__from.length===0,'sensitivity does not read or write the database');
  ok(!banned.test(D.body.textContent)&&/established manufacturing clusters/.test(D.body.textContent),'sensitivity uses the approved opening');
  w.location.hash='#/quotes';await tick();await tick();D=w.document;
