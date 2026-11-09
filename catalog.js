@@ -77,7 +77,7 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "B11",
@@ -97,8 +97,8 @@ window.FS_CATALOG = {
       "lead": 2,
       "geo": 2,
       "pass": "2026-11-02",
-      "cost": 2,
-      "cost_note": "Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026."
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "B12",
@@ -119,7 +119,7 @@ window.FS_CATALOG = {
       "geo": 3,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "B13",
@@ -287,7 +287,7 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "B9",
@@ -308,7 +308,7 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C1",
@@ -350,7 +350,7 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C11",
@@ -371,7 +371,7 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C12",
@@ -392,7 +392,7 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C2",
@@ -707,7 +707,7 @@ window.FS_CATALOG = {
       "geo": 3,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "D8",
@@ -728,7 +728,7 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "D9",
@@ -749,7 +749,7 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C13",
@@ -795,8 +795,8 @@ window.FS_CATALOG = {
         "Price is unknown.",
         "The Certipedia row was opened, but expiry was not checked, so the certificate is not verified."
       ],
-      "cost": 2,
-      "cost_note": "Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026."
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "C14",
@@ -831,8 +831,8 @@ window.FS_CATALOG = {
         "US export claim is unverified.",
         "Price, MOQ, and small-volume willingness are unknown."
       ],
-      "cost": 2,
-      "cost_note": "Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026."
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "D10",
@@ -878,8 +878,8 @@ window.FS_CATALOG = {
         "The New Jersey office is not verified US shipment history.",
         "Price is unknown."
       ],
-      "cost": 2,
-      "cost_note": "Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026."
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "D11",
@@ -920,8 +920,8 @@ window.FS_CATALOG = {
         "A stated US base is not verified US shipment history.",
         "Price, MOQ, and small-volume willingness are unknown."
       ],
-      "cost": 2,
-      "cost_note": "China. Scored on Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026. Ningbo was not a separate lane."
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026; Ningbo was not a separate lane. Section 301 also applies to products of China. The example lines on the study are on List 1 or List 3, both an extra 25%. Checked Nov 9, 2026. Not a classification of this part."
     }
   ],
   "watchlist": [
