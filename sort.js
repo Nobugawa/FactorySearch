@@ -23,15 +23,16 @@ function migrateSort(saved,allowed){
   const ok=k=>!allowed||allowed.indexOf(k)>=0;
   if(saved&&typeof saved==='object'){
     const key=String(saved.key||''), dir=saved.dir==='asc'?'asc':saved.dir==='desc'?'desc':'';
-    if(ok(key)&&dir&&key!=='cost') return {key,dir};
+    if(ok(key)&&dir) return {key,dir};
   }
   if(saved==='name'&&ok('name')) return {key:'name',dir:'asc'};
   if(saved==='country'&&ok('country')) return {key:'country',dir:'asc'};
   if(saved==='score'&&ok('score')) return {key:'score',dir:'desc'};
+  if(saved==='cost'&&ok('cost')) return {key:'cost',dir:'desc'};
   return {key:ok('score')?'score':'name', dir:ok('score')?'desc':'asc'};
 }
 function nextSort(current,key,preferDesc){
-  if(key==='cost'||key==='status') return current;
+  if(key==='status') return current;
   if(current&&current.key===key) return {key,dir:current.dir==='asc'?'desc':'asc'};
   return {key,dir:preferDesc?'desc':'asc'};
 }

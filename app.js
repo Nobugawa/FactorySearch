@@ -167,7 +167,7 @@ function sources(){
   <div class="card" style="margin-bottom:14px"><h2>Channels used in the desk research</h2>
   <table class="tbl"><thead><tr><th>Channel</th><th>How it was used</th><th>Limitation</th></tr></thead><tbody>
   ${CHANNELS.used.map(c=>`<tr><td><b>${esc(c[0])}</b></td><td>${esc(c[1])}</td><td>${esc(c[2])}</td></tr>`).join('')}</tbody></table>
-  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. The reference that first surfaced each supplier was not recorded. Cost is unknown and is not a score. Lead time and geography are indicative assumptions, not quotes or measured results.</p></div>
+  <p class="muted" style="font-size:12px">No supplier was contacted, no quote requested, and no certificate pulled. The reference that first surfaced each supplier was not recorded. Cost on the scorecard is a 1–5 freight-exposure rank, not a price. Lead time and geography are indicative assumptions, not quotes or measured results.</p></div>
   <div class="card" style="margin-bottom:14px"><h2>Planned research channels (not yet checked)</h2>
   <p class="muted" style="margin-top:-6px">These are the next checks, not sources already used for the scores. None of these has been searched as a full pass. On Nov 7, 2026 the visible names on ImportYeti’s public HYTORC page were reviewed (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered. Links are the public service or event sites, opened Nov 6, 2026.</p>
   <table class="tbl"><thead><tr><th>Channel</th><th>What would be checked</th><th>Limitation</th></tr></thead><tbody>
@@ -189,13 +189,13 @@ function sources(){
   ${(cat.watchlist||[]).map(w=>`<article class="watchitem"><h3>${esc(w.name)} <span class="tag alt2">${esc(w.id)}</span></h3><p>${esc(w.why)}</p><p class="muted">${esc(w.checked)}</p>${safeUrl(w.url)?`<p class="u"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>`:''}</article>`).join('')}
   </div>`;
 }
-const RUBRIC=[ ['Capability','29%','Clear public fit to the part family (e.g. HAWE compact ~700 bar packs)','Makes related products; fit to HYTORC geometry unproven from the site','Wrong category or no public evidence of the process'],
- ['Certs','19%','ISO / IATF / AS9100 named on site for the relevant scope (still unverified)','Quality system mentioned without a named standard','Nothing found'],
- ['Scale','13%','Multi-plant / global footprint visible','Single solid plant or mid-size group','Small or unclear capacity'],
- ['US footprint','13%','Named US subsidiary or sales office on a public page','US presence claimed without a clear office','No US footprint found'],
- ['Cost','Excluded','Not scored.','Not scored.','Not scored.'],
- ['Lead time','13%','Shorter expected door-to-door','Typical ocean from Asia or Europe','Longer or congested lanes expected'],
- ['Geo risk','13%','Lower concentration / tariff / disruption risk','Moderate','Higher; single-country exposure']];
+const RUBRIC=[ ['Capability','25%','Clear public fit to the part family (e.g. HAWE compact ~700 bar packs)','Makes related products; fit to HYTORC geometry unproven from the site','Wrong category or no public evidence of the process'],
+ ['Certs','15%','ISO / IATF / AS9100 named on site for the relevant scope (still unverified)','Quality system mentioned without a named standard','Nothing found'],
+ ['Scale','10%','Multi-plant / global footprint visible','Single solid plant or mid-size group','Small or unclear capacity'],
+ ['US footprint','10%','Named US subsidiary or sales office on a public page','US presence claimed without a clear office','No US footprint found'],
+ ['Cost','20%','US plant: no ocean container into New York. None on this list.','No sourced lane to New York. Neutral, and flagged. India and Israel.','Not used. The high freight band, China and other East Asia, is scored 2.'],
+ ['Lead time','10%','Shorter expected door-to-door','Typical ocean from Asia or Europe','Longer or congested lanes expected'],
+ ['Geo risk','10%','Lower concentration / tariff / disruption risk','Moderate','Higher; single-country exposure']];
 function study(){ log('study_open');
   const li=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
   const ncat=(rows,c)=>rows.filter(r=>r.category===c).length;
@@ -203,19 +203,22 @@ function study(){ log('study_open');
   ${bannerHtml()}
   <div class="card study">
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
-  <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: manufacturers with a public record in the part family, a scorecard that can be re-weighted, and a lead and an alternative in each family. Three families are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized. Landed cost is discussed below. It is not part of the weighted score.</p>
+  <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: manufacturers with a public record in the part family, a scorecard that can be re-weighted, and a lead and an alternative in each family. Three families are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized. The weighted score includes a 1–5 cost-exposure rank from ocean freight. That rank is not a landed cost.</p>
   <p>The scored list has ${S.rows.length} manufacturers (${ncat(S.rows,'Hydraulics')} hydraulics, ${ncat(S.rows,'Forgings/Castings')} forgings and castings, ${ncat(S.rows,'Precision machining')} precision machining) in China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, the Czech Republic, and Israel), plus ${(S.discovery||[]).length} names dated Nov 7, 2026 that are not scored. Scored names use the same criteria. The Nov 7 names are leads for follow-up, not a ranked result.</p>
   <p>This is not an exhaustive search, and it is not an evenly balanced survey of every producing country. It is a preliminary desk list of manufacturers already visible in these part families. Desk research is dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Each name keeps its own source date on <a href="#/sources">Sources</a> and in its detail card.</p>
   <h2>How to read cost, lead time, and geography</h2>
-  <p>Cost is unknown and is not part of the weighted score. No supplier purchase price was collected. Lead time and geography remain in the score only as assumptions: typical freight time and concentration in one country. They are not measured transit times. Capability is catalog fit, not proven quality. Drawing fit, verified quality, US shipment history, MOQ, and willingness to take HYTORC volumes are still open.</p>
+  <p>Cost is a 1–5 exposure rank from sourced ocean freight. It is in the weighted score. It is not a supplier price and not a landed cost. On the sourced lanes, Europe is more favorable than China, and a US plant would be more favorable than both. Lead time and geography remain in the score only as assumptions: typical freight time and concentration in one country. They are not measured transit times. Capability is catalog fit, not proven quality. Drawing fit, verified quality, US shipment history, MOQ, and willingness to take HYTORC volumes are still open.</p>
   <p>A US office, a US manufacturing claim, or an export sentence is not verified US shipment history. A certificate named on a website, or a registrar row whose expiry was not checked, is not a verified certificate. Price, MOQ, and willingness to take HYTORC volumes were not found.</p>
   <p>Beijing Huade, Shandong Taifeng, and TZ Yuci are on the watchlist, not in the ranked list. A ~700 bar bolting-pump line was not confirmed for Huade or Taifeng, so they are not qualified bolting-pump matches. TZ Yuci's profile page was not opened.</p>
-  <h2>How scores were set</h2><p>Six criteria are 1-5 desk judgments from public websites only: no quotes, plant visits, or certificate downloads. Cost is not one of them. Default weights total 100 (capability 29, certs 19, scale 13, US footprint 13, lead time 13, geography 13) and can be changed on the Scorecard. US footprint scores a named US office or a claimed US presence. It is not verified shipment history, and customs records were not used to set it. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified. A capability score is catalog fit, not proven quality.</p>
+  <h2>How scores were set</h2><p>Seven criteria are 1–5 judgments. Six are desk judgments from public websites only: no quotes, plant visits, or certificate downloads. Cost is the seventh. It is an exposure rank from the sourced freight lanes below, not a price. Default weights total 100 (capability 25, certs 15, scale 10, US footprint 10, cost 20, lead time 10, geography 10) and can be changed on the Scorecard. US footprint scores a named US office or a claimed US presence. It is not verified shipment history, and customs records were not used to set it. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified. A capability score is catalog fit, not proven quality.</p>
   <div class="wrap"><table class="tbl"><thead><tr><th>Criterion</th><th>Default weight</th><th>5 (strong)</th><th>3 (mixed)</th><th>1 (weak)</th></tr></thead><tbody>${RUBRIC.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="callout" style="margin-top:10px"><b>Capability is catalog fit, not an audit.</b> It reflects product and process fit from public material, not plant quality. Certifications are expected from public text, not verified. Quality is established through the qualification steps below.</div>
   <h2>Score is not a cost</h2>
-  <p>The weighted score is an ordinal screening rank. It orders candidates by how favorable they look on public evidence. A higher score is more favorable. The gaps between scores are not proportional and do not measure money. The score is not a landed cost and it contains no price. On the scorecard the same point is stated as: 1–5 screening scores: higher is more favorable; differences are not proportional.</p>
-  <p>A landed cost is the seller’s price for one drawing and one quantity, plus freight, duty, and the other charges to the same ship-to. Those amounts are not in the score. A blank is missing, not zero. Nothing here is a quote.</p>
+  <p>The weighted score is an ordinal screening rank. It orders candidates by how favorable they look on public evidence. A higher score is more favorable. The gaps between scores are not proportional and do not measure money. It is not a landed cost and it contains no price. On the scorecard the same point is stated as: 1–5 screening scores: higher is more favorable; differences are not proportional.</p>
+  <p>The rank includes a 1–5 cost-exposure factor. That factor uses sourced ocean freight into New York, not a supplier price. On those lanes, Europe and the United States are more favorable than China. Rotterdam to New York is the lower lane. Shanghai to New York is the higher lane, about $6,450 more per 40-ft container, and the two readings are one week apart. A United States plant would not pay that ocean leg. No scored name is a US plant.</p>
+  <p>5 is a US plant: no ocean container into New York. None of the scored names is in that cell. 4 is Europe, scored on Rotterdam to New York (~$3,181 per 40-ft container, Oct 22, 2026). Germany, Austria, Poland, the Czech Republic, and Italy are not Rotterdam. Hamburg, Antwerp, and Genoa to New York were not published, so those names use the nearest sourced lane and are flagged. 3 is neutral and flagged: India and Israel have no sourced lane to New York, so they are not scored as Shanghai and not scored as Rotterdam. 2 is the higher freight band: China, on Shanghai to New York ($9,631 per 40-ft container, Oct 29, 2026). Ningbo uses that same lane; Ningbo was not published separately. Taiwan, South Korea, and Japan have no named port lane. The Asia to US East Coast index (FBX03, 9,848 USD per FEU, week ending Nov 6, 2026) is in the same high band, so they take that nearest reading and are flagged. 1 is unused. Nothing sourced sits above that high band.</p>
+  <p>Example HTS lines in the references are not a classification of a HYTORC part. Column 1 on those lines is Free, 2%, or 2.9%, and additional duties were not returned. Duty does not move this score.</p>
+  <p>A landed cost is the seller’s price for one drawing and one quantity, plus freight, duty, and the other charges to the same ship-to. Those dollar amounts are not the score. A blank is missing, not zero. Nothing here is a quote.</p>
   <p>Break-even, without a worksheet: for the same item, the same quantity, and the same destination, a candidate’s price can be higher only by as much as its freight, duty, and other charges are lower. When those charges are unknown, there is no break-even and no landed-cost rank.</p>
   ${freightStudyHtml()}
   <h2>Proposed sourcing alternatives</h2><p>Summarized on the Scorecard. Lead and alternative candidates per part family are a starting point. They are not qualified and not interchangeable until drawings, specs and trials confirm fit.</p>
@@ -226,7 +229,7 @@ function study(){ log('study_open');
   <h2>Questions for discussion</h2>
   ${li(['Which category (hydraulics, forgings/castings, machining) is the biggest drag today on quality, lead time, or cost?','Which part numbers, volumes, and alloy grades should drive the next pass?','Are there factories already trusted or ruled out, so the list does not duplicate them?'])}
   <h2>Limitations and next checks</h2>
-  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, volume willingness, drawing fit, and verified quality are unknown across the list.','Cost is unknown and is not in the score. Lead time and geography are indicative assumptions, not quotations or measured outcomes. They do not establish that suppliers in one country are a better fit than suppliers in another.','On Nov 7, 2026 the visible names on ImportYeti’s public HYTORC page were reviewed. The page lists some sea-freight names only. Panjiva and the trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','The list is not an exhaustive world search. Vietnam and Thailand are not yet covered; Taiwan and Korea are thin. The Nov 7 names are not scored.','HYTORC part lists, volumes, and alloy grades are not in this review. Scores should be revisited once those are known.'])}
+  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, volume willingness, drawing fit, and verified quality are unknown across the list.','Cost is an ordinal freight-exposure rank, not a price and not a landed cost. Origins without their own sourced lane are flagged. Lead time and geography are indicative assumptions, not quotations or measured outcomes. They do not establish that suppliers in one country are a better fit than suppliers in another.','On Nov 7, 2026 the visible names on ImportYeti’s public HYTORC page were reviewed. The page lists some sea-freight names only. Panjiva and the trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','The list is not an exhaustive world search. Vietnam and Thailand are not yet covered; Taiwan and Korea are thin. The Nov 7 names are not scored.','HYTORC part lists, volumes, and alloy grades are not in this review. Scores should be revisited once those are known.'])}
   </div>`;
 }
 
@@ -246,35 +249,18 @@ function rebalance(w,lk,i,v){ // pure: returns new weights summing to 100; locke
 }
 const setLocks=(lk,v)=>lk.map(()=>!!v); // lock state only; never touches weights
 const validW=(w,lk)=>Array.isArray(w)&&w.length===7&&w.every(x=>Number.isInteger(x)&&x>=0&&x<=100)&&w.reduce((a,b)=>a+b,0)===100&&Array.isArray(lk)&&lk.length===7;
-function setW(i,v){if(i===4)return; S.lk[4]=true; S.w[4]=0; S.w=rebalance(S.w,S.lk,i,v); S.w[4]=0; S.lk[4]=true; if(S.w.reduce((a,b)=>a+b,0)!==100){const m=migrateWeights(S.w,S.lk); S.w=m.w; S.lk=m.lk;} savePrefs();}
+function setW(i,v){S.w=rebalance(S.w,S.lk,i,v); if(S.w.reduce((a,b)=>a+b,0)!==100){const m=migrateWeights(S.w,S.lk); S.w=m.w; S.lk=m.lk;} savePrefs();}
 function fixSum(w,idxs){let diff=100-w.reduce((a,b)=>a+b,0),g=0; while(diff&&g<200){const pool=diff>0?idxs:idxs.filter(j=>w[j]>0); if(!pool.length)break; const j=pool.reduce((b,k)=>w[k]>w[b]?k:b,pool[0]); const step=diff>0?1:-1; w[j]+=step; diff-=step; g++;}}
 function migrateWeights(w,lk){
   const base=[25,15,10,10,20,10,10];
-  w=(Array.isArray(w)&&w.length===7)?w.map(Number):base.slice();
-  lk=(Array.isArray(lk)&&lk.length===7)?lk.map(Boolean):Array(7).fill(false);
-  if(w.some(x=>!Number.isInteger(x)||x<0||x>100)||w.reduce((a,b)=>a+b,0)!==100){w=base.slice(); lk=Array(7).fill(false);}
-  const nw=w.slice(), nl=lk.slice(); nl[4]=true;
-  if(w[4]===0){nw[4]=0; return {w:nw,lk:nl};}
-  const retired=w[4]; nw[4]=0;
-  const locked=nw.map((_,j)=>j).filter(j=>j!==4&&nl[j]);
-  const free=nw.map((_,j)=>j).filter(j=>j!==4&&!nl[j]);
-  const lockedSum=locked.reduce((a,j)=>a+w[j],0);
-  if(!free.length||lockedSum>100){
-    const idxs=nw.map((_,j)=>j).filter(j=>j!==4);
-    const s=idxs.reduce((a,j)=>a+w[j],0);
-    idxs.forEach(j=>{nw[j]=s>0?Math.round(w[j]*100/s):0;});
-    fixSum(nw,idxs); nw[4]=0; return {w:nw,lk:nl};
-  }
-  const freeCur=free.reduce((a,j)=>a+w[j],0), room=100-lockedSum;
-  free.forEach(j=>{nw[j]=freeCur>0?Math.round(w[j]*room/freeCur):Math.round(room/free.length);});
-  locked.forEach(j=>{nw[j]=w[j];});
-  nw[4]=0; fixSum(nw,free); return {w:nw,lk:nl};
+  w=(Array.isArray(w)&&w.length===7)?w.map(Number):null;
+  lk=(Array.isArray(lk)&&lk.length===7)?lk.map(Boolean):null;
+  if(!w||!lk||w.some(x=>!Number.isInteger(x)||x<0||x>100)||w.reduce((a,b)=>a+b,0)!==100||w[4]===0) return {w:base,lk:Array(7).fill(false)};
+  return {w:w.slice(),lk:lk.slice()};
 }
 function weightsForSaved(data){
   const w=data&&data.weights, lk=data&&data.locked;
-  const ok=Array.isArray(w)&&w.length===7&&w.every(x=>Number.isInteger(x)&&x>=0&&x<=100)&&w.reduce((a,b)=>a+b,0)===100&&Array.isArray(lk)&&lk.length===7;
-  if(ok) return migrateWeights(w,lk);
-  return migrateWeights([25,15,10,10,20,10,10], Array(7).fill(false));
+  return migrateWeights(w,lk);
 }
 let pt; function savePrefs(){
   if(!S.user){
@@ -283,9 +269,9 @@ let pt; function savePrefs(){
   }
   clearTimeout(pt);pt=setTimeout(()=>sb.from('fs_weight_prefs').upsert({user_email:S.user,weights:S.w,locked:S.lk,updated_at:new Date().toISOString()}).then(()=>{}),800);
 }
-const score=r=>{if(!r||r.scored===false||r.cap==null)return null; return KEYS.reduce((a,k,i)=>a+(k==='cost'?0:(Number(r[k])||0)*S.w[i]),0)/100;};
-const COLS=['n','name','cat','country','makes','num','num','num','num','num','num','num','uspres','certs','src'];
-const WIDTHS=['3%','11%','7%','6.5%','12%','3.6%','3.6%','3.8%','7.2%','3.6%','3.6%','4.6%','11%','10.5%','9%'];
+const score=r=>{if(!r||r.scored===false||r.cap==null)return null; return KEYS.reduce((a,k,i)=>a+(Number(r[k])||0)*S.w[i],0)/100;};
+const COLS=['n','name','cat','country','makes','num','num','num','num','num','num','num','num','uspres','certs','src'];
+const WIDTHS=['3%','10.5%','6.5%','6.5%','11%','3.4%','3.4%','3.6%','6.4%','3.4%','3.4%','3.4%','4.4%','10%','10%','8.1%'];
 
 function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
@@ -293,7 +279,7 @@ function scorecard(){
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
   <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/study">How the scores were set</a></p>
   ${bannerHtml()}
-  <div class="callout"><b>Cost is unknown and is not in the score.</b> No purchase price, FOB, freight rate, or duty was collected, so cost is not a rank and it is not a column. <a href="#/study">The study</a> says what a landed cost is, and which container indexes were read. Those indexes are not a supplier cost. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
+  <div class="callout"><b>Cost is a 1–5 exposure rank, not a price.</b> It uses the ocean-freight lanes on <a href="#/study">the study</a>. Higher is more favorable. Europe ranks ahead of China on those lanes, and a US plant would rank ahead of both. It is not a landed cost. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
   <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">Weight changes stay in this browser only. They do not change the supplier scores.</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
@@ -312,8 +298,8 @@ function scorecard(){
   $('#fc').value=S.f.cat;$('#fr').value=S.f.reg;$('#fm').value=S.f.min||'';
   [['#fc','cat'],['#fr','reg']].forEach(([s,k])=>$(s).onchange=e=>{S.f[k]=e.target.value;table();});
   $('#fm').oninput=e=>{S.f.min=+e.target.value||0;table();};
-  $('#rst').onclick=()=>{const m=migrateWeights(DEF,Array(7).fill(false)); S.w=m.w; S.lk=m.lk; savePrefs(); weights(); table();};
-  const setAllLocks=v=>{S.lk=setLocks(S.lk,v); S.lk[4]=true; S.w[4]=0; savePrefs(); weights();};$('#lkall').onclick=()=>setAllLocks(true);$('#lknone').onclick=()=>setAllLocks(false);
+  $('#rst').onclick=()=>{S.w=DEF.slice(); S.lk=Array(7).fill(false); savePrefs(); weights(); table();};
+  const setAllLocks=v=>{S.lk=setLocks(S.lk,v); savePrefs(); weights();};$('#lkall').onclick=()=>setAllLocks(true);$('#lknone').onclick=()=>setAllLocks(false);
   weights();table();syncTopbar();
 }
 function watchlistHtml(){
@@ -324,14 +310,14 @@ function watchlistHtml(){
   </div>`;
 }
 function weights(){
-  $('#wts').innerHTML=KEYS.map((k,i)=>{const cost=k==='cost', proxy=k==='lead'||k==='geo';
-    return `<div class="w"><span>${LBL[i]}${cost?' — unknown':''}${proxy?' *':''}</span><input type="range" min="0" max="100" value="${S.w[i]}" data-i="${i}" ${S.lk[i]||cost?'disabled':''}>
-  <input type="number" min="0" max="100" value="${S.w[i]}" data-n="${i}" ${S.lk[i]||cost?'disabled':''}><label><input type="checkbox" data-l="${i}" ${S.lk[i]?'checked':''} ${cost?'disabled':''}> ${cost?'Excluded':'Lock'}</label></div>`;}).join('')+'<p class="muted" style="margin:8px 0 0">* Lead and Geo are assumptions, not a measured transit time or a proven risk score. Cost is excluded. The weights still total 100.</p>';
+  $('#wts').innerHTML=KEYS.map((k,i)=>{const proxy=k==='lead'||k==='geo';
+    return `<div class="w"><span>${LBL[i]}${proxy?' *':''}</span><input type="range" min="0" max="100" value="${S.w[i]}" data-i="${i}" ${S.lk[i]?'disabled':''}>
+  <input type="number" min="0" max="100" value="${S.w[i]}" data-n="${i}" ${S.lk[i]?'disabled':''}><label><input type="checkbox" data-l="${i}" ${S.lk[i]?'checked':''}> Lock</label></div>`;}).join('')+'<p class="muted" style="margin:8px 0 0">* Lead and Geo are assumptions, not a measured transit time or a proven risk score. Cost is a 1–5 exposure rank from sourced ocean freight, not a price. The weights still total 100.</p>';
   $('#tot').textContent='Total: '+S.w.reduce((a,b)=>a+b,0)+'%';
   const sync=()=>{KEYS.forEach((_,j)=>{$(`[data-i="${j}"]`).value=S.w[j];const n=$(`[data-n="${j}"]`);if(document.activeElement!==n)n.value=S.w[j];});table();};
   document.querySelectorAll('[data-i]').forEach(el=>el.oninput=()=>{setW(+el.dataset.i,+el.value);sync();});
   document.querySelectorAll('[data-n]').forEach(el=>el.onchange=()=>{setW(+el.dataset.n,+el.value);el.value=S.w[+el.dataset.n];sync();});
-  document.querySelectorAll('[data-l]').forEach(el=>el.onchange=()=>{if(+el.dataset.l===4){el.checked=true;return;} S.lk[+el.dataset.l]=el.checked; S.lk[4]=true; S.w[4]=0; savePrefs(); weights();});
+  document.querySelectorAll('[data-l]').forEach(el=>el.onchange=()=>{S.lk[+el.dataset.l]=el.checked; savePrefs(); weights();});
 }
 function dateLabel(r){return r.pass==='2026-11-07'?'Researched Nov 7, 2026':r.pass==='2026-11-06'?'Researched Nov 6, 2026':'Researched Nov 2, 2026';}
 function findAny(id){return S.rows.find(x=>x.id===id)||(S.discovery||[]).find(x=>x.id===id);}
@@ -346,10 +332,10 @@ function detailInner(r){
   ${r.claims?`<p><b>Claims, not verified:</b> ${esc(r.claims)}</p>`:''}
   <p><b>US presence:</b> ${esc(r.us_presence||'Unknown')}</p><p><b>Certs:</b> ${esc(r.certs_note||'Unknown')}</p>
   <p><b>HYTORC relationship:</b> ${esc(r.hytorc_relationship||'Unknown. Customs history has not been matched to this name.')}</p>
-  <p><b>Cost:</b> Unknown. Not a quote and not part of the score.</p>
-  ${scored?`<p>${KEYS.filter(k=>k!=='cost').map((k,i)=>`${LBL[KEYS.indexOf(k)]}: <b>${r[k]??'–'}</b>`).join(' · ')}</p>
-  <p>Weighted score, cost excluded: <b>${sc==null?'—':sc.toFixed(2)}</b></p>
-  <p class="callout">${esc(r.scores_status||'Preliminary 1-5 desk judgment from public pages. Not a qualification or a quote.')} Lead and Geo are assumptions. Capability is catalog fit, not proven quality. The score does not include a cost.</p>`:`<p class="callout">Not scored. No 1–5 technical scores were assigned, so this name is not ranked against the scored list. Cost is unknown.</p>`}
+  <p><b>Cost:</b> ${scored?`<b>${r.cost??'–'}</b>. ${esc(r.cost_note||'Freight and duty exposure, not a price.')}`:'Not scored.'}</p>
+  ${scored?`<p>${KEYS.map(k=>`${LBL[KEYS.indexOf(k)]}: <b>${r[k]??'–'}</b>`).join(' · ')}</p>
+  <p>Weighted score: <b>${sc==null?'—':sc.toFixed(2)}</b></p>
+  <p class="callout">${esc(r.scores_status||'Preliminary 1-5 desk judgment from public pages. Not a qualification or a quote.')} Cost is freight exposure, not a price. Lead and Geo are assumptions. Capability is catalog fit, not proven quality.</p>`:`<p class="callout">Not scored. No 1–5 scores were assigned, so this name is not ranked against the scored list.</p>`}
   ${r.pass==='2026-11-02'?'<p class="muted">Per-supplier discovery trail was not recorded. Source date Nov 2, 2026.</p>':''}
   ${r.price_note?`<p><b>Public price note, not a quote:</b> ${esc(r.price_note)}</p>`:''}
   ${flags?`<ul class="flags">${flags}</ul>`:''}
@@ -357,9 +343,9 @@ function detailInner(r){
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
   <a class="btn" href="#/study">Score is not a cost</a></div>`;
 }
-const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','lead','geo','score','uspres','certs','source'];
-const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US footprint','Lead','Geo','Score','US note','Certs','Source'];
-const SCORE_TIPS={usexp:'US footprint: 1–5 desk score for a public US office or claimed US presence. Not verified shipment history.'};
+const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','cost','lead','geo','score','uspres','certs','source'];
+const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US footprint','Cost','Lead','Geo','Score','US note','Certs','Source'];
+const SCORE_TIPS={usexp:'US footprint: 1–5 desk score for a public US office or claimed US presence. Not verified shipment history.',cost:'Cost: 1–5 exposure rank from sourced ocean freight. Higher is more favorable. Not a price. Differences are not proportional.'};
 const DISC_KEYS=['name','category','country','status','source'];
 const DISC_LABELS=['Name','Category','Country','Status','Source'];
 function rowValue(row,key){
@@ -369,7 +355,7 @@ function rowValue(row,key){
   if(key==='category') return row.category;
   if(key==='country') return row.country;
   if(key==='makes') return row.what_they_make;
-  if(key==='cap'||key==='cert'||key==='scale'||key==='usexp'||key==='lead'||key==='geo') return row[key];
+  if(key==='cap'||key==='cert'||key==='scale'||key==='usexp'||key==='cost'||key==='lead'||key==='geo') return row[key];
   if(key==='uspres') return row.us_presence;
   if(key==='certs') return row.certs_note;
   if(key==='source') return row.url||'';
@@ -385,7 +371,7 @@ function sortLabel(name,on,dir,off){
 function sortHeads(tableId,keys,labels,classes){
   const cur=tableId==='disc'?FSS.migrateSort(S.f.dsort,keys):FSS.migrateSort(S.f.sort,keys);
   if(tableId==='disc') S.f.dsort=cur; else S.f.sort=cur;
-  const numeric={'cap':1,'cert':1,'scale':1,'usexp':1,'lead':1,'geo':1,'score':1};
+  const numeric={'cap':1,'cert':1,'scale':1,'usexp':1,'cost':1,'lead':1,'geo':1,'score':1};
   return keys.map((key,i)=>{
     const on=cur.key===key;
     const aria=on?(cur.dir==='asc'?'ascending':'descending'):'none';
@@ -401,7 +387,7 @@ function bindSort(tableId){
   document.querySelectorAll('#'+tableId+' .sorthead').forEach(btn=>btn.onclick=e=>{
     e.stopPropagation();
     const key=btn.dataset.sort;
-    const prefer=key!=='rank'&&['cap','cert','scale','usexp','lead','geo','score'].indexOf(key)>=0;
+    const prefer=key!=='rank'&&['cap','cert','scale','usexp','cost','lead','geo','score'].indexOf(key)>=0;
     const cur=tableId==='disc'?S.f.dsort:S.f.sort;
     const next=FSS.nextSort(cur,key,prefer);
     if(tableId==='disc') S.f.dsort=next; else S.f.sort=next;
@@ -416,9 +402,8 @@ function table(){
   S.f.sort=cur;
   let rows=ranked.filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
   rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);
-  const shown=KEYS.filter(k=>k!=='cost');
   $('#tb').innerHTML=`<colgroup>${WIDTHS.map(w=>`<col style="width:${w}">`).join('')}</colgroup><thead><tr>${sortHeads('tb',SCORE_KEYS,SCORE_LABELS,COLS)}</tr></thead><tbody>`+
-  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${r._rank}</td><td class="name"><b>${esc(r.name)}</b></td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${shown.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${SCORE_KEYS.length}">No scored suppliers match these filters.</td></tr>`)+'</tbody>';
+  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${r._rank}</td><td class="name"><b>${esc(r.name)}</b></td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${SCORE_KEYS.length}">No scored suppliers match these filters.</td></tr>`)+'</tbody>';
   paintDiscovery();
   bindSort('tb'); bindSort('disc');
   document.querySelectorAll('#tb tr.r').forEach(tr=>tr.onclick=e=>{
@@ -441,7 +426,7 @@ function paintDiscovery(){
   if(window.FSS){const cur=FSS.migrateSort(S.f.dsort,['name','category','country','source']); S.f.dsort=cur; rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);}
   const scored=document.querySelectorAll('#tb tbody tr.r').length;
   const c=$('#counts'); if(c) c.textContent=scored+' scored in this view · '+rows.length+' not scored in this view. Min score applies only to scored rows. Not-scored names have no rank.';
-  box.innerHTML=`<h2>Not scored</h2><p class="muted">Public pages reviewed Nov 7, 2026. No 1–5 scores were assigned, so these names are not ranked with the scored list. Cost is unknown and is not a column here either. Where a customs check was made, it used only the visible names on ImportYeti’s public HYTORC page.</p>
+  box.innerHTML=`<h2>Not scored</h2><p class="muted">Public pages reviewed Nov 7, 2026. No 1–5 scores were assigned, so these names are not ranked with the scored list and they have no cost rank. Where a customs check was made, it used only the visible names on ImportYeti’s public HYTORC page.</p>
   <div class="scorewrap"><table class="tbl" id="disc"><thead><tr>${sortHeads('disc',DISC_KEYS,DISC_LABELS,DISC_KEYS.map(()=>''))}</tr></thead><tbody>`+
   (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>Not scored</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):'<tr><td colspan="5">No unscored names match this category and region.</td></tr>')+
   '</tbody></table></div>';
@@ -613,7 +598,7 @@ function freightComparisonHtml(){
   const rows=c.lanes.map(l=>`<tr><td>${esc(l.name)}</td><td>${esc(freightRateLabel(l))}</td><td>${esc(l.date)}</td><td><a href="${esc(c.source)}" target="_blank" rel="noopener">Drewry WCI</a></td></tr>`).join('');
   return `<div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th>Latest spot rate (per 40ft)</th><th>Date</th><th>Source</th></tr></thead><tbody>${rows}</tbody></table></div>
   <p>Shanghai is about $6,450 more per 40-ft container than Rotterdam (9,631 − 3,181 = 6,450). The dates differ by one week.</p>
-  <p>Supplier prices quoted FOB cover delivery to the port of loading. Ocean freight to the US is paid on top, so this gap belongs in landed cost, not in the screening score.</p>
+  <p>Supplier prices quoted FOB cover delivery to the port of loading. Ocean freight to the US is paid on top. The screening score uses that gap only as a 1–5 exposure rank. It is still not the landed cost.</p>
   <p class="muted">More recent China reading: Drewry, ${esc(later.drewry.date)}, ${esc(later.drewry.name)} ${later.drewry.usd40ft.toLocaleString('en-US')} USD per 40-ft container; Freightos Baltic ${esc(later.fbx.name)}, ${esc(later.fbx.date)}, ${later.fbx.usdFeu.toLocaleString('en-US')} USD per FEU.</p>`;
 }
 function freightStudyHtml(){

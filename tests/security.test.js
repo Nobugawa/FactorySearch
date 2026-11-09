@@ -10,7 +10,9 @@ const cat=JSON.parse(fs.readFileSync(R+'/catalog.js','utf8').replace(/^window\.F
 const archive=JSON.parse(fs.readFileSync(R+'/archive_cost_historical.json','utf8'));
 const costById=Object.fromEntries(archive.suppliers.map(r=>[r.id,r.cost]));
 const keys=['id','category','name','country','region','what_they_make','us_presence','certs_note','url','url_check','cap','cert','scale','usexp','cost','lead','geo'];
-ok(!cat.suppliers.some(r=>Object.prototype.hasOwnProperty.call(r,'cost')),'public catalog does not carry cost integers');
+ok(cat.suppliers.every(r=>Number.isInteger(r.cost)&&r.cost>=1&&r.cost<=5&&typeof r.cost_note==='string'&&r.cost_note.length>20),'each scored row carries an ordinal cost score and a basis note');
+ok(cat.suppliers.filter(r=>r.country==='China').every(r=>r.cost===2)&&cat.suppliers.filter(r=>r.country==='Germany').every(r=>r.cost===4)&&cat.suppliers.filter(r=>['India','Israel'].includes(r.country)).every(r=>r.cost===3),'China is the high-freight band, Europe the lower lane, and unsourced origins stay neutral');
+ok((cat.discovery||[]).every(r=>!Object.prototype.hasOwnProperty.call(r,'cost')),'unscored leads have no cost score');
 const core=cat.suppliers.filter(r=>r.pass==='2026-11-02').map(r=>{const o={};keys.forEach(k=>{o[k]=k==='cost'?costById[r.id]:(r[k]??null);});return o;}).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
 ok(crypto.createHash('sha256').update(JSON.stringify(core)).digest('hex')==='96e51d23034cc6de859856f89d2e05a86064af200206d2328a63ba73fd92db0d','original 34 rows unchanged, with cost kept only in the archive');
 ok(cat.suppliers.length===38&&cat.suppliers.filter(r=>r.pass==='2026-11-06').map(r=>r.id).join()==='C13,C14,D10,D11','four Nov 6 additions');
