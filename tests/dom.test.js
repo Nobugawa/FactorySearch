@@ -23,7 +23,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.8','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.9','version');
  ok(!D.querySelector('nav a[href="#/quotes"]')&&!/Quote entry/.test(D.querySelector('nav').textContent)&&!D.querySelector('a[href="#/quotes"]'),'quote entry is not in the public navigation or the scorecard');
  ok(!D.querySelector('nav a[href="#/sensitivity"]')&&[...D.querySelectorAll('nav a')].map(a=>a.textContent).join(' ')==='Scorecard Approach Worksheet Sources'&&!D.querySelector('a[href="#/sensitivity"]'),'sensitivity is not in the navigation or the scorecard');
  {const scale=D.getElementById('scalescale');
@@ -118,6 +118,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/footer\{position:static/.test(css)&&/overflow-wrap:anywhere/.test(css),'css: footer in flow, urls wrap');
  ok(!/#tb\{min-width:1480px\}/.test(css)&&/max-width:none/.test(css)&&/#tb th\.n,#tb td\.n,#tb th\.num,#tb td\.num\{[^}]*text-align:center/.test(css)&&/\.fspop\{[^}]*position:fixed/.test(css),'css: aligned numeric columns and floating detail');
  ok(/#tb tbody tr\.r:nth-child\(even\)[^{]*\{background:#fff9e6\}/.test(css)&&/#tb tbody tr\.r:hover[^{]*\{background:#e7edff\}/.test(css)&&/#tb tbody tr\.r\.on[^{]*\{background:#ffe8a3/.test(css),'css: light yellow stripes, distinct hover and selection');
+ ok(/#tb tbody tr\.r:nth-child\(even\)[^{]*\.wsnote\{background:#fff9e6\}/.test(css)&&/\.wsnote\{display:inline-block;padding:6px 10px;border-radius:8px/.test(css),'worksheet note uses the same light yellow as the stripes');
  ok(/\.filters select,\.filters input\{[^}]*background:#eef2ff[^}]*border:2px solid #2f5bea/.test(css)&&/\.filters select:focus/.test(css),'css: filters have a visible fill, border, and focus ring');
  ok(/@media\(max-width:1100px\)\{[\s\S]*overflow-x:auto/.test(css),'css: narrow screens may scroll sideways');
  ok(!/\.detail\{[^}]*position:\s*fixed/.test(css),'css: detail is not a fixed side panel');
