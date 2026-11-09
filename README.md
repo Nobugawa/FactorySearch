@@ -1,11 +1,11 @@
-# FactorySearch v1.6.6
+# FactorySearch v1.6.7
 
-Public HYTORC supplier scorecard, Sources, and Study, plus a private qualification worksheet. Static site on Netlify. Research rows ship in `catalog.js`. Shared worksheet notes, per-account weights, and email-linked activity stay in Supabase (`fs_*` tables, same project as the job portal).
+Public HYTORC supplier scorecard, Sources, and Approach, plus a private qualification worksheet. Static site on Netlify. Research rows ship in `catalog.js`. Shared worksheet notes, per-account weights, and email-linked activity stay in Supabase (`fs_*` tables, same project as the job portal).
 
 Anonymous visitors are not granted database access. The publishable key in `config.js` is not a service-role key. GA4 stays off (`GA4_MEASUREMENT_ID` is empty).
 
 ## What is public
-Scorecard, Sources, and Study render from `catalog.js` (the original 34 suppliers, snapshotted from the database without worksheet or account fields, plus four Nov 6, 2026 China candidates). Anonymous weight changes stay in `localStorage`. They are not written to `fs_weight_prefs`, `fs_suppliers`, or `fs_events`.
+Scorecard, Sources, and Approach render from `catalog.js` (the original 34 suppliers, snapshotted from the database without worksheet or account fields, plus four Nov 6, 2026 China candidates). Anonymous weight changes stay in `localStorage`. They are not written to `fs_weight_prefs`, `fs_suppliers`, or `fs_events`.
 
 v1.6.1 addresses the same screen to the HYTORC reviewer. v1.6.0 adds a Landed-cost drivers and sensitivity page for assumptions you type, and puts a sort control on each supplier column. The earlier quote-entry workspace remains. v1.5.0 keeps one list of Chinese and non-Chinese manufacturers and adds six Nov 7, 2026 leads that are not scored. Cost is unknown: the old 1–5 cost flags are not in the public catalog or the rank, and the other default weights are renormalized to 100. Those retired flags stay in git history as an audit trail, not as prices and not as a secret. The live site returns 404 for `archive_cost_historical.json` so the file is not presented as price evidence. Lead time and geography remain indicative assumptions. The Quotes page is a browser-only calculator for one quantity. It does not save, submit, or call the database, and it does not invent a freight rate, a duty rate, or a price break. No schema change and no new anon grant. Suggested 1-5 scores are preliminary desk judgments. A US office is not verified shipment history. A certificate named on a page, or a registrar row whose expiry was not checked, is not a verified certificate. Price, MOQ, and volume willingness were not found. Each supplier keeps its own source date. Desk research dates are Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026.
 

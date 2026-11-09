@@ -23,9 +23,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.6','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.7','version');
  ok(!D.querySelector('nav a[href="#/quotes"]')&&!/Quote entry/.test(D.querySelector('nav').textContent)&&!D.querySelector('a[href="#/quotes"]'),'quote entry is not in the public navigation or the scorecard');
- ok(!D.querySelector('nav a[href="#/sensitivity"]')&&[...D.querySelectorAll('nav a')].map(a=>a.textContent).join(' ')==='Scorecard Study Worksheet Sources'&&!D.querySelector('a[href="#/sensitivity"]'),'sensitivity is not in the navigation or the scorecard');
+ ok(!D.querySelector('nav a[href="#/sensitivity"]')&&[...D.querySelectorAll('nav a')].map(a=>a.textContent).join(' ')==='Scorecard Approach Worksheet Sources'&&!D.querySelector('a[href="#/sensitivity"]'),'sensitivity is not in the navigation or the scorecard');
  {const scale=D.getElementById('scalescale');
   ok(scale&&scale.textContent==='1–5 screening scores: higher is more favorable; differences are not proportional.'&&(scale.compareDocumentPosition(tb)&w.Node.DOCUMENT_POSITION_FOLLOWING)===w.Node.DOCUMENT_POSITION_FOLLOWING,'shared 1-5 scale note sits above the table');}
  ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&!D.querySelector('#fs')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score, without a global sort menu');
@@ -82,7 +82,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  const sel=tb.querySelector('tr.r.on'), pop=D.getElementById('fspop');
  ok(sel&&pop&&!tb.querySelector('tr.detailrow'),'detail floats instead of inserting a table row');
  ok(pop.getAttribute('role')==='dialog'&&pop.querySelector('.detail')&&pop.textContent.includes(sel.querySelector('b').textContent),'popover shows that supplier');
- ok(pop.querySelector('a[href^="http"]')&&pop.querySelector('#dx')&&!pop.querySelector('a[href="#/quotes"]')&&pop.querySelector('a[href="#/study"]')&&!pop.querySelector('a[href="#/sensitivity"]'),'popover keeps the source link and points at the study, not quote entry or sensitivity');
+ ok(pop.querySelector('a[href^="http"]')&&pop.querySelector('#dx')&&!pop.querySelector('a[href="#/quotes"]')&&pop.querySelector('a[href="#/approach"]')&&!pop.querySelector('a[href="#/sensitivity"]'),'popover keeps the source link and points at Approach, not quote entry or sensitivity');
  ok((w.scrollY||0)===y0,'opening detail does not jump the page');
  D.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
  ok(!D.getElementById('fspop'),'escape closes the popover');
@@ -147,7 +147,8 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok((D.querySelectorAll('#qout table').length===1)&&!/Quantity 1000/.test(D.getElementById('qout').textContent),'one typed list does not become two quantity tiers');
  ok(!w.__from.includes('fs_worksheet')&&w.__from.length===0,'quote page does not read or write the database');
  ok(!banned.test(D.body.textContent),'quote entry does not explain the edit history');
- w.location.hash='#/study';await tick();await tick();D=w.document;const st=D.body.textContent;
+ w.location.hash='#/approach';await tick();await tick();D=w.document;const st=D.body.textContent;
+ ok(D.querySelector('h1')&&D.querySelector('h1').textContent==='Approach'&&D.querySelector('nav a[data-v="approach"].on'),'Approach is the page heading and the active tab');
  ok(/Capability is catalog fit, not an audit/.test(st),'capability vs audit');ok(/Private label/.test(st)&&/Questions for discussion/.test(st)&&/Qualification method/.test(st),'study sections');
  ok(/cannot by itself qualify a supplier/.test(st)&&/used earlier, to find and screen candidates/.test(st)&&!/next deepening step/.test(st),'study customs wording');
  ok(/How to read cost, lead time, and geography/.test(st)&&/not an exhaustive search/.test(st)&&/established manufacturing clusters/.test(st)&&/Prepared for Teddy Hume by Philos Kim/.test(st),'study is addressed to Teddy and keeps the search limit');
@@ -160,6 +161,8 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/Cost is a 1–5 exposure rank from sourced ocean freight/.test(st)&&/do not establish that suppliers in one country are a better fit/.test(st),'study keeps cost as exposure and does not treat one country as a better factory');
  ok(!/Cost score is meant/.test(st)&&!/Landed cost ≈/.test(st)&&/Score is not a cost/.test(st)&&/ordinal screening rank/.test(st)&&/contains no price/.test(st)&&/differences are not proportional/.test(st)&&/about \$6,450 more per 40-ft container/.test(st)&&/Section 301, checked Nov 9, 2026/.test(st)&&/plus 25%/.test(st)&&/List 4A/.test(st)&&/7\.5%/.test(st)&&/policy-dependent and could change/.test(st)&&/IEEPA reciprocal and fentanyl duties are not in this score/.test(st)&&/Section 232 is not in the score/.test(st)&&!/Quote entry/.test(st),'study keeps the ordinal heading and states the sourced Section 301 rates');
  ok(!/not a lecture/i.test(st)&&!/\$100|\$135|\$120|~25%|20 to 30%/.test(st),'removed unsupported numbers/phrasing');ok(!D.querySelector('#app input[type=range]'),'no duplicate controls');
+ w.location.hash='#/study';await tick();await tick();D=w.document;
+ ok(D.querySelector('h1').textContent==='Approach'&&D.querySelector('nav a[data-v="approach"].on')&&/Score is not a cost/.test(D.body.textContent),'the old study address still opens Approach');
  w.location.hash='#/sources';await tick();await tick();D=w.document;const sr=D.body.textContent;
  ok(/Channels used in the desk research/.test(sr)&&/Planned research channels \(not yet checked\)/.test(sr),'sources split');
  ok(!/China supplier coverage/.test(sr),'sources have no separate China chapter');

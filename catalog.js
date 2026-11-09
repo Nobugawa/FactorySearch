@@ -98,7 +98,7 @@ window.FS_CATALOG = {
       "geo": 2,
       "pass": "2026-11-02",
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "B12",
@@ -796,7 +796,7 @@ window.FS_CATALOG = {
         "The Certipedia row was opened, but expiry was not checked, so the certificate is not verified."
       ],
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "C14",
@@ -832,7 +832,7 @@ window.FS_CATALOG = {
         "Price, MOQ, and small-volume willingness are unknown."
       ],
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "D10",
@@ -879,7 +879,7 @@ window.FS_CATALOG = {
         "Price is unknown."
       ],
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "D11",
@@ -921,7 +921,7 @@ window.FS_CATALOG = {
         "Price, MOQ, and small-volume willingness are unknown."
       ],
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026; Ningbo was not a separate lane. Section 301 also applies to products of China. The example lines on the study are on List 1 or List 3, both an extra 25%. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026; Ningbo was not a separate lane. Section 301 also applies to products of China. The example lines on the Approach page are on List 1 or List 3, both an extra 25%. Checked Nov 9, 2026. Not a classification of this part."
     }
   ],
   "watchlist": [
