@@ -1,5 +1,5 @@
 {
-  "note": "Retired 1-5 cost flags. Not prices. Not used in the score.",
+  "note": "Retired 1-5 cost flags from before v1.5.0. Not prices. Not the active freight-exposure scores.",
   "suppliers": [
     {
       "id": "B1",

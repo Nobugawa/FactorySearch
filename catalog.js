@@ -54,7 +54,9 @@ window.FS_CATALOG = {
       "usexp": 5,
       "lead": 4,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "B10",
@@ -73,7 +75,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "B11",
@@ -92,7 +96,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 2,
       "geo": 2,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "B12",
@@ -111,7 +117,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 3,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "B13",
@@ -130,7 +138,9 @@ window.FS_CATALOG = {
       "usexp": 2,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
     },
     {
       "id": "B2",
@@ -149,7 +159,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 4,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "B3",
@@ -168,7 +180,9 @@ window.FS_CATALOG = {
       "usexp": 5,
       "lead": 4,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "B4",
@@ -187,7 +201,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published."
     },
     {
       "id": "B5",
@@ -206,7 +222,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published."
     },
     {
       "id": "B6",
@@ -225,7 +243,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published."
     },
     {
       "id": "B7",
@@ -244,7 +264,9 @@ window.FS_CATALOG = {
       "usexp": 2,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "B8",
@@ -263,7 +285,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "B9",
@@ -282,7 +306,9 @@ window.FS_CATALOG = {
       "usexp": 5,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C1",
@@ -301,7 +327,9 @@ window.FS_CATALOG = {
       "usexp": 5,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "C10",
@@ -320,7 +348,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C11",
@@ -339,7 +369,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C12",
@@ -358,7 +390,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C2",
@@ -377,7 +411,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "C3",
@@ -396,7 +432,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "C4",
@@ -415,7 +453,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published."
     },
     {
       "id": "C5",
@@ -434,7 +474,9 @@ window.FS_CATALOG = {
       "usexp": 2,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "C6",
@@ -453,7 +495,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 3,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Rotterdam. Genoa to New York was not published."
     },
     {
       "id": "C7",
@@ -472,7 +516,9 @@ window.FS_CATALOG = {
       "usexp": 5,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
     },
     {
       "id": "C8",
@@ -491,7 +537,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
     },
     {
       "id": "C9",
@@ -510,7 +558,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
     },
     {
       "id": "D1",
@@ -529,7 +579,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
     },
     {
       "id": "D2",
@@ -548,7 +600,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
     },
     {
       "id": "D3",
@@ -567,7 +621,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
     },
     {
       "id": "D4",
@@ -586,7 +642,9 @@ window.FS_CATALOG = {
       "usexp": 5,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "D5",
@@ -605,7 +663,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 5,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 4,
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
     },
     {
       "id": "D6",
@@ -624,7 +684,9 @@ window.FS_CATALOG = {
       "usexp": 3,
       "lead": 3,
       "geo": 3,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 3,
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Rotterdam. Genoa to New York was not published."
     },
     {
       "id": "D7",
@@ -643,7 +705,9 @@ window.FS_CATALOG = {
       "usexp": 5,
       "lead": 3,
       "geo": 3,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "D8",
@@ -662,7 +726,9 @@ window.FS_CATALOG = {
       "usexp": 5,
       "lead": 4,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "D9",
@@ -681,7 +747,9 @@ window.FS_CATALOG = {
       "usexp": 4,
       "lead": 3,
       "geo": 4,
-      "pass": "2026-11-02"
+      "pass": "2026-11-02",
+      "cost": 2,
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
     },
     {
       "id": "C13",
@@ -726,7 +794,9 @@ window.FS_CATALOG = {
         "US export history is unverified.",
         "Price is unknown.",
         "The Certipedia row was opened, but expiry was not checked, so the certificate is not verified."
-      ]
+      ],
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "C14",
@@ -760,7 +830,9 @@ window.FS_CATALOG = {
         "IATF claim was not verified with a registrar.",
         "US export claim is unverified.",
         "Price, MOQ, and small-volume willingness are unknown."
-      ]
+      ],
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "D10",
@@ -805,7 +877,9 @@ window.FS_CATALOG = {
         "Certificates are stated by the company, not verified with a registrar.",
         "The New Jersey office is not verified US shipment history.",
         "Price is unknown."
-      ]
+      ],
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the study are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
     },
     {
       "id": "D11",
@@ -845,7 +919,9 @@ window.FS_CATALOG = {
         "IATF was not verified.",
         "A stated US base is not verified US shipment history.",
         "Price, MOQ, and small-volume willingness are unknown."
-      ]
+      ],
+      "cost": 1,
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026; Ningbo was not a separate lane. Section 301 also applies to products of China. The example lines on the study are on List 1 or List 3, both an extra 25%. Checked Nov 9, 2026. Not a classification of this part."
     }
   ],
   "watchlist": [
