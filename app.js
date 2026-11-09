@@ -506,7 +506,7 @@ function worksheet(){
   const opts=S.rows.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.id)}" ${r.id===sel?'selected':''}>${esc(r.name)} (${esc(r.category)})</option>`).join('');
   const forms={}; FSW.GATES.concat([FSW.DECISION]).forEach(g=>{forms[g.id]=FSW.deserialize(g.id,localWsRow(sel,g.id));});
   WS={sel,forms,loadedAt:{},dirty:false,hasDetails:true}; S.wsDirty=false;
-  app.innerHTML=`<h1>Supplier qualification worksheet</h1><p>Your entries save only in the browser you're using.</p><p class="sub">These are the fields a qualification review fills in after a drawing, a quote, and a certificate check.</p>
+  app.innerHTML=`<h1>Supplier qualification worksheet</h1><p class="wsnote">Your entries save only in the browser you're using.</p><p class="sub">These are the fields a qualification review fills in after a drawing, a quote, and a certificate check.</p>
   <div class="card wstop"><label for="sup" class="fl">Supplier</label><select id="sup" class="fld" style="max-width:420px">${opts}</select>
   <p class="muted" style="font-size:12px">${esc(sup.category)} · ${esc(sup.country)}</p></div>
   <div class="card" id="wssum" style="margin:14px 0"></div><div id="wsform"></div>`;
