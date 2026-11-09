@@ -494,27 +494,34 @@ function summaryHtml(){const r=FSW.readiness(WS.forms),c=r.counts;
 function readForm(){document.querySelectorAll('#wsform [data-gid][data-k]').forEach(el=>{const gid=el.dataset.gid,f=WS.forms[gid];
   if(el.dataset.k==='_status')f.status=el.value;else if(el.dataset.k==='_evidence')f.evidence=el.value;
   else{const def=FSW.fieldsOf(gid==='decision'?FSW.DECISION:FSW.GATES.find(g=>g.id===gid)).find(x=>x.k===el.dataset.k);f.details[el.dataset.k]=def.t==='urls'?FSW.cleanUrls(el.value):el.value;}});}
+const LOCAL_WS='fs_local_worksheet_v1';
+function readLocalWs(){try{const v=JSON.parse(localStorage.getItem(LOCAL_WS)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}catch(e){return {};}}
+function localWsRow(sel,gid){const bag=readLocalWs()[sel];if(!bag||typeof bag!=='object')return null;const row=bag[gid];return row&&typeof row==='object'?{status:row.status,evidence:row.evidence,details:row.details}:null;}
+function saveLocalWs(){if(!WS.sel)return;const all=readLocalWs(),pack={};FSW.GATES.concat([FSW.DECISION]).forEach(g=>{const f=WS.forms[g.id];pack[g.id]={status:f.status,evidence:f.evidence,details:f.details};});all[WS.sel]=pack;try{localStorage.setItem(LOCAL_WS,JSON.stringify(all));}catch(e){}}
 function worksheet(){
   closePop();
   const q=new URLSearchParams(location.hash.split('?')[1]||''); let sel=q.get('s'); if(!S.rows.some(r=>r.id===sel))sel=(S.rows[0]||{}).id;
   if(!sel){app.innerHTML='<div class="card"><p class="muted">No suppliers loaded yet.</p></div>';return;}
   const sup=S.rows.find(r=>r.id===sel);
   const opts=S.rows.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.id)}" ${r.id===sel?'selected':''}>${esc(r.name)} (${esc(r.category)})</option>`).join('');
-  const forms={}; FSW.GATES.concat([FSW.DECISION]).forEach(g=>{forms[g.id]=FSW.deserialize(g.id);});
-  WS={sel,forms,loadedAt:{},dirty:false,hasDetails:false}; S.wsDirty=false;
-  app.innerHTML=`<h1>Supplier qualification worksheet</h1><p class="sub">Blank template. These are the fields a qualification review would fill in after a drawing, a quote, and a certificate check. Nothing on this page is loaded from saved notes.</p>
+  const forms={}; FSW.GATES.concat([FSW.DECISION]).forEach(g=>{forms[g.id]=FSW.deserialize(g.id,localWsRow(sel,g.id));});
+  WS={sel,forms,loadedAt:{},dirty:false,hasDetails:true}; S.wsDirty=false;
+  app.innerHTML=`<h1>Supplier qualification worksheet</h1><p>Your entries save only in the browser you're using.</p><p class="sub">These are the fields a qualification review fills in after a drawing, a quote, and a certificate check.</p>
   <div class="card wstop"><label for="sup" class="fl">Supplier</label><select id="sup" class="fld" style="max-width:420px">${opts}</select>
-  <p class="muted" style="font-size:12px">${esc(sup.category)} · ${esc(sup.country)} · every field below starts empty. This is not a completed qualification.</p></div>
+  <p class="muted" style="font-size:12px">${esc(sup.category)} · ${esc(sup.country)}</p></div>
   <div class="card" id="wssum" style="margin:14px 0"></div><div id="wsform"></div>`;
   $('#sup').onchange=e=>{location.hash='#/worksheet?s='+encodeURIComponent(e.target.value);};
+  const keep=()=>{readForm();saveLocalWs();$('#wssum').innerHTML=summaryHtml();};
   $('#wssum').innerHTML=summaryHtml();
   $('#wsform').innerHTML=FSW.GATES.map(g=>{const f=forms[g.id];return `<details class="card gatecard" open><summary><span class="gn">${g.n}</span> <b>${esc(g.l)}</b> <span class="gs">${esc(f.status)}</span></summary>
     <p class="muted hint">${esc(g.hint)}</p>
-    <div class="wgrid"><div class="wf"><label for="st_${g.id}">Gate status (required checkpoint)</label><select id="st_${g.id}" class="fld" disabled>${FSW.STATUSES.map(s=>`<option ${s===f.status?'selected':''}>${s}</option>`).join('')}</select></div>
-    ${g.f.map(x=>fieldHtml(g.id,x,f.details[x.k],true)).join('')}</div>
-    <h4>Follow-up</h4><div class="wgrid">${FSW.COMMON.map(x=>fieldHtml(g.id,x,f.details[x.k],true)).join('')}
-    <div class="wf wide"><label for="ev_${g.id}">Notes / evidence summary</label><textarea id="ev_${g.id}" class="fld" rows="2" disabled></textarea></div></div></details>`;}).join('')+
-   `<div class="card gatecard"><h2>Open risks and recommendation</h2><div class="wgrid">${FSW.DECISION.f.map(x=>fieldHtml('decision',x,forms.decision.details[x.k],true)).join('')}</div></div>`;
+    <div class="wgrid"><div class="wf"><label for="st_${g.id}">Gate status (required checkpoint)</label><select id="st_${g.id}" class="fld" data-gid="${g.id}" data-k="_status">${FSW.STATUSES.map(s=>`<option ${s===f.status?'selected':''}>${s}</option>`).join('')}</select></div>
+    ${g.f.map(x=>fieldHtml(g.id,x,f.details[x.k],false)).join('')}</div>
+    <h4>Follow-up</h4><div class="wgrid">${FSW.COMMON.map(x=>fieldHtml(g.id,x,f.details[x.k],false)).join('')}
+    <div class="wf wide"><label for="ev_${g.id}">Notes / evidence summary</label><textarea id="ev_${g.id}" class="fld" rows="2" maxlength="4000" data-gid="${g.id}" data-k="_evidence">${esc(f.evidence)}</textarea></div></div></details>`;}).join('')+
+   `<div class="card gatecard"><h2>Open risks and recommendation</h2><div class="wgrid">${FSW.DECISION.f.map(x=>fieldHtml('decision',x,forms.decision.details[x.k],false)).join('')}</div></div>`;
+  $('#wsform').addEventListener('input',keep);
+  $('#wsform').addEventListener('change',keep);
 }
 // Kept for a future signed-in editor. The public page does not call this, and it is not reachable from the navigation.
 async function worksheetStored(){

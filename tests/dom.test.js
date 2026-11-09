@@ -23,7 +23,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.7','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.8','version');
  ok(!D.querySelector('nav a[href="#/quotes"]')&&!/Quote entry/.test(D.querySelector('nav').textContent)&&!D.querySelector('a[href="#/quotes"]'),'quote entry is not in the public navigation or the scorecard');
  ok(!D.querySelector('nav a[href="#/sensitivity"]')&&[...D.querySelectorAll('nav a')].map(a=>a.textContent).join(' ')==='Scorecard Approach Worksheet Sources'&&!D.querySelector('a[href="#/sensitivity"]'),'sensitivity is not in the navigation or the scorecard');
  {const scale=D.getElementById('scalescale');
@@ -102,9 +102,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  await new Promise(r=>setTimeout(r,900));
  ok(!(w.__ups||[]).length&&w.__from.length===0,'anon lock does not upsert shared prefs');
  w.location.hash='#/worksheet';await tick();await tick();
- ok(/Blank template/.test(w.document.body.textContent)&&w.document.getElementById('f_commercial_moq').disabled&&w.document.getElementById('f_commercial_small_ok').value==='Unknown','worksheet is a blank read-only template');
+ ok(/Your entries save only in the browser you're using\./.test(w.document.body.textContent)&&!w.document.getElementById('f_commercial_moq').disabled&&w.document.getElementById('f_commercial_small_ok').value==='Unknown','worksheet is editable in this browser and starts unknown');
  ok(!banned.test(w.document.body.textContent),'worksheet does not explain the edit history');
- ok(!w.document.getElementById('sv')&&!w.__from.includes('fs_worksheet')&&!/Last saved by/.test(w.document.body.textContent),'blank worksheet does not load or save notes');
+ ok(!w.document.getElementById('sv')&&!w.__from.includes('fs_worksheet')&&!/Last saved by/.test(w.document.body.textContent),'unsigned worksheet does not load or save shared notes');
  // password setup remains available for a recovery link, off the public nav
  ({w}=mk({user:{email:'philos@greymatterfusion.com'}},'?setup=1'));ok(await waitFor(w,'#p1'),'setup view');
  ok(w.document.getElementById('p1')&&w.document.querySelectorAll('.pwtog').length===2,'setup has 2 toggles');
