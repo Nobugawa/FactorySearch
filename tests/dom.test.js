@@ -23,7 +23,8 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.3','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.4','version');
+ ok(!D.querySelector('nav a[href="#/quotes"]')&&!/Quote entry/.test(D.querySelector('nav').textContent)&&!D.querySelector('a[href="#/quotes"]'),'quote entry is not in the public navigation or the scorecard');
  {const scale=D.getElementById('scalescale');
   ok(scale&&scale.textContent==='1–5 screening scores: higher is more favorable; differences are not proportional.'&&(scale.compareDocumentPosition(tb)&w.Node.DOCUMENT_POSITION_FOLLOWING)===w.Node.DOCUMENT_POSITION_FOLLOWING,'shared 1-5 scale note sits above the table');}
  ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&!D.querySelector('#fs')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score, without a global sort menu');
@@ -79,7 +80,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  const sel=tb.querySelector('tr.r.on'), pop=D.getElementById('fspop');
  ok(sel&&pop&&!tb.querySelector('tr.detailrow'),'detail floats instead of inserting a table row');
  ok(pop.getAttribute('role')==='dialog'&&pop.querySelector('.detail')&&pop.textContent.includes(sel.querySelector('b').textContent),'popover shows that supplier');
- ok(pop.querySelector('a[href^="http"]')&&pop.querySelector('#dx'),'popover keeps the source link and a close control');
+ ok(pop.querySelector('a[href^="http"]')&&pop.querySelector('#dx')&&!pop.querySelector('a[href="#/quotes"]'),'popover keeps the source link and does not offer quote entry');
  ok((w.scrollY||0)===y0,'opening detail does not jump the page');
  D.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
  ok(!D.getElementById('fspop'),'escape closes the popover');
@@ -138,6 +139,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/Shanghai to New York/.test(D.body.textContent)&&/9,303/.test(D.body.textContent)&&/Not returned\. Not zero/.test(D.body.textContent)&&!/3,062|3062/.test(D.body.textContent),'a checked container index is shown and is not written into the freight box');
  ok(w.__from.length===0,'sensitivity does not read or write the database');
  ok(!banned.test(D.body.textContent)&&/established manufacturing clusters/.test(D.body.textContent),'sensitivity uses the approved opening');
+ ok(!D.querySelector('a[href="#/quotes"]'),'sensitivity does not link to quote entry');
  w.location.hash='#/quotes';await tick();await tick();D=w.document;
  D.getElementById('qqty').value='10, 1000';D.getElementById('qqty').dispatchEvent(new w.Event('input',{bubbles:true}));
  ok((D.querySelectorAll('#qout table').length===1)&&!/Quantity 1000/.test(D.getElementById('qout').textContent),'one typed list does not become two quantity tiers');
@@ -148,6 +150,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/cannot by itself qualify a supplier/.test(st)&&/used earlier, to find and screen candidates/.test(st)&&!/next deepening step/.test(st),'study customs wording');
  ok(/How to read cost, lead time, and geography/.test(st)&&/not an exhaustive search/.test(st)&&/established manufacturing clusters/.test(st)&&/Prepared for Teddy Hume by Philos Kim/.test(st),'study is addressed to Teddy and keeps the search limit');
  ok(!banned.test(st),'study does not explain the edit history');
+ ok(!D.querySelector('a[href="#/quotes"]'),'study does not link to quote entry');
  ok(/indicative assumptions/.test(st)&&/not quotations/.test(st)&&/MOQ/.test(st)&&/Drawing fit/.test(st),'study keeps assumption and verification gaps');
  ok(!/diversification-biased|reincorporat|China was not the main search|light on China|China additions|China supplier coverage|later desk pass|not the Nov 2 discovery trail/i.test(st),'study omits the China chapter and internal backstory');
  ok(/Nov 2, 2026/.test(st)&&/Nov 6, 2026/.test(st),'study keeps both source dates');
