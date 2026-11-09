@@ -23,8 +23,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.4','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.5','version');
  ok(!D.querySelector('nav a[href="#/quotes"]')&&!/Quote entry/.test(D.querySelector('nav').textContent)&&!D.querySelector('a[href="#/quotes"]'),'quote entry is not in the public navigation or the scorecard');
+ ok(!D.querySelector('nav a[href="#/sensitivity"]')&&[...D.querySelectorAll('nav a')].map(a=>a.textContent).join(' ')==='Scorecard Study Worksheet Sources'&&!D.querySelector('a[href="#/sensitivity"]'),'sensitivity is not in the navigation or the scorecard');
  {const scale=D.getElementById('scalescale');
   ok(scale&&scale.textContent==='1–5 screening scores: higher is more favorable; differences are not proportional.'&&(scale.compareDocumentPosition(tb)&w.Node.DOCUMENT_POSITION_FOLLOWING)===w.Node.DOCUMENT_POSITION_FOLLOWING,'shared 1-5 scale note sits above the table');}
  ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&!D.querySelector('#fs')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score, without a global sort menu');
@@ -80,7 +81,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  const sel=tb.querySelector('tr.r.on'), pop=D.getElementById('fspop');
  ok(sel&&pop&&!tb.querySelector('tr.detailrow'),'detail floats instead of inserting a table row');
  ok(pop.getAttribute('role')==='dialog'&&pop.querySelector('.detail')&&pop.textContent.includes(sel.querySelector('b').textContent),'popover shows that supplier');
- ok(pop.querySelector('a[href^="http"]')&&pop.querySelector('#dx')&&!pop.querySelector('a[href="#/quotes"]'),'popover keeps the source link and does not offer quote entry');
+ ok(pop.querySelector('a[href^="http"]')&&pop.querySelector('#dx')&&!pop.querySelector('a[href="#/quotes"]')&&pop.querySelector('a[href="#/study"]')&&!pop.querySelector('a[href="#/sensitivity"]'),'popover keeps the source link and points at the study, not quote entry or sensitivity');
  ok((w.scrollY||0)===y0,'opening detail does not jump the page');
  D.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
  ok(!D.getElementById('fspop'),'escape closes the popover');
@@ -134,9 +135,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/A dash is missing, not zero/.test(D.body.textContent)&&/Nothing here is sent or saved/.test(D.body.textContent)&&/no built-in rate/.test(D.body.textContent),'quote page explains local estimates');
  ok(/1 EUR = 1\.08 USD/.test(D.body.textContent)&&/1 quote currency = this many comparison currency/.test(D.body.textContent)&&D.getElementById('qx0').value===''&&!/FX to comparison currency/.test(D.body.textContent),'fx label shows the direction and the example is not filled in');
  w.location.hash='#/sensitivity';await tick();await tick();D=w.document;
- ok(/Landed-cost drivers and sensitivity/.test(D.body.textContent)&&/does not turn them into a price curve/.test(D.body.textContent)&&/not converted into dollars/.test(D.body.textContent),'sensitivity explains the question before the form');
- ok(D.getElementById('syqty')&&D.getElementById('syqty').value===''&&D.getElementById('sbfob').value===''&&D.getElementById('sbfr').value===''&&!/bell curve|normal curve/i.test(D.body.textContent),'sensitivity starts blank and does not draw a price curve');
- ok(/Shanghai to New York/.test(D.body.textContent)&&/9,303/.test(D.body.textContent)&&/Not returned\. Not zero/.test(D.body.textContent)&&!/3,062|3062/.test(D.body.textContent),'a checked container index is shown and is not written into the freight box');
+ ok(/Landed-cost drivers and sensitivity/.test(D.body.textContent)&&/does not turn them into a price curve/.test(D.body.textContent)&&/not converted into dollars/.test(D.body.textContent),'sensitivity explains the question without a worksheet');
+ ok(!D.getElementById('syqty')&&!D.getElementById('sbfob')&&!D.getElementById('feupieces')&&!/bell curve|normal curve/i.test(D.body.textContent)&&/id="syqty"/.test(fs.readFileSync(R+'app.js','utf8')),'the worksheet is not presented, and its markup stays in the file');
+ ok(/Shanghai to New York/.test(D.body.textContent)&&/\$9,631, down 5% on the week/.test(D.body.textContent)&&/~\$3,181, up 3% on the week/.test(D.body.textContent)&&/about \$6,450 more/.test(D.body.textContent)&&/9,303/.test(D.body.textContent)&&/9,848/.test(D.body.textContent)&&/Not returned\. Not zero/.test(D.body.textContent)&&!/3,062|3062|2,895|3,615|4,166/.test(D.body.textContent)&&![...D.querySelectorAll('#pubref tbody tr td:first-child')].some(td=>/Genoa|Los Angeles|Shanghai to Rotterdam/.test(td.textContent)),'the supplied Drewry comparison is shown and Asia-to-Europe lanes are not rows');
  ok(w.__from.length===0,'sensitivity does not read or write the database');
  ok(!banned.test(D.body.textContent)&&/established manufacturing clusters/.test(D.body.textContent),'sensitivity uses the approved opening');
  ok(!D.querySelector('a[href="#/quotes"]'),'sensitivity does not link to quote entry');
@@ -150,13 +151,13 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/cannot by itself qualify a supplier/.test(st)&&/used earlier, to find and screen candidates/.test(st)&&!/next deepening step/.test(st),'study customs wording');
  ok(/How to read cost, lead time, and geography/.test(st)&&/not an exhaustive search/.test(st)&&/established manufacturing clusters/.test(st)&&/Prepared for Teddy Hume by Philos Kim/.test(st),'study is addressed to Teddy and keeps the search limit');
  ok(!banned.test(st),'study does not explain the edit history');
- ok(!D.querySelector('a[href="#/quotes"]'),'study does not link to quote entry');
+ ok(!D.querySelector('a[href="#/quotes"]')&&!D.querySelector('a[href="#/sensitivity"]'),'study does not link to quote entry or the hidden sensitivity page');
  ok(/indicative assumptions/.test(st)&&/not quotations/.test(st)&&/MOQ/.test(st)&&/Drawing fit/.test(st),'study keeps assumption and verification gaps');
  ok(!/diversification-biased|reincorporat|China was not the main search|light on China|China additions|China supplier coverage|later desk pass|not the Nov 2 discovery trail/i.test(st),'study omits the China chapter and internal backstory');
  ok(/Nov 2, 2026/.test(st)&&/Nov 6, 2026/.test(st),'study keeps both source dates');
  ok(/not a verified certificate/.test(st)&&/not verified US shipment history/.test(st),'study keeps certificate and shipment caveats');
  ok(/Cost is unknown and is not part of the weighted score/.test(st)&&/do not establish that suppliers in one country are a better fit/.test(st),'study does not treat one country as confirmed better');
- ok(!/Cost score is meant/.test(st)&&!/Landed cost ≈/.test(st)&&/There is no cost score/.test(st),'study does not describe a cost score');
+ ok(!/Cost score is meant/.test(st)&&!/Landed cost ≈/.test(st)&&/Score is not a cost/.test(st)&&/ordinal screening rank/.test(st)&&/contains no price/.test(st)&&/about \$6,450 more per 40-ft container than Rotterdam/.test(st)&&/dates differ by one week/.test(st)&&/FOB cover delivery to the port of loading/.test(st)&&/this gap belongs in landed cost, not in the screening score/.test(st)&&!/do not show a Europe-to-US comparison/.test(st)&&!/Quote entry/.test(st),'study states the Shanghai–Rotterdam container gap and keeps it out of the score');
  ok(!/not a lecture/i.test(st)&&!/\$100|\$135|\$120|~25%|20 to 30%/.test(st),'removed unsupported numbers/phrasing');ok(!D.querySelector('#app input[type=range]'),'no duplicate controls');
  w.location.hash='#/sources';await tick();await tick();D=w.document;const sr=D.body.textContent;
  ok(/Channels used in the desk research/.test(sr)&&/Planned research channels \(not yet checked\)/.test(sr),'sources split');
