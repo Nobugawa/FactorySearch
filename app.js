@@ -120,14 +120,14 @@ const logoutBtn=$('#logout'); if(logoutBtn) logoutBtn.onclick=async e=>{e.preven
 let lastHash=location.hash;
 window.addEventListener('hashchange',()=>{if(S.wsDirty&&!confirm('You have unsaved worksheet changes. Leave without saving?')){history.replaceState(null,'',lastHash||'#/worksheet');return;} S.wsDirty=false; lastHash=location.hash; route();});
 window.addEventListener('beforeunload',e=>{if(S.wsDirty){e.preventDefault();e.returnValue='';}});
-function route(){const h=location.hash, v=h.startsWith('#/sensitivity')?'sens':h.startsWith('#/quotes')?'q':h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':h.startsWith('#/study')?'study':'score';
+function route(){const h=location.hash, v=h.startsWith('#/sensitivity')?'sens':h.startsWith('#/quotes')?'q':h.startsWith('#/worksheet')?'ws':h.startsWith('#/sources')?'src':(h.startsWith('#/approach')||h.startsWith('#/study'))?'approach':'score';
   if(v!=='score') closePop();
   document.querySelectorAll('nav a[data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
   if(v==='sens') return sensitivity();
   if(v==='q') return quotes();
   if(v==='ws') return worksheet();
   if(v==='src') return sources();
-  if(v==='study') return study();
+  if(v==='approach') return study();
   scorecard();
 }
 const ALTS=[
@@ -162,7 +162,7 @@ function evidenceHtml(r){return (r.evidence||[]).map(e=>safeUrl(e[0])?`<div clas
 function sources(){
   const rc=S.recheck||{results:{}}; log('sources_open');
   const cat=window.FS_CATALOG||{};
-  app.innerHTML=`<h1>Sources</h1><p class="sub">Research channels for this short list, and what each link does and does not prove. Source dates are Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. See <a href="#/study">Study</a> for the method.</p>
+  app.innerHTML=`<h1>Sources</h1><p class="sub">Research channels for this short list, and what each link does and does not prove. Source dates are Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. See <a href="#/approach">Approach</a> for the method.</p>
   ${bannerHtml()}
   <div class="card" style="margin-bottom:14px"><h2>Channels used in the desk research</h2>
   <table class="tbl"><thead><tr><th>Channel</th><th>How it was used</th><th>Limitation</th></tr></thead><tbody>
@@ -199,7 +199,7 @@ const RUBRIC=[ ['Capability','25%','Clear public fit to the part family (e.g. HA
 function study(){ log('study_open');
   const li=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
   const ncat=(rows,c)=>rows.filter(r=>r.category===c).length;
-  app.innerHTML=`<h1>HYTORC supplier sourcing study</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
+  app.innerHTML=`<h1>Approach</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
   ${bannerHtml()}
   <div class="card study">
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
@@ -278,9 +278,9 @@ function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
   app.innerHTML=`<h1>Supplier scorecard</h1>
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
-  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/study">How the scores were set</a></p>
+  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/approach">How the scores were set</a></p>
   ${bannerHtml()}
-  <div class="callout"><b>Cost is a 1–5 exposure rank, not a price.</b> It uses the ocean-freight lanes on <a href="#/study">the study</a>. Higher is more favorable. Europe ranks ahead of China on those lanes, and a US plant would rank ahead of both. It is not a landed cost. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
+  <div class="callout"><b>Cost is a 1–5 exposure rank, not a price.</b> It uses the ocean-freight lanes on <a href="#/approach">Approach</a>. Higher is more favorable. Europe ranks ahead of China on those lanes, and a US plant would rank ahead of both. It is not a landed cost. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
   <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">Weight changes stay in this browser only. They do not change the supplier scores.</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
@@ -342,7 +342,7 @@ function detailInner(r){
   ${flags?`<ul class="flags">${flags}</ul>`:''}
   ${ev?`<div class="ev">${ev}</div>`:''}
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
-  <a class="btn" href="#/study">Score is not a cost</a></div>`;
+  <a class="btn" href="#/approach">Score is not a cost</a></div>`;
 }
 const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','cost','lead','geo','score','uspres','certs','source'];
 const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US footprint','Cost','Lead','Geo','Score','US note','Certs','Source'];
@@ -640,7 +640,7 @@ function sensitivity(){
   <p>${esc(FSN.COPY.qualitative)}</p>
   <p>${esc(FSN.COPY.noRate)}</p>
   <p class="eq">${esc(FSN.formulaText())}</p>
-  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD. Do not enter the inverse. Same currency uses a rate of 1. The short form of this note is on <a href="#/study">Study</a>. No worksheet is shown on this page.</p></div>
+  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD. Do not enter the inverse. Same currency uses a rate of 1. The short form of this note is on <a href="#/approach">Approach</a>. No worksheet is shown on this page.</p></div>
   ${referenceHtml()}`;
 }
 // Preserved assumption worksheet. Not rendered: the public pages do not ask anyone to fill it in.
