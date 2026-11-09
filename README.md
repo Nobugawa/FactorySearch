@@ -1,4 +1,4 @@
-# FactorySearch v1.6.3
+# FactorySearch v1.6.4
 
 Public HYTORC supplier scorecard, Sources, and Study, plus a private qualification worksheet. Static site on Netlify. Research rows ship in `catalog.js`. Shared worksheet notes, per-account weights, and email-linked activity stay in Supabase (`fs_*` tables, same project as the job portal).
 

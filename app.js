@@ -213,7 +213,7 @@ function study(){ log('study_open');
   <h2>How scores were set</h2><p>Six criteria are 1-5 desk judgments from public websites only: no quotes, plant visits, or certificate downloads. Cost is not one of them. Default weights total 100 (capability 29, certs 19, scale 13, US footprint 13, lead time 13, geography 13) and can be changed on the Scorecard. US footprint scores a named US office or a claimed US presence. It is not verified shipment history, and customs records were not used to set it. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified. A capability score is catalog fit, not proven quality.</p>
   <div class="wrap"><table class="tbl"><thead><tr><th>Criterion</th><th>Default weight</th><th>5 (strong)</th><th>3 (mixed)</th><th>1 (weak)</th></tr></thead><tbody>${RUBRIC.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="callout" style="margin-top:10px"><b>Capability is catalog fit, not an audit.</b> It reflects product and process fit from public material, not plant quality. Certifications are expected from public text, not verified. Quality is established through the qualification steps below.</div>
-  <h2>Cost is not a score</h2><p>There is no cost score, and the weighted score is not a landed cost. A comparison of one drawing, one quantity, and one ship-to belongs on <a href="#/quotes">Quote entry</a> once a seller has quoted, or on <a href="#/sensitivity">Landed-cost sensitivity</a> while the figures are still assumptions. Neither page supplies a freight rate, a duty rate, or a price break. A blank is missing rather than zero.</p>
+  <h2>Cost is not a score</h2><p>There is no cost score, and the weighted score is not a landed cost. Freight and duty assumptions for one drawing, one quantity, and one ship-to are entered on <a href="#/sensitivity">Landed-cost sensitivity</a>. That page does not supply a freight rate, a duty rate, or a price break, and a blank is missing rather than zero.</p>
   <h2>Proposed sourcing alternatives</h2><p>Summarized on the Scorecard. Lead and alternative candidates per part family are a starting point. They are not qualified and not interchangeable until drawings, specs and trials confirm fit.</p>
   <h2>Beyond factories: private label and agents</h2>
   ${li(['<b>Private label / white label:</b> buying a ready-made or lightly adapted product under the HYTORC name. Private label usually implies some exclusivity or customization; white label is a generic product many brands rebrand.','<b>Where it fits:</b> standard or near-standard items (hoses, fittings, some valves, C-parts, packaging) more than housings, reaction arms, or compact high-pressure pumps that must match tool geometry.','<b>Industrial distributors</b> with private-label programs can cover the standardized slice; they are a weaker fit for unique hydraulic power packs.','<b>Sourcing agents / trading companies:</b> useful for mapping an industrial district; the risks are markup and an obscured factory. Best used once the part family is defined, with factory identity, capability evidence, and a path to direct dual sourcing.'])}
@@ -289,7 +289,7 @@ function scorecard(){
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
   <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/study">How the scores were set</a> · <a href="#/sensitivity">Landed-cost sensitivity</a></p>
   ${bannerHtml()}
-  <div class="callout"><b>Cost is unknown and is not in the score.</b> No purchase price, FOB, freight rate, or duty was collected, so cost is not a rank and it is not a column. Freight and duty belong on <a href="#/sensitivity">Landed-cost sensitivity</a> when you enter them, or on <a href="#/quotes">Quote entry</a> when a supplier has quoted. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
+  <div class="callout"><b>Cost is unknown and is not in the score.</b> No purchase price, FOB, freight rate, or duty was collected, so cost is not a rank and it is not a column. Freight and duty belong on <a href="#/sensitivity">Landed-cost sensitivity</a> when you enter them. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
   <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">Weight changes stay in this browser only. They do not change the supplier scores.</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
@@ -351,7 +351,7 @@ function detailInner(r){
   ${flags?`<ul class="flags">${flags}</ul>`:''}
   ${ev?`<div class="ev">${ev}</div>`:''}
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
-  <a class="btn" href="#/sensitivity">Landed-cost drivers</a> <a class="btn sec" href="#/quotes">Quote entry</a></div>`;
+  <a class="btn" href="#/sensitivity">Landed-cost drivers</a></div>`;
 }
 const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','lead','geo','score','uspres','certs','source'];
 const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US footprint','Lead','Geo','Score','US note','Certs','Source'];
@@ -635,7 +635,7 @@ function sensitivity(){
   <p>${esc(FSN.COPY.qualitative)}</p>
   <p>${esc(FSN.COPY.noRate)}</p>
   <p class="eq">${esc(FSN.formulaText())}</p>
-  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD. Do not enter the inverse. Same currency uses a rate of 1. A real supplier quote is entered separately on <a href="#/quotes">Quote entry</a>. These assumptions are not copied there.</p></div>
+  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD. Do not enter the inverse. Same currency uses a rate of 1.</p></div>
   ${referenceHtml()}
   <div class="card"><h2>Same item, quantity, and destination</h2><div class="wgrid">
     <div class="wf"><label for="syitem">Item label</label><input id="syitem" class="fld" placeholder="Optional. Not a drawing number"></div>
