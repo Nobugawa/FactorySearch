@@ -298,9 +298,10 @@ function scorecard(){
   <label for="fr">Region <select id="fr"><option value="">All regions</option>${regs.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>
   <label for="fm">Min score <input id="fm" type="number" inputmode="decimal" step="0.1" min="0" max="5" aria-describedby="fmhint"></label>
   <span id="fmhint">0 to 5. Leave blank to show every row at or above 0.</span></div>
-  <p class="sortnote" id="sortnote">Each column title has an up button and a down button. Up sorts ascending. Down sorts descending. The rank number stays the weighted-score rank.</p>
+  <p class="sortnote" id="sortnote">Click any column heading to sort; click again to reverse. The rank number stays the weighted-score rank.</p>
   <p class="uslegend" id="uslegend"><b>US footprint</b> is a 1–5 desk score for a US office, subsidiary, or claimed US presence on a public page. A named office is the strong end of the scale. A claim without a clear office is the middle. No US footprint found is the weak end. It is not verified shipment history, and customs records were not used. <b>US note</b> is the sentence kept with that score. For many names dated Nov 2, 2026 the sentence was not recorded, so the note says unknown even though a score is shown.</p>
   <p class="muted" id="counts"></p>
+  <p class="callout" id="scalescale">1–5 screening scores: higher is more favorable; differences are not proportional.</p>
   <div class="card scorewrap"><table class="tbl" id="tb"></table></div>
   <div class="card" id="discover"></div>
   ${watchlistHtml()}`;
@@ -380,22 +381,25 @@ function sortLabel(name,on,dir,off){
 function sortHeads(tableId,keys,labels,classes){
   const cur=tableId==='disc'?FSS.migrateSort(S.f.dsort,keys):FSS.migrateSort(S.f.sort,keys);
   if(tableId==='disc') S.f.dsort=cur; else S.f.sort=cur;
+  const numeric={'cap':1,'cert':1,'scale':1,'usexp':1,'lead':1,'geo':1,'score':1};
   return keys.map((key,i)=>{
     const on=cur.key===key;
     const aria=on?(cur.dir==='asc'?'ascending':'descending'):'none';
-    const tip=SCORE_TIPS[key]?` title="${esc(SCORE_TIPS[key])}"`:'';
-    const btn=(dir,glyph)=>{
-      const pressed=on&&cur.dir===dir;
-      const word=dir==='asc'?'ascending':'descending';
-      return `<button type="button" class="sortdir" data-sort="${key}" data-dir="${dir}" data-table="${tableId}" aria-pressed="${pressed?'true':'false'}" aria-label="${esc(labels[i]+', sort '+word)}">${glyph}</button>`;
-    };
-    return `<th class="${classes[i]||''}" aria-sort="${aria}"><div class="sortwrap"${tip}><span class="thlab">${labels[i]}</span><span class="sortpair">${btn('asc','↑')}${btn('desc','↓')}</span></div></th>`;
+    const prefer=!!numeric[key]&&key!=='rank';
+    const nextWord=on?(cur.dir==='asc'?'descending':'ascending'):(prefer?'descending':'ascending');
+    const now=on?(cur.dir==='asc'?'ascending':'descending'):'';
+    const action=on?(labels[i]+', sorted '+now+'. Activate to sort '+nextWord+'.'):('Sort by '+labels[i]);
+    const tip=SCORE_TIPS[key]||'';
+    return `<th class="${classes[i]||''}" aria-sort="${aria}"><button type="button" class="sorthead" data-sort="${key}" data-table="${tableId}" title="${esc(tip||action)}" aria-label="${esc(tip?tip+' '+action:action)}"><span class="thlab">${labels[i]}</span><span class="tri" aria-hidden="true"><i class="up${on&&cur.dir==='asc'?' on':''}"></i><i class="dn${on&&cur.dir==='desc'?' on':''}"></i></span></button></th>`;
   }).join('');
 }
 function bindSort(tableId){
-  document.querySelectorAll('#'+tableId+' .sortdir').forEach(btn=>btn.onclick=e=>{
+  document.querySelectorAll('#'+tableId+' .sorthead').forEach(btn=>btn.onclick=e=>{
     e.stopPropagation();
-    const next={key:btn.dataset.sort,dir:btn.dataset.dir};
+    const key=btn.dataset.sort;
+    const prefer=key!=='rank'&&['cap','cert','scale','usexp','lead','geo','score'].indexOf(key)>=0;
+    const cur=tableId==='disc'?S.f.dsort:S.f.sort;
+    const next=FSS.nextSort(cur,key,prefer);
     if(tableId==='disc') S.f.dsort=next; else S.f.sort=next;
     table();
   });
