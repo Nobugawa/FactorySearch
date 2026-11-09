@@ -31,29 +31,30 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/established manufacturing clusters/.test(D.body.textContent)&&/promising suppliers for further qualification/.test(D.body.textContent)&&/equivalent specifications and quoted terms/.test(D.body.textContent),'approved opening on the scorecard');
  ok(!banned.test(D.body.textContent),'scorecard does not explain the edit history');
  {const heads=[...tb.tHead.rows[0].cells];
-  ok(heads.every(th=>th.querySelectorAll('button.sortdir').length===2),'each scored column has up and down controls');
+  ok(heads.every(th=>th.querySelectorAll('button.sorthead').length===1&&th.querySelector('.tri'))&&!tb.querySelector('.sortdir'),'each heading is one sort control with a compact arrow pair');
   ok(!tb.querySelector('button[data-sort="cost"]')&&!/\\bCost\\b/.test([...heads].map(th=>th.querySelector('.thlab').textContent).join(' ')),'the all-unknown cost column is gone');
   const ush=heads.find(th=>th.querySelector('.thlab').textContent==='US footprint');
-  ok(ush&&/not verified shipment history/i.test(ush.querySelector('.sortwrap').title)&&/Up sorts ascending/.test(D.getElementById('sortnote').textContent),'US footprint is named and the sort buttons are explained');
+  ok(ush&&/not verified shipment history/i.test(ush.querySelector('.sorthead').title)&&D.getElementById('sortnote').textContent.indexOf('Click any column heading to sort; click again to reverse.')===0,'US footprint is named and the sort instruction is the short one');
   const rankOf=id=>tb.querySelector(`tr[data-id="${id}"] td.n`).textContent;
   const top=tb.querySelector('tbody tr.r'); const topId=top.dataset.id; const topRank=rankOf(topId);
-  tb.querySelector('button[data-sort="name"][data-dir="asc"]').click();
-  ok(rankOf(topId)===topRank&&tb.querySelector('th[aria-sort="ascending"] button[data-sort="name"][aria-pressed="true"]'),'sorting by name keeps the weighted rank');
+  tb.querySelector('button[data-sort="name"]').click();
+  ok(rankOf(topId)===topRank&&tb.querySelector('th[aria-sort="ascending"] button[data-sort="name"]'),'sorting by name keeps the weighted rank');
   const names=[...tb.querySelectorAll('tbody tr.r td.name')].map(td=>td.textContent.trim());
   ok(names.length===38&&names[0].localeCompare(names[names.length-1])<=0,'name sort runs from A toward Z');
-  tb.querySelector('button[data-sort="country"][data-dir="desc"]').click();
-  ok(tb.querySelector('th[aria-sort="descending"] button[data-sort="country"][data-dir="desc"][aria-pressed="true"]'),'the down button sorts descending');
+  tb.querySelector('button[data-sort="country"]').click();
+  tb.querySelector('button[data-sort="country"]').click();
+  ok(tb.querySelector('th[aria-sort="descending"] button[data-sort="country"] .dn.on'),'clicking a heading again reverses the sort');
   const us=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[12].textContent.trim());
-  tb.querySelector('button[data-sort="uspres"][data-dir="asc"]').click();
+  tb.querySelector('button[data-sort="uspres"]').click();
   const usAsc=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[12].textContent.trim());
-  tb.querySelector('button[data-sort="uspres"][data-dir="desc"]').click();
+  tb.querySelector('button[data-sort="uspres"]').click();
   const usDesc=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.cells[12].textContent.trim());
   const unk=s=>/^unknown$/i.test(s)||s==='';
   ok(us.some(unk)&&usAsc.filter(unk).length===us.filter(unk).length&&usAsc.slice(-usAsc.filter(unk).length).every(unk)&&usDesc.slice(-usDesc.filter(unk).length).every(unk),'unknown US presence stays last in both directions');
   D.getElementById('fc').value='Hydraulics';D.getElementById('fc').dispatchEvent(new w.Event('change',{bubbles:true}));
   ok([...tb.querySelectorAll('tbody tr.r')].every(tr=>/Hydraulic/.test(tr.cells[2].textContent))&&D.querySelectorAll('#disc tbody tr.r').length>=1,'category filter still limits both tables');
   const shown=tb.querySelector('tbody tr.r'); const shownRank=shown.querySelector('td.n').textContent;
-  tb.querySelector('button[data-sort="name"][data-dir="asc"]').click();
+  tb.querySelector('button[data-sort="name"]').click();
   ok(tb.querySelector(`tr[data-id="${shown.dataset.id}"] td.n`).textContent===shownRank,'a filtered sort does not renumber rank');
   D.getElementById('fc').value='';D.getElementById('fc').dispatchEvent(new w.Event('change',{bubbles:true}));
  }
@@ -70,9 +71,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  {const row=w.FS_CATALOG.suppliers.find(r=>r.id==='B2'),ww=[29,19,13,13,0,13,13],keys=['cap','cert','scale','usexp','cost','lead','geo'];
   const exp=keys.reduce((a,k,i)=>a+(k==='cost'?0:row[k]*ww[i]),0)/100;
   ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'displayed score excludes cost');
-  row.cost=1;tb.querySelector('button[data-sort="name"][data-dir="asc"]').click();
+  row.cost=1;tb.querySelector('button[data-sort="name"]').click();
   ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'a planted cost integer does not change the score');
-  delete row.cost;tb.querySelector('button[data-sort="score"][data-dir="desc"]').click();}
+  delete row.cost;tb.querySelector('button[data-sort="score"]').click();}
  const y0=w.scrollY||0;
  tb.querySelector('tr.r').click();
  const sel=tb.querySelector('tr.r.on'), pop=D.getElementById('fspop');
