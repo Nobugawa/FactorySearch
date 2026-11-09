@@ -203,7 +203,7 @@ function study(){ log('study_open');
   ${bannerHtml()}
   <div class="card study">
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
-  <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: manufacturers with a public record in the part family, a scorecard that can be re-weighted, and a lead and an alternative in each family. Three families are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized. <a href="#/sensitivity">Landed-cost sensitivity</a> is where freight and duty assumptions can be tested before a quote is in hand.</p>
+  <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: manufacturers with a public record in the part family, a scorecard that can be re-weighted, and a lead and an alternative in each family. Three families are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized. Landed cost is discussed below. It is not part of the weighted score.</p>
   <p>The scored list has ${S.rows.length} manufacturers (${ncat(S.rows,'Hydraulics')} hydraulics, ${ncat(S.rows,'Forgings/Castings')} forgings and castings, ${ncat(S.rows,'Precision machining')} precision machining) in China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, the Czech Republic, and Israel), plus ${(S.discovery||[]).length} names dated Nov 7, 2026 that are not scored. Scored names use the same criteria. The Nov 7 names are leads for follow-up, not a ranked result.</p>
   <p>This is not an exhaustive search, and it is not an evenly balanced survey of every producing country. It is a preliminary desk list of manufacturers already visible in these part families. Desk research is dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Each name keeps its own source date on <a href="#/sources">Sources</a> and in its detail card.</p>
   <h2>How to read cost, lead time, and geography</h2>
@@ -213,7 +213,11 @@ function study(){ log('study_open');
   <h2>How scores were set</h2><p>Six criteria are 1-5 desk judgments from public websites only: no quotes, plant visits, or certificate downloads. Cost is not one of them. Default weights total 100 (capability 29, certs 19, scale 13, US footprint 13, lead time 13, geography 13) and can be changed on the Scorecard. US footprint scores a named US office or a claimed US presence. It is not verified shipment history, and customs records were not used to set it. A certificate score of 5 means a named standard was found in the sources. It does not mean the certificate was verified. A capability score is catalog fit, not proven quality.</p>
   <div class="wrap"><table class="tbl"><thead><tr><th>Criterion</th><th>Default weight</th><th>5 (strong)</th><th>3 (mixed)</th><th>1 (weak)</th></tr></thead><tbody>${RUBRIC.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="callout" style="margin-top:10px"><b>Capability is catalog fit, not an audit.</b> It reflects product and process fit from public material, not plant quality. Certifications are expected from public text, not verified. Quality is established through the qualification steps below.</div>
-  <h2>Cost is not a score</h2><p>There is no cost score, and the weighted score is not a landed cost. Freight and duty assumptions for one drawing, one quantity, and one ship-to are entered on <a href="#/sensitivity">Landed-cost sensitivity</a>. That page does not supply a freight rate, a duty rate, or a price break, and a blank is missing rather than zero.</p>
+  <h2>Score is not a cost</h2>
+  <p>The weighted score is an ordinal screening rank. It orders candidates by how favorable they look on public evidence. A higher score is more favorable. The gaps between scores are not proportional and do not measure money. The score is not a landed cost and it contains no price. On the scorecard the same point is stated as: 1–5 screening scores: higher is more favorable; differences are not proportional.</p>
+  <p>A landed cost is the seller’s price for one drawing and one quantity, plus freight, duty, and the other charges to the same ship-to. Those amounts are not in the score. A blank is missing, not zero. Nothing here is a quote.</p>
+  <p>Break-even, without a worksheet: for the same item, the same quantity, and the same destination, a candidate’s price can be higher only by as much as its freight, duty, and other charges are lower. When those charges are unknown, there is no break-even and no landed-cost rank.</p>
+  ${freightStudyHtml()}
   <h2>Proposed sourcing alternatives</h2><p>Summarized on the Scorecard. Lead and alternative candidates per part family are a starting point. They are not qualified and not interchangeable until drawings, specs and trials confirm fit.</p>
   <h2>Beyond factories: private label and agents</h2>
   ${li(['<b>Private label / white label:</b> buying a ready-made or lightly adapted product under the HYTORC name. Private label usually implies some exclusivity or customization; white label is a generic product many brands rebrand.','<b>Where it fits:</b> standard or near-standard items (hoses, fittings, some valves, C-parts, packaging) more than housings, reaction arms, or compact high-pressure pumps that must match tool geometry.','<b>Industrial distributors</b> with private-label programs can cover the standardized slice; they are a weaker fit for unique hydraulic power packs.','<b>Sourcing agents / trading companies:</b> useful for mapping an industrial district; the risks are markup and an obscured factory. Best used once the part family is defined, with factory identity, capability evidence, and a path to direct dual sourcing.'])}
@@ -287,9 +291,9 @@ function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
   app.innerHTML=`<h1>Supplier scorecard</h1>
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
-  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/study">How the scores were set</a> · <a href="#/sensitivity">Landed-cost sensitivity</a></p>
+  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/study">How the scores were set</a></p>
   ${bannerHtml()}
-  <div class="callout"><b>Cost is unknown and is not in the score.</b> No purchase price, FOB, freight rate, or duty was collected, so cost is not a rank and it is not a column. Freight and duty belong on <a href="#/sensitivity">Landed-cost sensitivity</a> when you enter them. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
+  <div class="callout"><b>Cost is unknown and is not in the score.</b> No purchase price, FOB, freight rate, or duty was collected, so cost is not a rank and it is not a column. <a href="#/study">The study</a> says what a landed cost is, and which container indexes were read. Those indexes are not a supplier cost. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
   <div class="card" style="margin-bottom:14px"><h2>Weights</h2><p class="muted" style="margin-top:-6px">Weight changes stay in this browser only. They do not change the supplier scores.</p><div class="weights" id="wts"></div>
   <div class="wtot"><span id="tot"></span> &nbsp; <button class="btn sec" id="rst">Return to defaults</button></div>
@@ -351,7 +355,7 @@ function detailInner(r){
   ${flags?`<ul class="flags">${flags}</ul>`:''}
   ${ev?`<div class="ev">${ev}</div>`:''}
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
-  <a class="btn" href="#/sensitivity">Landed-cost drivers</a></div>`;
+  <a class="btn" href="#/study">Score is not a cost</a></div>`;
 }
 const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','lead','geo','score','uspres','certs','source'];
 const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US footprint','Lead','Geo','Score','US note','Certs','Source'];
@@ -600,10 +604,24 @@ function readParty(prefix){
   const v=id=>{const el=$('#'+id); return el?el.value:'';};
   return {fob:v(prefix+'fob'),currency:v(prefix+'ccy'),fx:v(prefix+'fx'),freight:v(prefix+'fr'),freightBasis:v(prefix+'frb'),insurance:v(prefix+'in'),insuranceBasis:v(prefix+'inb'),other:v(prefix+'ot'),otherBasis:v(prefix+'otb'),dutyPercent:v(prefix+'du'),dutyScope:v(prefix+'ds'),fobLow:v(prefix+'lo'),fobHigh:v(prefix+'hi')};
 }
+function freightStudyHtml(){
+  if(!window.FSR) return '';
+  const d=FSR.freight, f=FSR.fbx;
+  const row=(name,index,date,rate,unit)=>`<tr><td>${esc(name)}</td><td>${esc(index)}</td><td>${esc(date)}</td><td class="num">${Number(rate).toLocaleString('en-US')} USD ${esc(unit)}</td></tr>`;
+  const rows=d.lanes.map(l=>row(l.name,'Drewry World Container Index',d.assessed,l.usd40ft,'per 40-ft container')).join('')
+    +f.lanes.map(l=>row(l.name,'Freightos Baltic Index',f.assessed,l.usdFeu,'per FEU')).join('');
+  return `<h3>Container spot rates into the US East Coast</h3>
+  <p>HYTORC’s address is Mahwah, New Jersey, so the ocean leg that matters is into the Port of New York and New Jersey. These are public spot indexes for a container, port to port. They are not a per-piece cost, not inland delivery to Mahwah, and not a quote.</p>
+  <div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th>Index</th><th>Date</th><th class="num">Rate</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p class="muted">${esc(d.note)} ${esc(f.note)}</p>
+  <p class="muted">Drewry: <a href="${esc(d.source)}" target="_blank" rel="noopener">${esc(d.source)}</a>. Baltic weekly update: <a href="${esc(f.source)}" target="_blank" rel="noopener">${esc(f.source)}</a>.</p>
+  <p>Both rates are from Asia into the US East Coast. They do not show a Europe-to-US comparison. A public figure that would show North Europe or the Mediterranean much lower into New York was not in the assessments that were read, so that comparison is not stated.</p>`;
+}
 function referenceHtml(){
   if(!window.FSR) return '';
   const R=FSR;
   const lanes=R.freight.lanes.map(l=>`<tr><td>${esc(l.name)}</td><td class="num">${l.usd40ft.toLocaleString('en-US')}</td><td>${esc(l.note||'')}</td></tr>`).join('');
+  const fbxRows=R.fbx.lanes.map(l=>`<tr><td>${esc(l.name)}</td><td class="num">${l.usdFeu.toLocaleString('en-US')}</td><td>${esc(l.note||'')}</td></tr>`).join('');
   const lines=R.hts.map(h=>`<tr><td>${esc(h.code)}</td><td>${esc(h.lineDescription)}</td><td>${esc(h.general)}</td><td>${esc(h.special)}</td><td>${esc(h.column2)}</td><td>Not returned. Not zero.</td></tr>`).join('');
   return `<div class="card" id="pubref"><h2>Public references, not a supplier cost</h2>
   <p>${esc(R.intro)}</p>
@@ -613,9 +631,12 @@ function referenceHtml(){
   <p class="muted">${esc(R.unconfirmed)}</p>
   <h3>Drewry World Container Index, ${esc(R.freight.assessed)}</h3>
   <p class="muted">${esc(R.freight.note)}</p>
-  <div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th class="num">USD per 40-ft container</th><th>What Drewry said</th></tr></thead><tbody>${lanes}</tbody></table></div>
-  <p class="muted">Source: <a href="${esc(R.freight.source)}" target="_blank" rel="noopener">${esc(R.freight.source)}</a>. Checked ${esc(R.checked)}.</p>
-  <p id="feuout" class="muted">Pieces in one 40-ft container, if you know them for a port-to-port illustration only: <input id="feupieces" class="fld" style="max-width:8rem" inputmode="numeric" placeholder="Blank"> <span id="feuresult">No per-piece figure until that number is entered. Inland freight is not in this index.</span></p>
+  <div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th class="num">USD per 40-ft container</th><th>What the assessment said</th></tr></thead><tbody>${lanes}</tbody></table></div>
+  <p class="muted">Source: <a href="${esc(R.freight.source)}" target="_blank" rel="noopener">${esc(R.freight.source)}</a>.</p>
+  <h3>Freightos Baltic Index, ${esc(R.fbx.assessed)}</h3>
+  <p class="muted">${esc(R.fbx.note)}</p>
+  <div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th class="num">USD per FEU</th><th>What the update said</th></tr></thead><tbody>${fbxRows}</tbody></table></div>
+  <p class="muted">Source: <a href="${esc(R.fbx.source)}" target="_blank" rel="noopener">${esc(R.fbx.source)}</a>.</p>
   </div>`;
 }
 function paintFeu(){
@@ -635,9 +656,12 @@ function sensitivity(){
   <p>${esc(FSN.COPY.qualitative)}</p>
   <p>${esc(FSN.COPY.noRate)}</p>
   <p class="eq">${esc(FSN.formulaText())}</p>
-  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD. Do not enter the inverse. Same currency uses a rate of 1.</p></div>
-  ${referenceHtml()}
-  <div class="card"><h2>Same item, quantity, and destination</h2><div class="wgrid">
+  <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD. Do not enter the inverse. Same currency uses a rate of 1. The short form of this note is on <a href="#/study">Study</a>. No worksheet is shown on this page.</p></div>
+  ${referenceHtml()}`;
+}
+// Preserved assumption worksheet. Not rendered: the public pages do not ask anyone to fill it in.
+function sensitivityWorksheetMarkup(){
+  return `<div class="card"><h2>Same item, quantity, and destination</h2><div class="wgrid">
     <div class="wf"><label for="syitem">Item label</label><input id="syitem" class="fld" placeholder="Optional. Not a drawing number"></div>
     <div class="wf"><label for="sydest">Destination</label><input id="sydest" class="fld" placeholder="Final destination"></div>
     <div class="wf"><label for="syccy">Comparison currency</label><input id="syccy" class="fld" maxlength="8" placeholder="Code"></div>
@@ -649,10 +673,6 @@ function sensitivity(){
     <div class="wf"><label for="schi">Assumed high FOB</label><input id="schi" class="fld" inputmode="decimal"></div>
   </div></div>
   <div id="syout"></div>`;
-  app.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',paintSensitivity); el.addEventListener('change',paintSensitivity);});
-  const feu=$('#feupieces'); if(feu){feu.addEventListener('input',paintFeu); feu.addEventListener('change',paintFeu);}
-  paintSensitivity();
-  paintFeu();
 }
 function paintSensitivity(){
   const out=$('#syout'); if(!out||!window.FSN) return;
@@ -706,7 +726,7 @@ function quotes(){
   </div>
   <p class="muted">Example of the rate direction, not a number filled in for you: 1 EUR = 1.08 USD means one euro is 1.08 of the comparison currency. Do not enter the inverse. Buyer-paid amounts below are in the comparison currency. The Incoterm does not fill any of them in. Unknown stays blank and blocks the total. There is no built-in rate.</p>
   <div class="legs">${FSQ.LEGS.map(([key,label])=>legRow(i,key,label)).join('')}</div></div>`;
-  app.innerHTML=`<h1>Quote entry</h1><p class="sub">For a quote a supplier has given, or for an estimate kept separate from a quote. Freight and duty assumptions, before a quote is in hand, belong on <a href="#/sensitivity">Landed-cost sensitivity</a>. One drawing, one quantity, one ship-to. No drawing number or volume is on file, so the fields start empty. Nothing here is sent or saved.</p>
+  app.innerHTML=`<h1>Quote entry</h1><p class="sub">For a quote a supplier has given, or for an estimate kept separate from a quote. One drawing, one quantity, one ship-to. No drawing number or volume is on file, so the fields start empty. Nothing here is sent or saved.</p>
   <div class="card"><h2>Common request</h2><p class="muted">Leave these blank until the drawing and the quantity are known. One quantity. A unit price is not reused at a second quantity.</p><div class="wgrid">
     <div class="wf"><label for="qdraw">Drawing</label><input id="qdraw" class="fld"></div>
     <div class="wf"><label for="qrev">Revision</label><input id="qrev" class="fld"></div>

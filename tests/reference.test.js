@@ -1,4 +1,4 @@
-const {hts,freight,perPiece,unconfirmed}=require('../reference.js');
+const {hts,freight,fbx,perPiece,unconfirmed}=require('../reference.js');
 const fs=require('fs');
 const blob=fs.readFileSync(__dirname+'/../reference.js','utf8');
 let f=0,n=0;const ok=(c,m)=>{n++;if(!c){f++;console.log('FAIL',m);}};
@@ -6,9 +6,10 @@ const line=code=>hts.find(h=>h.code===code);
 ok(line('7326.19.00').general==='2.9%'&&line('8413.50.00').general==='Free'&&line('8481.20.00').general==='2%','column 1 general rates match the USITC rows that were read');
 ok(hts.every(h=>h.additional==='not returned'),'additional duties are not filled in');
 ok(!/50%|25%|12\.5|9903\.88|Annex I/.test(blob),'section 232 and 301 rates from the research file are not published');
-ok(!/3062/.test(JSON.stringify(freight))&&!freight.lanes.some(l=>/Rotterdam to New York/i.test(l.name)),'the unconfirmed Rotterdam to New York rate is not listed as a lane');
+ok(!/3062|2895/.test(JSON.stringify(freight)+JSON.stringify(fbx))&&!freight.lanes.some(l=>/Rotterdam|Genoa|Los Angeles/.test(l.name))&&!fbx.lanes.some(l=>/Europe|Mediterranean|Genoa/.test(l.name)),'unconfirmed Europe-to-US and Asia-to-Europe lanes are not published');
 const ny=freight.lanes.find(l=>l.id==='sha-ny');
-ok(freight.assessed.indexOf('5 Nov 2026')>=0&&ny.usd40ft===9303&&freight.lanes.find(l=>l.id==='sha-la').usd40ft===7539&&freight.lanes.find(l=>l.id==='sha-rtm').usd40ft===3615&&freight.lanes.find(l=>l.id==='composite').usd40ft===4389&&freight.lanes.find(l=>l.id==='sha-goa').usd40ft===4166,'Drewry 5 Nov 2026 assessment figures that were on the page');
+ok(freight.assessed.indexOf('5 Nov 2026')>=0&&ny.usd40ft===9303&&freight.lanes.length===1,'Drewry 5 Nov 2026 US East Coast lane that was on the page');
+ok(fbx.assessed.indexOf('6 Nov 2026')>=0&&fbx.lanes.length===1&&fbx.lanes[0].id==='fbx03'&&fbx.lanes[0].usdFeu===9848,'Baltic weekly FBX03 Asia to US East Coast');
 ok(perPiece(9303,'')==null&&perPiece(9303,'10, 1000')==null&&perPiece(9303,'0')==null,'a container rate is not a per-piece rate until a whole number of pieces is entered');
 ok(perPiece(9303,'10').perPiece===930.3,'ten pieces in that container is 930.30 per piece, port to port only');
 ok(/not treated as zero|Not shown/.test(unconfirmed),'the missing duties are described as not zero');
