@@ -604,24 +604,27 @@ function readParty(prefix){
   const v=id=>{const el=$('#'+id); return el?el.value:'';};
   return {fob:v(prefix+'fob'),currency:v(prefix+'ccy'),fx:v(prefix+'fx'),freight:v(prefix+'fr'),freightBasis:v(prefix+'frb'),insurance:v(prefix+'in'),insuranceBasis:v(prefix+'inb'),other:v(prefix+'ot'),otherBasis:v(prefix+'otb'),dutyPercent:v(prefix+'du'),dutyScope:v(prefix+'ds'),fobLow:v(prefix+'lo'),fobHigh:v(prefix+'hi')};
 }
+function freightRateLabel(l){
+  return (l.approx?'~':'')+'$'+l.usd40ft.toLocaleString('en-US')+', '+l.move;
+}
+function freightComparisonHtml(){
+  if(!window.FSR) return '';
+  const c=FSR.comparison, later=FSR.laterChina;
+  const rows=c.lanes.map(l=>`<tr><td>${esc(l.name)}</td><td>${esc(freightRateLabel(l))}</td><td>${esc(l.date)}</td><td><a href="${esc(c.source)}" target="_blank" rel="noopener">Drewry WCI</a></td></tr>`).join('');
+  return `<div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th>Latest spot rate (per 40ft)</th><th>Date</th><th>Source</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p>Shanghai is about $6,450 more per 40-ft container than Rotterdam (9,631 − 3,181 = 6,450). The dates differ by one week.</p>
+  <p>Supplier prices quoted FOB cover delivery to the port of loading. Ocean freight to the US is paid on top, so this gap belongs in landed cost, not in the screening score.</p>
+  <p class="muted">More recent China reading: Drewry, ${esc(later.drewry.date)}, ${esc(later.drewry.name)} ${later.drewry.usd40ft.toLocaleString('en-US')} USD per 40-ft container; Freightos Baltic ${esc(later.fbx.name)}, ${esc(later.fbx.date)}, ${later.fbx.usdFeu.toLocaleString('en-US')} USD per FEU.</p>`;
+}
 function freightStudyHtml(){
   if(!window.FSR) return '';
-  const d=FSR.freight, f=FSR.fbx;
-  const row=(name,index,date,rate,unit)=>`<tr><td>${esc(name)}</td><td>${esc(index)}</td><td>${esc(date)}</td><td class="num">${Number(rate).toLocaleString('en-US')} USD ${esc(unit)}</td></tr>`;
-  const rows=d.lanes.map(l=>row(l.name,'Drewry World Container Index',d.assessed,l.usd40ft,'per 40-ft container')).join('')
-    +f.lanes.map(l=>row(l.name,'Freightos Baltic Index',f.assessed,l.usdFeu,'per FEU')).join('');
   return `<h3>Container spot rates into the US East Coast</h3>
-  <p>HYTORC’s address is Mahwah, New Jersey, so the ocean leg that matters is into the Port of New York and New Jersey. These are public spot indexes for a container, port to port. They are not a per-piece cost, not inland delivery to Mahwah, and not a quote.</p>
-  <div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th>Index</th><th>Date</th><th class="num">Rate</th></tr></thead><tbody>${rows}</tbody></table></div>
-  <p class="muted">${esc(d.note)} ${esc(f.note)}</p>
-  <p class="muted">Drewry: <a href="${esc(d.source)}" target="_blank" rel="noopener">${esc(d.source)}</a>. Baltic weekly update: <a href="${esc(f.source)}" target="_blank" rel="noopener">${esc(f.source)}</a>.</p>
-  <p>Both rates are from Asia into the US East Coast. They do not show a Europe-to-US comparison. A public figure that would show North Europe or the Mediterranean much lower into New York was not in the assessments that were read, so that comparison is not stated.</p>`;
+  <p>HYTORC’s address is Mahwah, New Jersey, so the ocean leg that matters is into the Port of New York and New Jersey. These are Drewry World Container Index spot rates, US dollars per 40-ft container, port to port. They are not a per-piece cost, not inland delivery to Mahwah, and not a quote.</p>
+  ${freightComparisonHtml()}`;
 }
 function referenceHtml(){
   if(!window.FSR) return '';
   const R=FSR;
-  const lanes=R.freight.lanes.map(l=>`<tr><td>${esc(l.name)}</td><td class="num">${l.usd40ft.toLocaleString('en-US')}</td><td>${esc(l.note||'')}</td></tr>`).join('');
-  const fbxRows=R.fbx.lanes.map(l=>`<tr><td>${esc(l.name)}</td><td class="num">${l.usdFeu.toLocaleString('en-US')}</td><td>${esc(l.note||'')}</td></tr>`).join('');
   const lines=R.hts.map(h=>`<tr><td>${esc(h.code)}</td><td>${esc(h.lineDescription)}</td><td>${esc(h.general)}</td><td>${esc(h.special)}</td><td>${esc(h.column2)}</td><td>Not returned. Not zero.</td></tr>`).join('');
   return `<div class="card" id="pubref"><h2>Public references, not a supplier cost</h2>
   <p>${esc(R.intro)}</p>
@@ -629,14 +632,9 @@ function referenceHtml(){
   <p class="muted">${esc(R.htsNote)}</p>
   <div class="scorewrap"><table class="tbl"><thead><tr><th>HTS</th><th>Line description returned</th><th>General</th><th>Special column</th><th>Column 2</th><th>Chapter 99 / 232 / 301</th></tr></thead><tbody>${lines}</tbody></table></div>
   <p class="muted">${esc(R.unconfirmed)}</p>
-  <h3>Drewry World Container Index, ${esc(R.freight.assessed)}</h3>
-  <p class="muted">${esc(R.freight.note)}</p>
-  <div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th class="num">USD per 40-ft container</th><th>What the assessment said</th></tr></thead><tbody>${lanes}</tbody></table></div>
-  <p class="muted">Source: <a href="${esc(R.freight.source)}" target="_blank" rel="noopener">${esc(R.freight.source)}</a>.</p>
-  <h3>Freightos Baltic Index, ${esc(R.fbx.assessed)}</h3>
-  <p class="muted">${esc(R.fbx.note)}</p>
-  <div class="scorewrap"><table class="tbl"><thead><tr><th>Lane</th><th class="num">USD per FEU</th><th>What the update said</th></tr></thead><tbody>${fbxRows}</tbody></table></div>
-  <p class="muted">Source: <a href="${esc(R.fbx.source)}" target="_blank" rel="noopener">${esc(R.fbx.source)}</a>.</p>
+  <h3>Drewry World Container Index</h3>
+  ${freightComparisonHtml()}
+  <p class="muted">Source: <a href="${esc(R.comparison.source)}" target="_blank" rel="noopener">${esc(R.comparison.source)}</a>.</p>
   </div>`;
 }
 function paintFeu(){
