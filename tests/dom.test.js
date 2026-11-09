@@ -23,7 +23,9 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.2','version');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.6.3','version');
+ {const scale=D.getElementById('scalescale');
+  ok(scale&&scale.textContent==='1–5 screening scores: higher is more favorable; differences are not proportional.'&&(scale.compareDocumentPosition(tb)&w.Node.DOCUMENT_POSITION_FOLLOWING)===w.Node.DOCUMENT_POSITION_FOLLOWING,'shared 1-5 scale note sits above the table');}
  ok(D.querySelector('label[for="fc"]')&&D.querySelector('label[for="fr"]')&&!D.querySelector('#fs')&&/0 to 5/.test(D.getElementById('fmhint').textContent),'filters are labeled, including min score, without a global sort menu');
  const banned=/keeps China in the comparison|China stays in the (comparison|set)|buys only from China|not a finding that HYTORC|repository history|scripted page load|likely blocks scripts/i;
  ok(/established manufacturing clusters/.test(D.body.textContent)&&/promising suppliers for further qualification/.test(D.body.textContent)&&/equivalent specifications and quoted terms/.test(D.body.textContent),'approved opening on the scorecard');

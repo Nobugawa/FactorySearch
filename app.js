@@ -301,6 +301,7 @@ function scorecard(){
   <p class="sortnote" id="sortnote">Each column title has an up button and a down button. Up sorts ascending. Down sorts descending. The rank number stays the weighted-score rank.</p>
   <p class="uslegend" id="uslegend"><b>US footprint</b> is a 1–5 desk score for a US office, subsidiary, or claimed US presence on a public page. A named office is the strong end of the scale. A claim without a clear office is the middle. No US footprint found is the weak end. It is not verified shipment history, and customs records were not used. <b>US note</b> is the sentence kept with that score. For many names dated Nov 2, 2026 the sentence was not recorded, so the note says unknown even though a score is shown.</p>
   <p class="muted" id="counts"></p>
+  <p class="callout" id="scalescale">1–5 screening scores: higher is more favorable; differences are not proportional.</p>
   <div class="card scorewrap"><table class="tbl" id="tb"></table></div>
   <div class="card" id="discover"></div>
   ${watchlistHtml()}`;
