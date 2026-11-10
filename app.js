@@ -278,7 +278,7 @@ function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
   app.innerHTML=`<h1>Supplier scorecard</h1>
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
-  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/approach">How the scores were set</a></p>
+  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, Nov 7, 2026, and Nov 10, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/approach">How the scores were set</a></p>
   ${bannerHtml()}
   <div class="callout"><b>Cost is a 1–5 exposure rank, not a price.</b> It uses the ocean-freight lanes on <a href="#/approach">Approach</a>. Higher is more favorable. Europe ranks ahead of China on those lanes, and a US plant would rank ahead of both. It is not a landed cost. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
@@ -290,7 +290,7 @@ function scorecard(){
   <label for="fm">Min score <input id="fm" type="number" inputmode="decimal" step="0.1" min="0" max="5" aria-describedby="fmhint"></label>
   <span id="fmhint">0 to 5. Leave blank to show every row at or above 0.</span></div>
   <p class="sortnote" id="sortnote">Click any column heading to sort; click again to reverse. The rank number stays the weighted-score rank.</p>
-  <p class="uslegend" id="tslegend"><b>Tool scale</b> is a desk judgment from public pages: Fits handheld tools, Possible fit, or Built for heavy equipment. It is not a qualification. The default view lists handheld-scale names first.</p>
+  <p class="uslegend" id="tslegend"><b>Tool scale</b> is a desk judgment from public pages: Fits handheld tools, Possible fit, or Built for heavy equipment. The handheld standard used here is tools of about 4–25 lb (HYTORC STEALTH), with larger square-drive models up to about 77 lb. It is not a qualification. The default view lists handheld-scale names first.</p>
   <p class="uslegend" id="uslegend"><b>US footprint</b> is a 1–5 desk score for a US office, subsidiary, or claimed US presence on a public page. A named office is the strong end of the scale. A claim without a clear office is the middle. No US footprint found is the weak end. It is not verified shipment history, and customs records were not used. <b>US note</b> is the sentence kept with that score. For many names dated Nov 2, 2026 the sentence was not recorded, so the note says unknown even though a score is shown.</p>
   <p class="muted" id="counts"></p>
   <p class="callout" id="scalescale">1–5 screening scores: higher is more favorable; differences are not proportional.</p>
@@ -348,7 +348,7 @@ function detailInner(r){
 }
 const SCORE_KEYS=['rank','name','category','country','tool_scale','makes','cap','cert','scale','usexp','cost','lead','geo','score','uspres','certs','source'];
 const SCORE_LABELS=['#','Supplier','Cat','Country','Tool scale','Makes','Cap','Cert','Scale','US footprint','Cost','Lead','Geo','Score','US note','Certs','Source'];
-const SCORE_TIPS={tool_scale:'Tool scale: whether public pages point to handheld or tool-size work, a possible fit, or equipment built at heavy-industry scale. Desk judgment, not a qualification.',usexp:'US footprint: 1–5 desk score for a public US office or claimed US presence. Not verified shipment history.',cost:'Cost: 1–5 exposure rank from sourced ocean freight. Higher is more favorable. Not a price. Differences are not proportional.'};
+const SCORE_TIPS={tool_scale:'Tool scale: whether public pages point to handheld or tool-size work (about 4–25 lb, HYTORC STEALTH; larger square-drive models up to about 77 lb), a possible fit, or equipment built at heavy-industry scale. Desk judgment, not a qualification.',usexp:'US footprint: 1–5 desk score for a public US office or claimed US presence. Not verified shipment history.',cost:'Cost: 1–5 exposure rank from sourced ocean freight. Higher is more favorable. Not a price. Differences are not proportional.'};
 const DISC_KEYS=['name','category','country','tool_scale','status','source'];
 const DISC_LABELS=['Name','Category','Country','Tool scale','Status','Source'];
 const TOOL_SCALE_RANK={'Fits handheld tools':1,'Possible fit':2,'Built for heavy equipment':3};
