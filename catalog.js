@@ -46,7 +46,7 @@ window.FS_CATALOG = {
       "what_they_make": "Pumps, cylinders, power units, valves",
       "us_presence": "US subsidiary (Bethlehem PA HQ)",
       "certs_note": "ISO 9001 expected; not verified this pass",
-      "url": "https://www.boschrexroth.com",
+      "url": "https://www.boschrexroth.com/en/us/c/cylinders/",
       "url_check": 200,
       "cap": 5,
       "cert": 5,
@@ -56,7 +56,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.boschrexroth.com"
     },
     {
       "id": "B10",
@@ -67,7 +70,7 @@ window.FS_CATALOG = {
       "what_they_make": "Vane/piston pumps, valves",
       "us_presence": "Nachi America",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.nachi-fujikoshi.co.jp/eng/",
+      "url": "https://www.nachi.de/product-portfolio/hydraulics.html",
       "url_check": 200,
       "cap": 3,
       "cert": 5,
@@ -77,7 +80,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.nachi-fujikoshi.co.jp/eng/"
     },
     {
       "id": "B11",
@@ -88,7 +94,7 @@ window.FS_CATALOG = {
       "what_they_make": "Cylinders, pumps, valves (excavator scale)",
       "us_presence": "Hengli America (US office)",
       "certs_note": "ISO 9001/IATF 16949 expected; not verified",
-      "url": "https://www.henglihydraulics.com",
+      "url": "https://www.henglihydraulics.com/en/col490/1464",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -98,7 +104,10 @@ window.FS_CATALOG = {
       "geo": 2,
       "pass": "2026-11-02",
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.henglihydraulics.com"
     },
     {
       "id": "B12",
@@ -109,7 +118,7 @@ window.FS_CATALOG = {
       "what_they_make": "Vane/piston pumps, valves, power units",
       "us_presence": "unknown",
       "certs_note": "unknown",
-      "url": "https://www.kompass.com.tw",
+      "url": "https://www.kompass.com.tw/pageen_A01_B0001.html",
       "url_check": 200,
       "cap": 3,
       "cert": 3,
@@ -119,7 +128,10 @@ window.FS_CATALOG = {
       "geo": 3,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "KOMPASS customizes exclusive products for you (prior review)",
+      "url_previous": "https://www.kompass.com.tw"
     },
     {
       "id": "B13",
@@ -130,7 +142,7 @@ window.FS_CATALOG = {
       "what_they_make": "Pumps, valves, power units (Yuken licensee)",
       "us_presence": "unknown",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.yukenindia.com",
+      "url": "https://www.yukenindia.com/power-units/",
       "url_check": 200,
       "cap": 3,
       "cert": 4,
@@ -140,7 +152,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.yukenindia.com"
     },
     {
       "id": "B2",
@@ -151,7 +166,7 @@ window.FS_CATALOG = {
       "what_they_make": "Compact high-pressure pumps and power packs up to 700 bar (closest fit to bolting pumps)",
       "us_presence": "HAWE North America (Charlotte NC)",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.hawe.com",
+      "url": "https://www.hawe.com/products/engineering-and-one-stop-shop-turnkey-hydraulic-solutions/",
       "url_check": 200,
       "cap": 5,
       "cert": 5,
@@ -161,7 +176,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "Hydraulic tools are often carried to their place of use by hand ... Small dimensions and low weight",
+      "url_previous": "https://www.hawe.com"
     },
     {
       "id": "B3",
@@ -172,7 +190,7 @@ window.FS_CATALOG = {
       "what_they_make": "Accumulators, filters, power units, hoses/fittings",
       "us_presence": "HYDAC USA (Bethlehem PA)",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.hydac.com",
+      "url": "https://www.hydac.com/en/our-solutions-for-innovative-hydraulics-and-filtration/",
       "url_check": 200,
       "cap": 4,
       "cert": 5,
@@ -182,7 +200,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.hydac.com"
     },
     {
       "id": "B4",
@@ -193,7 +214,7 @@ window.FS_CATALOG = {
       "what_they_make": "Valves, pumps, cylinders",
       "us_presence": "unknown",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.atos.com",
+      "url": "https://www.atos.com/en-it/High_pressure_big_bore_cylinders",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -203,7 +224,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published."
+      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.atos.com"
     },
     {
       "id": "B5",
@@ -224,7 +248,9 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published."
+      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv"
     },
     {
       "id": "B6",
@@ -245,7 +271,9 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published."
+      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv"
     },
     {
       "id": "B7",
@@ -256,7 +284,7 @@ window.FS_CATALOG = {
       "what_they_make": "Valves, pumps, cylinders, power units",
       "us_presence": "unknown",
       "certs_note": "unknown",
-      "url": "https://www.ponar-wadowice.pl",
+      "url": "https://www.ponar-wadowice.pl/en/about-the-company",
       "url_check": 200,
       "cap": 3,
       "cert": 3,
@@ -266,7 +294,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.ponar-wadowice.pl"
     },
     {
       "id": "B8",
@@ -277,7 +308,7 @@ window.FS_CATALOG = {
       "what_they_make": "Piston pumps, valves, power units",
       "us_presence": "Yuken America",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.yuken.co.jp",
+      "url": "https://www.yuken.co.jp/en/contact/tech",
       "url_check": 200,
       "cap": 4,
       "cert": 5,
@@ -287,7 +318,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.yuken.co.jp"
     },
     {
       "id": "B9",
@@ -298,7 +332,7 @@ window.FS_CATALOG = {
       "what_they_make": "Piston pumps and motors",
       "us_presence": "Kawasaki Precision Machinery USA",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.kawasakihydraulics.com",
+      "url": "https://www.kawasakihydraulics.com/contact/",
       "url_check": 200,
       "cap": 4,
       "cert": 5,
@@ -308,7 +342,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://www.kawasakihydraulics.com"
     },
     {
       "id": "C1",
@@ -319,7 +356,7 @@ window.FS_CATALOG = {
       "what_they_make": "Closed-die steel and aluminum forgings, machined",
       "us_presence": "Hirschvogel Inc (Columbus OH)",
       "certs_note": "IATF 16949 expected (auto); not verified",
-      "url": "https://www.hirschvogel.com",
+      "url": "https://www.hirschvogel.com/en/products/drivetrain/intermediate-shaft/",
       "url_check": 200,
       "cap": 5,
       "cert": 5,
@@ -329,7 +366,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "components ... weigh between 100 grams and nine kilograms (aluminium)",
+      "url_previous": "https://www.hirschvogel.com"
     },
     {
       "id": "C10",
@@ -340,7 +380,7 @@ window.FS_CATALOG = {
       "what_they_make": "Special steels, forgings",
       "us_presence": "Daido US",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.daido.co.jp/en/",
+      "url": "https://www.daido.co.jp/en/products/dieforging/die/index.html",
       "url_check": 200,
       "cap": 4,
       "cert": 5,
@@ -350,7 +390,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "Short-term delivery and small lot production",
+      "url_previous": "https://www.daido.co.jp/en/"
     },
     {
       "id": "C11",
@@ -361,7 +404,7 @@ window.FS_CATALOG = {
       "what_they_make": "Special steel bar and forgings",
       "us_presence": "unknown",
       "certs_note": "unknown",
-      "url": "https://www.seah.co.kr",
+      "url": "https://www.seahbesteel.co.kr/products/freeforging.asp",
       "url_check": 200,
       "cap": 3,
       "cert": 4,
@@ -371,7 +414,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "forgings up to 200-250 t (prior review)",
+      "url_previous": "https://www.seah.co.kr"
     },
     {
       "id": "C12",
@@ -382,7 +428,7 @@ window.FS_CATALOG = {
       "what_they_make": "Castings, machined parts, machine tools",
       "us_presence": "Hyundai WIA US",
       "certs_note": "IATF 16949 expected; not verified",
-      "url": "https://www.hyundai-wia.com",
+      "url": "https://en.hyundai-wia.com/business/auto_material_02.asp",
       "url_check": 200,
       "cap": 3,
       "cert": 4,
@@ -392,7 +438,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "captive automotive castings (prior review)",
+      "url_previous": "https://www.hyundai-wia.com"
     },
     {
       "id": "C2",
@@ -403,7 +452,7 @@ window.FS_CATALOG = {
       "what_they_make": "High-alloy tool and special steels, open-die forgings",
       "us_presence": "voestalpine US entities",
       "certs_note": "ISO 9001/AS9100 expected; not verified",
-      "url": "https://www.voestalpine.com/bohler-edelstahl/en/",
+      "url": "https://www.bohler-edelstahl.com/en/company/production/",
       "url_check": 200,
       "cap": 5,
       "cert": 5,
@@ -413,7 +462,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "forged to customer specifications up to 45 tons",
+      "url_previous": "https://www.voestalpine.com/bohler-edelstahl/en/"
     },
     {
       "id": "C3",
@@ -424,7 +476,7 @@ window.FS_CATALOG = {
       "what_they_make": "Investment castings, steel forgings, drive parts",
       "us_presence": "unknown",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.zollern.com",
+      "url": "https://www.zollern.com/en/products/castings/castings/",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -434,7 +486,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "customer-specific castings from large series to individual pieces; investment casting weights 30 – 3.000 g examples",
+      "url_previous": "https://www.zollern.com"
     },
     {
       "id": "C4",
@@ -445,7 +500,7 @@ window.FS_CATALOG = {
       "what_they_make": "Forged and rolled rings, open-die forgings",
       "us_presence": "Fomas US presence unknown",
       "certs_note": "ISO 9001/PED expected; not verified",
-      "url": "https://www.fomasgroup.com",
+      "url": "https://www.fomasgroup.com/en/solutions/industrial",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -455,7 +510,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published."
+      "cost_note": "No sourced lane from Italy. Scored on the nearest sourced European lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Genoa to New York was not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "Maximum ingot weight : 125,000 Kg; Power Generation, Oil & Gas",
+      "url_previous": "https://www.fomasgroup.com"
     },
     {
       "id": "C5",
@@ -466,7 +524,7 @@ window.FS_CATALOG = {
       "what_they_make": "Heavy forgings, castings, pressure vessels",
       "us_presence": "unknown",
       "certs_note": "unknown",
-      "url": "https://www.vitkovice.cz",
+      "url": "https://witkowitz-hammering.eu/products-and-services/machined-parts",
       "url_check": 200,
       "cap": 3,
       "cert": 3,
@@ -476,7 +534,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "Heavy forgings/castings (prior review); Oil & gas",
+      "url_previous": "https://www.vitkovice.cz"
     },
     {
       "id": "C6",
@@ -487,7 +548,7 @@ window.FS_CATALOG = {
       "what_they_make": "Precision forgings and machined aerospace/defense parts",
       "us_presence": "unknown",
       "certs_note": "AS9100 expected; not verified",
-      "url": "https://www.ashot.co.il",
+      "url": "https://ashot.co.il/capabilities/",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -497,7 +558,10 @@ window.FS_CATALOG = {
       "geo": 3,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Rotterdam. Genoa to New York was not published."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Rotterdam. Genoa to New York was not published.",
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "according to customer specifications ... gear cutting ... titanium",
+      "url_previous": "https://www.ashot.co.il"
     },
     {
       "id": "C7",
@@ -508,7 +572,7 @@ window.FS_CATALOG = {
       "what_they_make": "Closed-die forgings, machined, large exporter",
       "us_presence": "Bharat Forge America",
       "certs_note": "IATF 16949/AS9100 expected; not verified",
-      "url": "https://www.bharatforge.com",
+      "url": "https://bharatforge.eu/service/bharat-forge-cdp/?lang=en",
       "url_check": 200,
       "cap": 5,
       "cert": 5,
@@ -518,7 +582,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "Product Ranges from 0.2 KG to 30+Ton (investor deck); CDP crankshafts 12-25 kg",
+      "url_previous": "https://www.bharatforge.com"
     },
     {
       "id": "C8",
@@ -529,7 +596,7 @@ window.FS_CATALOG = {
       "what_they_make": "Closed-die forgings for trucks/rail",
       "us_presence": "unknown",
       "certs_note": "IATF 16949 expected; not verified",
-      "url": "https://www.ramkrishnaforgings.com",
+      "url": "https://ramkrishnaforgings.com/product-design-engineering-development/",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -539,7 +606,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "supply components from 0.5Kgs to 200Kgs (truck/rail)",
+      "url_previous": "https://www.ramkrishnaforgings.com"
     },
     {
       "id": "C9",
@@ -550,7 +620,7 @@ window.FS_CATALOG = {
       "what_they_make": "Crankshafts, heavy forgings, machined",
       "us_presence": "unknown",
       "certs_note": "IATF 16949 expected; not verified",
-      "url": "https://www.happyforgingsltd.com",
+      "url": "https://happyforgingsltd.com/",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -560,7 +630,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "commercial vehicle and high horse-power industrial crankshafts",
+      "url_previous": "https://www.happyforgingsltd.com"
     },
     {
       "id": "D1",
@@ -571,7 +644,7 @@ window.FS_CATALOG = {
       "what_they_make": "CNC machined parts, aluminum castings, engineering",
       "us_presence": "unknown",
       "certs_note": "IATF 16949 expected; not verified",
-      "url": "https://www.craftsmanautomation.com",
+      "url": "https://www.craftsmanautomation.com/industrial-and-engineering.html",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -581,7 +654,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "heavy machined castings ... locomotive, power transmission ... windmills; high quality mass production",
+      "url_previous": "https://www.craftsmanautomation.com"
     },
     {
       "id": "D2",
@@ -592,7 +668,7 @@ window.FS_CATALOG = {
       "what_they_make": "Precision machined/forged components incl. aerospace",
       "us_presence": "unknown",
       "certs_note": "IATF 16949/AS9100 expected; not verified",
-      "url": "https://www.sansera.in",
+      "url": "https://sansera.in/design-engineering",
       "url_check": null,
       "cap": 4,
       "cert": 4,
@@ -602,7 +678,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam.",
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "precision forged components ranging from 5 gm to 13.5kgs; AS9100 aerospace Al/Ti machining",
+      "url_previous": "https://www.sansera.in"
     },
     {
       "id": "D3",
@@ -613,7 +692,7 @@ window.FS_CATALOG = {
       "what_they_make": "Hydraulic gear pumps + aerospace machining",
       "us_presence": "unknown",
       "certs_note": "AS9100 expected; not verified",
-      "url": "https://www.dynamatics.com",
+      "url": "https://www.dynamatics.com/Hydraulics/",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -623,7 +702,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Shanghai and not scored as Rotterdam.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "own gear pumps",
+      "url_previous": "https://www.dynamatics.com"
     },
     {
       "id": "D4",
@@ -634,7 +716,7 @@ window.FS_CATALOG = {
       "what_they_make": "Forge-plus-machine finished parts",
       "us_presence": "Hirschvogel Inc (Columbus OH)",
       "certs_note": "IATF 16949 expected; not verified",
-      "url": "https://www.hirschvogel.com",
+      "url": "https://www.hirschvogel.com/en/products/drivetrain/intermediate-shaft/",
       "url_check": 200,
       "cap": 4,
       "cert": 5,
@@ -644,7 +726,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "components ... weigh between 100 grams and nine kilograms (aluminium)",
+      "url_previous": "https://www.hirschvogel.com"
     },
     {
       "id": "D5",
@@ -655,7 +740,7 @@ window.FS_CATALOG = {
       "what_they_make": "Machined castings, gear/drive parts",
       "us_presence": "unknown",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.zollern.com",
+      "url": "https://www.zollern.com/en/products/castings/castings/",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -665,7 +750,10 @@ window.FS_CATALOG = {
       "geo": 5,
       "pass": "2026-11-02",
       "cost": 4,
-      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published."
+      "cost_note": "No sourced lane from this country. Scored on the nearest sourced lane, Rotterdam to New York, about $3,181 per 40-ft container, Oct 22, 2026. Hamburg and Antwerp were not published.",
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "customer-specific castings from large series to individual pieces; investment casting weights 30 – 3.000 g examples",
+      "url_previous": "https://www.zollern.com"
     },
     {
       "id": "D6",
@@ -676,7 +764,7 @@ window.FS_CATALOG = {
       "what_they_make": "Tight-tolerance aerospace machining",
       "us_presence": "unknown",
       "certs_note": "AS9100 expected; not verified",
-      "url": "https://www.ashot.co.il",
+      "url": "https://ashot.co.il/capabilities/",
       "url_check": 200,
       "cap": 5,
       "cert": 4,
@@ -686,7 +774,10 @@ window.FS_CATALOG = {
       "geo": 3,
       "pass": "2026-11-02",
       "cost": 3,
-      "cost_note": "No sourced lane to New York. Neutral. Not scored as Rotterdam. Genoa to New York was not published."
+      "cost_note": "No sourced lane to New York. Neutral. Not scored as Rotterdam. Genoa to New York was not published.",
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "according to customer specifications ... gear cutting ... titanium",
+      "url_previous": "https://www.ashot.co.il"
     },
     {
       "id": "D7",
@@ -697,7 +788,7 @@ window.FS_CATALOG = {
       "what_they_make": "Ground ball screws, linear guides (shows precision-grinding depth)",
       "us_presence": "HIWIN USA",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://www.hiwin.tw",
+      "url": "https://www.hiwin.de/en/kugelgewindetriebe-loesungen",
       "url_check": 200,
       "cap": 3,
       "cert": 4,
@@ -707,7 +798,10 @@ window.FS_CATALOG = {
       "geo": 3,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "ball screws/linear guides only",
+      "url_previous": "https://www.hiwin.tw"
     },
     {
       "id": "D8",
@@ -718,7 +812,7 @@ window.FS_CATALOG = {
       "what_they_make": "Configurable and quote-on-demand machined parts",
       "us_presence": "MISUMI USA",
       "certs_note": "ISO 9001 expected; not verified",
-      "url": "https://jp.misumi-ec.com",
+      "url": "https://meviy-usa.com/meviy-usa/",
       "url_check": null,
       "cap": 3,
       "cert": 4,
@@ -728,7 +822,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "on-demand custom parts from 3D CAD (prior review, search index)",
+      "url_previous": "https://jp.misumi-ec.com"
     },
     {
       "id": "D9",
@@ -739,7 +836,7 @@ window.FS_CATALOG = {
       "what_they_make": "Machined castings and housings",
       "us_presence": "Hyundai WIA US",
       "certs_note": "IATF 16949 expected; not verified",
-      "url": "https://www.hyundai-wia.com",
+      "url": "https://en.hyundai-wia.com/business/auto_material_02.asp",
       "url_check": 200,
       "cap": 3,
       "cert": 4,
@@ -749,7 +846,10 @@ window.FS_CATALOG = {
       "geo": 4,
       "pass": "2026-11-02",
       "cost": 2,
-      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin."
+      "cost_note": "No named port lane. Scored with the Asia to US East Coast reading, Freightos Baltic FBX03, 9,848 USD per FEU, week ending Nov 6, 2026, the same high band as Shanghai to New York. No Section 301-style China duty was sourced for this origin.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "captive automotive castings (prior review)",
+      "url_previous": "https://www.hyundai-wia.com"
     },
     {
       "id": "C13",
@@ -796,7 +896,9 @@ window.FS_CATALOG = {
         "The Certipedia row was opened, but expiry was not checked, so the certificate is not verified."
       ],
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "auto gear forger (prior review)"
     },
     {
       "id": "C14",
@@ -832,7 +934,9 @@ window.FS_CATALOG = {
         "Price, MOQ, and small-volume willingness are unknown."
       ],
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "0.5-100 kg (search only, site 500)"
     },
     {
       "id": "D10",
@@ -844,7 +948,7 @@ window.FS_CATALOG = {
       "what_they_make": "Precision ground gears (ISO 6 / DIN 5 stated), gear components, transmission and robot-reducer gears, and industrial gearboxes. Gears for power tools are listed among applications.",
       "us_presence": "A North American office in New Jersey is stated in the company ESG report. That statement is not verified US shipment history.",
       "certs_note": "ISO 9001:2015 and IATF 16949:2016 are stated in the company ESG report. The certificates were not pulled from a registrar.",
-      "url": "https://www.gearsnet.com/en/about.html",
+      "url": "https://www.gearsnet.com/en/product1.html",
       "url_check": 200,
       "cap": 4,
       "cert": 4,
@@ -879,7 +983,10 @@ window.FS_CATALOG = {
         "Price is unknown."
       ],
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026, plus Section 301. The example lines on the Approach page are on List 1 or List 3, both an extra 25% for products of China. Checked Nov 9, 2026. Not a classification of this part.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "precision gears, power tools listed (prior review)",
+      "url_previous": "https://www.gearsnet.com/en/about.html"
     },
     {
       "id": "D11",
@@ -891,7 +998,7 @@ window.FS_CATALOG = {
       "what_they_make": "Aluminium and magnesium die-cast, forged, and extruded parts with CNC machining (five-axis and composite machining stated). EV drive, battery, chassis, and robot-system parts.",
       "us_presence": "The company profile says manufacturing bases in the US, Mexico, and Thailand. Third-party customs lists were not checked. Not verified shipments.",
       "certs_note": "IATF 16949 is cited by third-party sources only. Not verified.",
-      "url": "https://www.nbxus.com/en/about.html",
+      "url": "https://www.nbxus.com/en",
       "url_check": 200,
       "cap": 3,
       "cert": 3,
@@ -921,7 +1028,10 @@ window.FS_CATALOG = {
         "Price, MOQ, and small-volume willingness are unknown."
       ],
       "cost": 1,
-      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026; Ningbo was not a separate lane. Section 301 also applies to products of China. The example lines on the Approach page are on List 1 or List 3, both an extra 25%. Checked Nov 9, 2026. Not a classification of this part."
+      "cost_note": "China. Scored 1. Shanghai to New York, Drewry WCI, $9,631 per 40-ft container, Oct 29, 2026; Ningbo was not a separate lane. Section 301 also applies to products of China. The example lines on the Approach page are on List 1 or List 3, both an extra 25%. Checked Nov 9, 2026. Not a classification of this part.",
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "precision aluminum and magnesium alloy automotive parts",
+      "url_previous": "https://www.nbxus.com/en/about.html"
     }
   ],
   "watchlist": [
@@ -930,24 +1040,31 @@ window.FS_CATALOG = {
       "name": "Beijing Huade Hydraulic Industrial Group",
       "url": "http://www.huade-hyd.com/EN.aspx",
       "why": "Not a qualified bolting-pump match. Published pump ratings seen are about 35 MPa nominal / 40 MPa peak (about 350/400 bar), below the ~700 bar class of bolting-tool pumps. Not scored and not ranked.",
-      "checked": "Search index on 2026-11-06. Direct fetch from the research network returned HTTP 500. No certificate verified. No US entity found. Price, MOQ, and small-volume willingness unknown. Exclude the reseller huadeonline.com (Huafilter): a trader, not the manufacturer."
+      "checked": "Search index on 2026-11-06. Direct fetch from the research network returned HTTP 500. No certificate verified. No US entity found. Price, MOQ, and small-volume willingness unknown. Exclude the reseller huadeonline.com (Huafilter): a trader, not the manufacturer.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv"
     },
     {
       "id": "B15",
       "name": "Shandong Taifeng Intelligent Control",
-      "url": "https://en.taifenghydraulic.com/",
+      "url": "https://en.taifenghydraulic.com/product/8.html",
       "why": "Not a qualified bolting-pump match. Strong in press and metal-forming cartridge valves. No confirmed ~700 bar bolting pump. Not scored and not ranked.",
-      "checked": "English site and investor page opened 2026-11-06 (HTTP 200). No certificate verified. No US presence found. Pressure ratings were not captured. Price, MOQ, and small-volume willingness unknown."
+      "checked": "English site and investor page opened 2026-11-06 (HTTP 200). No certificate verified. No US presence found. Pressure ratings were not captured. Price, MOQ, and small-volume willingness unknown.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv",
+      "url_previous": "https://en.taifenghydraulic.com/"
     },
     {
       "id": "WL-TZ",
       "name": "TZ Yuci Hydraulic Industry (Taiyuan Heavy Machinery Group)",
       "url": "http://en.tzyy.com.cn/About_TZYY/Company_Profile.htm",
       "why": "Not scored. Established high-pressure piston pumps, valves, cylinders, and hydraulic castings are described in search snippets, but the profile page was not opened, so this is not a candidate yet.",
-      "checked": "Search index only. Direct fetch returned HTTP 500 on 2026-11-06."
+      "checked": "Search index only. Direct fetch returned HTTP 500 on 2026-11-06.",
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "see factorysearch_custom_spec_review_2026-11-10.csv"
     }
   ],
-  "discovery_as_of": "2026-11-07",
+  "discovery_as_of": "2026-11-07 and 2026-11-10",
   "discovery": [
     {
       "id": "CN-M1",
@@ -977,7 +1094,9 @@ window.FS_CATALOG = {
           "Capabilities, tolerances, MOQ, lead times, address (Primary: company site)",
           "opened; checked 2026-11-07"
         ]
-      ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Up to 600 × 600 × 400 mm; No strict MOQ for prototype evaluation runs"
     },
     {
       "id": "CN-F1",
@@ -992,7 +1111,7 @@ window.FS_CATALOG = {
       "claims": "Certificate numbers are published (API Spec 20C licence 20C-0051, TUV NORD PED and AD2000). They were not checked in the registries. Smallest economic weight and batch size were not stated.",
       "us_presence": "Unknown",
       "certs_note": "API 20C, PED, AD2000, NORSOK, BV, ISO 9001/14001/45001 claimed. Not verified in a registry.",
-      "url": "https://longruiforging.com/",
+      "url": "https://longruiforging.com/closed-die-forging/",
       "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
       "price_note": "",
       "flags": [
@@ -1012,42 +1131,10 @@ window.FS_CATALOG = {
           "Process and part weights 5-520 kg (Primary: manufacturer site)",
           "opened; checked 2026-11-07"
         ]
-      ]
-    },
-    {
-      "id": "CN-H1",
-      "scored": false,
-      "name": "Hangzhou WREN Hydraulic Equipment Manufacturing Co., Ltd.",
-      "country": "China",
-      "region": "China",
-      "category": "Hydraulics",
-      "pass": "2026-11-07",
-      "what_they_make": "Electric torque-wrench pumps (LP3, DHP), hydraulic torque wrenches, cylinders, and power packs. Own-brand product maker that also offers OEM/ODM.",
-      "supplier_type": "Product OEM (own brand) that offers OEM/ODM",
-      "claims": "Manufacturer site describes LP3 pumps as 70-700 bar torque-wrench pumps. A marketplace lists prices and MOQ 1. Incoterm is not stated.",
-      "us_presence": "Unknown",
-      "certs_note": "ISO 9001:2015 and TUV Rheinland / CE claimed. Certificate number was not checked.",
-      "url": "https://www.wrenchina.com/en/products/detail/LP3-Z4%20Hydraulic%20Torque%20Wrench%20Electric%20Pump",
-      "hytorc_relationship": "Unknown. Not among the visible names on ImportYeti’s public HYTORC page (CBP sea data synced 2026-11-04). That page lists only some top sea-freight names. Forwarder-masked, air, and other-name shipments are not covered.",
-      "price_note": "A Made-in-China page lists LP3-2 at US$2,100 (1-19) and US$1,800 (20+), and DHP at US$3,300 (1-9) and US$3,100 (10+). Incoterm is not stated. This is a list price, not a quote, and it is not used in the score or in any landed-cost total.",
-      "flags": [
-        "Sells its own hydraulic torque wrenches: a direct competitor. An OEM pump supply would need IP, NDA, and non-compete terms.",
-        "Marketplace price is not a quote and has no Incoterm.",
-        "Certificates were not checked in a registry.",
-        "HYTORC relationship is unknown."
       ],
-      "evidence": [
-        [
-          "https://www.wrenchina.com/en/products/detail/LP3-Z4%20Hydraulic%20Torque%20Wrench%20Electric%20Pump",
-          "700 bar pump specs, TUV/CE claim, address (Primary: manufacturer site)",
-          "opened; checked 2026-11-07"
-        ],
-        [
-          "https://wrenchina.en.made-in-china.com/product/mvGQUXqbRnRf/China-WREN-High-quality-LP3-2-Series-Special-Pump-for-Hydraulic-Torque-Wrench-700bar.html",
-          "List price, MOQ, staff, plant area, ISO 9001 claim (Secondary: B2B marketplace self-report)",
-          "opened; checked 2026-11-07"
-        ]
-      ]
+      "tool_scale": "Built for heavy equipment",
+      "tool_scale_evidence": "producing parts from 5 kg to 520 kg",
+      "url_previous": "https://longruiforging.com/"
     },
     {
       "id": "HU-F1",
@@ -1077,7 +1164,9 @@ window.FS_CATALOG = {
           "Sites, weight ranges, cert claims, in-house dies and machining (Primary: company site)",
           "opened; checked 2026-11-07"
         ]
-      ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "products weighing between 0.5 and 12 kg; smaller batches 0.5-20 kg"
     },
     {
       "id": "HU-F2",
@@ -1107,7 +1196,9 @@ window.FS_CATALOG = {
           "History, about 50 staff, 6 press lines, sales to North America (Primary: company site)",
           "opened; checked 2026-11-07"
         ]
-      ]
+      ],
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "custom-designed mass production ... trucks, public transport vehicles"
     },
     {
       "id": "HU-M1",
@@ -1136,7 +1227,430 @@ window.FS_CATALOG = {
           "Contract machining scope and certificate claims (Primary: company site)",
           "opened; checked 2026-11-07"
         ]
-      ]
+      ],
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "complete machining of diverse metal raw and semi-finished materials and castings ... Automotive and Industrial"
+    },
+    {
+      "id": "TW-M1",
+      "scored": false,
+      "name": "Weiyon Industry (Taichung)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Precision machining",
+      "pass": "2026-11-10",
+      "what_they_make": "Housings (Al/Ti CNC). Get a Quote on page; titanium/stainless specialist",
+      "supplier_type": "Contract / build-to-print machining supplier",
+      "claims": "Custom Precision Parts. Drawing to Doorstep. ... single-piece prototypes to volume production",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://www.weiyon.com/en",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.weiyon.com/en",
+          "Custom Precision Parts. Drawing to Doorstep. ... single-piece prototypes to volume production",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Custom Precision Parts. Drawing to Doorstep. ... single-piece prototypes to volume production"
+    },
+    {
+      "id": "TW-M2",
+      "scored": false,
+      "name": "CTT (Shengang, Taichung)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Precision machining",
+      "pass": "2026-11-10",
+      "what_they_make": "Housings (Al/Ti CNC); valve bodies. AS9100/ISO13485; milling 3x3x3 to 1200x800x500 mm; makes aerospace hydraulic valve bodies (search-page text). Inquiry on page",
+      "supplier_type": "Contract / build-to-print machining supplier",
+      "claims": "Our factory operates 24-hour CNC machining equipment for custom machined parts ... AL7075, AL6061 aluminum ... Ti-6Al-4V titanium alloys",
+      "us_presence": "Unknown",
+      "certs_note": "AS9100/ISO13485; milling 3x3x3 to 1200x800x500 mm; makes aerospace hydraulic valve bodies (search-page text). Inquiry on page",
+      "url": "https://ctt-metal.com/",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not checked in a registry.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://ctt-metal.com/",
+          "Our factory operates 24-hour CNC machining equipment for custom machined parts ... AL7075, AL6061 aluminum ... Ti-6Al-4V titanium alloys",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Our factory operates 24-hour CNC machining equipment for custom machined parts ... AL7075, AL6061 aluminum ... Ti-6Al-4V titanium alloys"
+    },
+    {
+      "id": "TW-M3",
+      "scored": false,
+      "name": "AN YI Industrial (Wuri, Taichung)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Precision machining",
+      "pass": "2026-11-10",
+      "what_they_make": "Housings / turned parts (CNC). Upload drawings for quote; Al and Ti listed",
+      "supplier_type": "Contract / build-to-print machining supplier",
+      "claims": "We specialize in OEM precision machining services using CNC lathes and milling machines to manufacture customized parts",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://en.anyimaker.com/",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://en.anyimaker.com/",
+          "We specialize in OEM precision machining services using CNC lathes and milling machines to manufacture customized parts",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "We specialize in OEM precision machining services using CNC lathes and milling machines to manufacture customized parts"
+    },
+    {
+      "id": "TW-M4",
+      "scored": false,
+      "name": "Chi Xin CNC (Nantun, Taichung)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Precision machining",
+      "pass": "2026-11-10",
+      "what_they_make": "Small housings, manifold blocks (CNC). Very small shop (5+ machines, founded 2022); prototypes/small lots; aluminum manifold block shown",
+      "supplier_type": "Contract / build-to-print machining supplier",
+      "claims": "Machined to your drawing, with critical tolerances confirmed before production",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://chixin-cnc.com/",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://chixin-cnc.com/",
+          "Machined to your drawing, with critical tolerances confirmed before production",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Machined to your drawing, with critical tolerances confirmed before production"
+    },
+    {
+      "id": "TW-M5",
+      "scored": false,
+      "name": "DELI Precision (Dali, Taichung)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Precision machining",
+      "pass": "2026-11-10",
+      "what_they_make": "Pistons, pins, swivel/coupler bodies (Swiss turning). Diameter 1-42 mm only; hydraulic fittings/valve bodies listed; samples 1-10 then 500+",
+      "supplier_type": "Contract / build-to-print machining supplier",
+      "claims": "Custom OEM precision parts ... from prototype to production",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://delicnc.com.tw/",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://delicnc.com.tw/",
+          "Custom OEM precision parts ... from prototype to production",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Custom OEM precision parts ... from prototype to production"
+    },
+    {
+      "id": "TW-F1",
+      "scored": false,
+      "name": "Action Fast (Changhua)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-10",
+      "what_they_make": "Al forged housings / reaction arms (forge+CNC). 7075/6061 aluminum forging; hand-tool parts listed; very small team per LinkedIn",
+      "supplier_type": "Contract / build-to-print forging supplier",
+      "claims": "Fast Quotation Based on Your Drawings ... 2D / 3D Drawing Based OEM Manufacturing",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://actionfast.com.tw/",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://actionfast.com.tw/",
+          "Fast Quotation Based on Your Drawings ... 2D / 3D Drawing Based OEM Manufacturing",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Fast Quotation Based on Your Drawings ... 2D / 3D Drawing Based OEM Manufacturing"
+    },
+    {
+      "id": "TW-F2",
+      "scored": false,
+      "name": "Tung Jui Yih / TRY (Hemei, Changhua)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-10",
+      "what_they_make": "Steel forgings: ratchets, links, reaction arms. Hot/cold/die forging + CNC + heat treat; small-batch samples to mass production",
+      "supplier_type": "Contract / build-to-print forging supplier",
+      "claims": "you are welcome to send us your 2D/3D drawings and technical specifications",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://www.trycnc.com.tw/metal-forging-services/forged-parts",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.trycnc.com.tw/metal-forging-services/forged-parts",
+          "you are welcome to send us your 2D/3D drawings and technical specifications",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "you are welcome to send us your 2D/3D drawings and technical specifications"
+    },
+    {
+      "id": "TW-F3",
+      "scored": false,
+      "name": "Auto Tool (Taiwan)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-10",
+      "what_they_make": "Steel forgings: hand-tool parts (ratchets, pawls blanks). City not verified",
+      "supplier_type": "Contract / build-to-print forging supplier",
+      "claims": "Fully customizable based on customer-supplied blueprints, 3D CAD files, or physical prototypes for custom mold creation and mass production",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://www.auto-tool.com.tw/product-Steel-Forging-Products02-Hand-Tool06.html",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.auto-tool.com.tw/product-Steel-Forging-Products02-Hand-Tool06.html",
+          "Fully customizable based on customer-supplied blueprints, 3D CAD files, or physical prototypes for custom mold creation and mass production",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Fully customizable based on customer-supplied blueprints, 3D CAD files, or physical prototypes for custom mold creation and mass production"
+    },
+    {
+      "id": "TW-F4",
+      "scored": false,
+      "name": "Yusing CNC (Taiwan)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Precision machining",
+      "pass": "2026-11-10",
+      "what_they_make": "Ratchet / hand-tool parts machining. Inquiry cart on site; city not verified",
+      "supplier_type": "Contract / build-to-print machining supplier",
+      "claims": "Precision hand tool manufacturing and customized ratchet wrench parts processing ... Hand Tool OEM & Parts Machining",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://www.yusing-cnc.com.tw/en/product/category/hand-tools-and-ratchet-wrench",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.yusing-cnc.com.tw/en/product/category/hand-tools-and-ratchet-wrench",
+          "Precision hand tool manufacturing and customized ratchet wrench parts processing ... Hand Tool OEM & Parts Machining",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Precision hand tool manufacturing and customized ratchet wrench parts processing ... Hand Tool OEM & Parts Machining"
+    },
+    {
+      "id": "TW-T1",
+      "scored": false,
+      "name": "Feng Ching (Taiwan)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Precision machining",
+      "pass": "2026-11-10",
+      "what_they_make": "Torque/ratchet tool OEM (mechanical). Makes manual torque wrenches (not hydraulic) - low competitor risk; drawing wording not captured",
+      "supplier_type": "Mechanical torque-tool OEM",
+      "claims": "Our specialties include torque wrenches, socket wrenches and pneumatic hand tools ... OEM / ODM Service",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://www.fc-machining.com/hand-tool-industry",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.fc-machining.com/hand-tool-industry",
+          "Our specialties include torque wrenches, socket wrenches and pneumatic hand tools ... OEM / ODM Service",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Our specialties include torque wrenches, socket wrenches and pneumatic hand tools ... OEM / ODM Service"
+    },
+    {
+      "id": "TW-C1",
+      "scored": false,
+      "name": "Lin Chiao Casting (Yongkang, Tainan)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-10",
+      "what_they_make": "Investment castings (arms, small steel bodies). Pneumatic tool parts listed; 60 t/month max",
+      "supplier_type": "Contract / build-to-print investment-casting supplier",
+      "claims": "Lin Chiao specializes in precision lost wax investment casting for OEM components",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://www.linchiao.com/en/page/map.html",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.linchiao.com/en/page/company-profile.html",
+          "Lin Chiao specializes in precision lost wax investment casting for OEM components",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Lin Chiao specializes in precision lost wax investment casting for OEM components"
+    },
+    {
+      "id": "TW-C2",
+      "scored": false,
+      "name": "Kinfuren / KFR (Daliao, Kaohsiung)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-10",
+      "what_they_make": "Investment castings. Also MIM/PM via alliance; inquiry cart",
+      "supplier_type": "Contract / build-to-print investment-casting supplier",
+      "claims": "The range of our parts is from 10 gram to 35 kilogram ... OEM Investment Casting Parts ... Hand Tool Casting Parts",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://www.kfrcast.com/en/a1/Company-Profile.html",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.kfrcast.com/en/a1/Company-Profile.html",
+          "The range of our parts is from 10 gram to 35 kilogram ... OEM Investment Casting Parts ... Hand Tool Casting Parts",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "The range of our parts is from 10 gram to 35 kilogram ... OEM Investment Casting Parts ... Hand Tool Casting Parts"
+    },
+    {
+      "id": "TW-C3",
+      "scored": false,
+      "name": "Valve-tek (Taiping, Taichung)",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Forgings/Castings",
+      "pass": "2026-11-10",
+      "what_they_make": "Investment castings + machining. Valve-focused foundry; lists hand tools hardware",
+      "supplier_type": "Contract / build-to-print investment-casting supplier",
+      "claims": "Inquiry with Drawing: Please provide 2D or 3D drawings",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://www.valve-tek.com.tw/oem-casting.html",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://www.valve-tek.com.tw/oem-casting.html",
+          "Inquiry with Drawing: Please provide 2D or 3D drawings",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Possible fit",
+      "tool_scale_evidence": "Inquiry with Drawing: Please provide 2D or 3D drawings"
+    },
+    {
+      "id": "TW-G1",
+      "scored": false,
+      "name": "Porite Taiwan",
+      "country": "Taiwan",
+      "region": "Taiwan",
+      "category": "Precision machining",
+      "pass": "2026-11-10",
+      "what_they_make": "Planetary gears / gear rings (PM). Powder metallurgy - check strength for gun output stages",
+      "supplier_type": "Powder-metallurgy component supplier",
+      "claims": "Porite Taiwan can produce parts such as planetary gears, internal gear rings, planetary turntables, motor gears ... Major global power tool manufacturers are clients",
+      "us_presence": "Unknown",
+      "certs_note": "Unknown",
+      "url": "https://tw.porite.com/en-US/applicationsc2-power-tools",
+      "hytorc_relationship": "Unknown. A customs-name check has not been made for this Nov 10, 2026 review.",
+      "price_note": "",
+      "flags": [
+        "Certificates were not verified.",
+        "HYTORC relationship is unknown."
+      ],
+      "evidence": [
+        [
+          "https://tw.porite.com/en-US/applicationsc2-power-tools",
+          "Porite Taiwan can produce parts such as planetary gears, internal gear rings, planetary turntables, motor gears ... Major global power tool manufacturers are clients",
+          "opened; checked 2026-11-10"
+        ]
+      ],
+      "tool_scale": "Fits handheld tools",
+      "tool_scale_evidence": "Porite Taiwan can produce parts such as planetary gears, internal gear rings, planetary turntables, motor gears ... Major global power tool manufacturers are clients"
     }
-  ]
+  ],
+  "taiwan_as_of": "2026-11-10"
 };
