@@ -14,20 +14,20 @@ ok(cat.suppliers.every(r=>Number.isInteger(r.cost)&&r.cost>=1&&r.cost<=5&&typeof
 ok(cat.suppliers.filter(r=>r.country==='China').every(r=>r.cost===1)&&cat.suppliers.filter(r=>['Japan','South Korea','Taiwan'].includes(r.country)).every(r=>r.cost===2)&&cat.suppliers.filter(r=>r.country==='Germany').every(r=>r.cost===4)&&cat.suppliers.filter(r=>['India','Israel'].includes(r.country)).every(r=>r.cost===3),'China is 1 after Section 301, other East Asia stays 2, Europe is 4, and unsourced origins stay neutral');
 ok((cat.discovery||[]).every(r=>!Object.prototype.hasOwnProperty.call(r,'cost')),'unscored leads have no cost score');
 const core=cat.suppliers.filter(r=>r.pass==='2026-11-02').map(r=>{const o={};keys.forEach(k=>{o[k]=k==='cost'?costById[r.id]:(r[k]??null);});return o;}).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
-ok(crypto.createHash('sha256').update(JSON.stringify(core)).digest('hex')==='c5a5a648a2d19a553b7707070eafdd91f527a7502b8b83a4383f1aa1dc3839d0','original 34 rows unchanged except custom-spec URLs, with cost kept only in the archive');
-ok(cat.suppliers.length===38&&cat.suppliers.filter(r=>r.pass==='2026-11-06').map(r=>r.id).join()==='C13,C14,D10,D11','four Nov 6 additions');
+ok(crypto.createHash('sha256').update(JSON.stringify(core)).digest('hex')==='a5af651809edbcbd759823bc4cefee8e1f8379588ff0eacda0ea179957c793b6','remaining Nov 2 scored rows unchanged except custom-spec URLs, with cost kept only in the archive');
+ok(cat.suppliers.length===16&&cat.suppliers.filter(r=>r.pass==='2026-11-06').map(r=>r.id).join()==='C13,C14,D10,D11','sixteen scored names remain, including four Nov 6 additions');
 ok(!cat.suppliers.some(r=>r.id==='B14'||r.id==='B15'),'Huade and Taifeng are not scored suppliers');
-ok(cat.watchlist.map(w=>w.id).join()==='B14,B15,WL-TZ','watchlist is separate');
+ok(!(cat.watchlist||[]).length,'watchlist is empty in the public catalog');
 const def=[25,15,10,10,20,10,10];
 for(const [id,exp] of [['C13',3.35],['C14',3.1],['D10',3.5],['D11',3.3]]){
   const r=cat.suppliers.find(x=>x.id===id);
   const sc=['cap','cert','scale','usexp','cost','lead','geo'].reduce((a,k,i)=>a+(k==='cost'?costById[r.id]:r[k])*def[i],0)/100;
   ok(Math.abs(sc-exp)<1e-9, id+' archived historical score '+sc);
 }
-ok((cat.discovery||[]).length===19&&(cat.discovery||[]).every(r=>r.scored===false&&r.cap==null),'nineteen leads have no fabricated scores');
-ok(!(cat.discovery||[]).some(r=>r.id==='CN-H1'||/WREN/i.test(r.name||''))&&!JSON.stringify(cat).includes('CN-H1'),'WREN is not in the public catalog');
+ok((cat.discovery||[]).length===18&&(cat.discovery||[]).every(r=>r.scored===false&&r.cap==null),'eighteen leads have no fabricated scores');
+ok(!(cat.discovery||[]).some(r=>['CN-H1','CN-F1'].includes(r.id)||/WREN|Longrui/i.test(r.name||''))&&!JSON.stringify(cat).includes('CN-H1')&&!JSON.stringify(cat).includes('Bharat Forge'),'removed heavy-equipment names are not in the public catalog');
 ok((cat.discovery||[]).filter(r=>r.pass==='2026-11-10').length===14&&(cat.discovery||[]).filter(r=>r.pass==='2026-11-10').every(r=>r.country==='Taiwan'&&!Object.prototype.hasOwnProperty.call(r,'cap')&&!Object.prototype.hasOwnProperty.call(r,'cost')),'fourteen Taiwan leads stay unscored');
-ok(cat.suppliers.every(r=>['Fits handheld tools','Possible fit','Built for heavy equipment'].includes(r.tool_scale)),'every scored supplier has a tool scale label');
+ok(cat.suppliers.every(r=>['Fits handheld tools','Possible fit'].includes(r.tool_scale))&&!cat.suppliers.some(r=>r.tool_scale==='Built for heavy equipment')&&!(cat.discovery||[]).some(r=>r.tool_scale==='Built for heavy equipment'),'public catalog has no heavy-equipment names');
 const blob=JSON.stringify(cat);
 for(const bad of ['user_email','fs_events','fs_worksheet','fs_weight_prefs','service_role','sb_secret','@gmail','thume@','philos']) ok(!blob.includes(bad),'catalog has no '+bad);
 ok(/GA4_MEASUREMENT_ID:\s*""/.test(config),'GA4 disabled');

@@ -22,6 +22,6 @@ function mk(seed){const dom=new JSDOM(html,{url:'https://factorysearch.netlify.a
  const w2=mk(saved);await tick();await tick();
  ok(w2.document.getElementById('f_commercial_moq').value==='SKU-1: 25','a later visit in the same browser restores the entry');
  ok(!w2.__from.includes('fs_worksheet'),'restoring the entry does not read the database');
- const sup=D.getElementById('sup');sup.value='B1';sup.dispatchEvent(new w.Event('change'));await tick();
- ok(w.location.hash.includes('B1'),'supplier switch updates the worksheet address');
+ const sup=D.getElementById('sup');sup.value='D2';sup.dispatchEvent(new w.Event('change'));await tick();
+ ok(w.location.hash.includes('D2'),'supplier switch updates the worksheet address');
  console.log(n,'checks',f,'failures');process.exit(f?1:0);})();

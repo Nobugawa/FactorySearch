@@ -14,20 +14,20 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  let {w,logged}=mk(null);ok(await waitFor(w,'#tb'),'anon scorecard rendered');let D=w.document;let tb=D.getElementById('tb');
  ok(!D.getElementById('pw'),'no password field while viewing');
  ok(tb.tHead&&tb.tHead.rows.length===1,'thead present');
- ok([...tb.tBodies[0].rows].filter(r=>r.classList.contains('r')).length===38,'38 scored rows');
+ ok([...tb.tBodies[0].rows].filter(r=>r.classList.contains('r')).length===16,'16 scored rows');
  ok(!tb.querySelector('tr.china')&&!tb.querySelector('.tag.new'),'no afterthought badge on China rows');
- ok(![...tb.querySelectorAll('tr.r')].some(tr=>tr.dataset.id==='B14'||tr.dataset.id==='B15'),'Huade and Taifeng are not ranked');
- ok(/not scored/.test(D.querySelector('.watchcard').textContent)&&/Huade/.test(D.querySelector('.watchcard').textContent)&&/700 bar/.test(D.querySelector('.watchcard').textContent),'watchlist is separate and unscored');
+ ok(![...tb.querySelectorAll('tr.r')].some(tr=>tr.dataset.id==='B14'||tr.dataset.id==='B15'||tr.dataset.id==='C7'||tr.dataset.id==='B1'||tr.dataset.id==='B8'||tr.dataset.id==='B9'),'heavy-equipment names are not ranked');
+ ok(!D.querySelector('.watchcard'),'empty watchlist is not shown');
  ok(/Cost is a 1–5 exposure rank, not a price/.test(D.body.textContent)&&/Europe ranks ahead of China/.test(D.body.textContent)&&/Lead time and geography stay in the score as assumptions/.test(D.body.textContent)&&/Capability is catalog fit, not proven quality/.test(D.body.textContent),'cost is an exposure rank and the other assumptions stay');
  ok(!/diversif|reincorporat|light on China|China additions|biased/i.test(D.body.textContent),'scorecard omits the internal list backstory');
  ok(/this browser only/.test(D.body.textContent),'signed-out weights are described as local');
  ok(tb.firstElementChild.tagName==='COLGROUP'&&tb.querySelector('thead')&&!tb.tBodies[0].querySelector('th'),'header above body rows');
  ok(/not qualified or interchangeable/.test(D.body.textContent),'alternatives heading');ok(D.querySelectorAll('.alt').length===3,'3 alt cards');
- ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.7.0','version');
- ok(!/CN-H1|wrenchina|Hangzhou WREN/i.test(D.body.textContent),'WREN is not in the public view');
- ok(/Fits handheld tools/.test(D.body.textContent)&&/Built for heavy equipment/.test(D.body.textContent),'tool scale labels are shown');
+ ok(!/Dual-source pairs:/.test(D.body.textContent),'old shorthand removed');ok(D.getElementById('ver').textContent==='v1.7.1','version');
+ ok(!/CN-H1|wrenchina|Hangzhou WREN|Bharat Forge|Yuken Kogyo|Kawasaki Precision|Bosch Rexroth|Jiangsu Hengli|Beijing Huade|Shandong Taifeng|TZ Yuci|Longrui|Hyundai WIA|HIWIN/i.test(D.body.textContent),'removed heavy-equipment names are not in the public view');
+ ok(/Fits handheld tools/.test(D.body.textContent)&&/Possible fit/.test(D.body.textContent)&&/Names judged built for heavy equipment are not on this list/.test(D.body.textContent),'tool scale labels are shown and heavy-equipment names are off the list');
  ok(/Weiyon|Chi Xin|Porite|Action Fast/.test(D.body.textContent),'Taiwan custom and OEM candidates are listed');
- {const first=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.querySelector('td.toolscale')&&tr.querySelector('td.toolscale').textContent.trim()); const lastFit=Math.max(...first.map((l,i)=>l==='Fits handheld tools'?i:-1)); const firstHeavy=first.findIndex(l=>l==='Built for heavy equipment'); const firstPoss=first.findIndex(l=>l==='Possible fit'); ok(first[0]==='Fits handheld tools'&&lastFit>=0&&firstPoss>lastFit&&firstHeavy>firstPoss,'default view leads with Fits handheld tools, then Possible fit, then Built for heavy equipment');}
+ {const first=[...tb.querySelectorAll('tbody tr.r')].map(tr=>tr.querySelector('td.toolscale')&&tr.querySelector('td.toolscale').textContent.trim()); const lastFit=Math.max(...first.map((l,i)=>l==='Fits handheld tools'?i:-1)); const firstHeavy=first.findIndex(l=>l==='Built for heavy equipment'); const firstPoss=first.findIndex(l=>l==='Possible fit'); ok(first[0]==='Fits handheld tools'&&lastFit>=0&&firstPoss>lastFit&&firstHeavy===-1,'default view leads with Fits handheld tools, then Possible fit, and has no heavy-equipment rows');}
  ok(!D.querySelector('nav a[href="#/quotes"]')&&!/Quote entry/.test(D.querySelector('nav').textContent)&&!D.querySelector('a[href="#/quotes"]'),'quote entry is not in the public navigation or the scorecard');
  ok(!D.querySelector('nav a[href="#/sensitivity"]')&&[...D.querySelectorAll('nav a')].map(a=>a.textContent).join(' ')==='Scorecard Approach Worksheet Sources'&&!D.querySelector('a[href="#/sensitivity"]'),'sensitivity is not in the navigation or the scorecard');
  {const scale=D.getElementById('scalescale');
@@ -46,7 +46,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
   tb.querySelector('button[data-sort="name"]').click();
   ok(rankOf(topId)===topRank&&tb.querySelector('th[aria-sort="ascending"] button[data-sort="name"]'),'sorting by name keeps the weighted rank');
   const names=[...tb.querySelectorAll('tbody tr.r td.name')].map(td=>td.textContent.trim());
-  ok(names.length===38&&names[0].localeCompare(names[names.length-1])<=0,'name sort runs from A toward Z');
+  ok(names.length===16&&names[0].localeCompare(names[names.length-1])<=0,'name sort runs from A toward Z');
   tb.querySelector('button[data-sort="country"]').click();
   tb.querySelector('button[data-sort="country"]').click();
   ok(tb.querySelector('th[aria-sort="descending"] button[data-sort="country"] .dn.on'),'clicking a heading again reverses the sort');
@@ -67,13 +67,13 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(!/China supplier coverage/.test(D.body.textContent),'scorecard has no separate China chapter');
  ok(!/Authorized users only/.test(D.body.textContent)&&!/Private supplier study/.test(D.body.textContent),'mandatory-login warning removed');
  ok(!D.getElementById('signin')&&!D.getElementById('logout')&&!/Sign in|linked to this email/.test(D.querySelector('nav').textContent+(D.getElementById('notice').textContent||'')),'no public sign-in control or tracking notice');
- ok(tb.querySelectorAll('td.u').length===38&&[...tb.querySelectorAll('td.u a')].every(a=>a.textContent===a.getAttribute('href')&&/^https?:\/\//.test(a.textContent)&&!a.textContent.includes('…')),'full URL text in source cells');
+ ok(tb.querySelectorAll('td.u').length===16&&[...tb.querySelectorAll('td.u a')].every(a=>a.textContent===a.getAttribute('href')&&/^https?:\/\//.test(a.textContent)&&!a.textContent.includes('…')),'full URL text in source cells');
  ok(![...tb.querySelectorAll('tbody tr.r')].some(tr=>[...tr.cells].some(td=>td.textContent==='Unknown'&&td.classList.contains('num'))),'scored numbers are not an unknown cost column');
- ok(D.querySelectorAll('#disc tbody tr.r').length===19&&!D.querySelector('#disc .sc'),'nineteen leads are listed and not scored');
+ ok(D.querySelectorAll('#disc tbody tr.r').length===18&&!D.querySelector('#disc .sc'),'eighteen leads are listed and not scored');
  D.getElementById('fm').value='5';D.getElementById('fm').dispatchEvent(new w.Event('input',{bubbles:true}));
- ok([...tb.querySelectorAll('tbody tr.r')].length<38&&D.querySelectorAll('#disc tbody tr.r').length===19,'min score filters scored rows only');
+ ok([...tb.querySelectorAll('tbody tr.r')].length<16&&D.querySelectorAll('#disc tbody tr.r').length===18,'min score filters scored rows only');
  D.getElementById('fm').value='';D.getElementById('fm').dispatchEvent(new w.Event('input',{bubbles:true}));
- ok([...tb.querySelectorAll('tbody tr.r')].length===38,'clearing min score shows the scored list again');
+ ok([...tb.querySelectorAll('tbody tr.r')].length===16,'clearing min score shows the scored list again');
  {const row=w.FS_CATALOG.suppliers.find(r=>r.id==='B2'),ww=[25,15,10,10,20,10,10],keys=['cap','cert','scale','usexp','cost','lead','geo'];
   const exp=keys.reduce((a,k,i)=>a+(Number(row[k])||0)*ww[i],0)/100;
   ok([...tb.querySelectorAll('tr.r')].find(tr=>tr.dataset.id==='B2').querySelector('.sc').textContent===exp.toFixed(2),'displayed score includes the cost weight');
@@ -173,7 +173,7 @@ function mk(session,hash){const dom=new JSDOM(html,{url:'https://factorysearch.n
  ok(!/China supplier coverage/.test(sr),'sources have no separate China chapter');
  ['importyeti.com','panjiva.com','timtos.com.tw','buykorea.org','ptc-asia.com','emo-hannover.de'].forEach(h=>ok([...D.querySelectorAll('a')].some(a=>a.href.includes(h)),'link '+h));
  ok(/Discovery:/.test(sr)&&/Screening:/.test(sr)&&/Validation:/.test(sr)&&/None of these has been searched/.test(sr),'customs data: discovery/screening/validation + not searched');ok(/does not prove quality, drawing fit, capacity, MOQ/.test(sr),'customs limitations');
- ok(D.querySelectorAll('.tblwrap tbody tr').length===38,'38 supplier source rows');
+ ok(D.querySelectorAll('.tblwrap tbody tr').length===16,'16 supplier source rows');
  ok([...D.querySelectorAll('.tblwrap td.u a')].every(a=>a.textContent===a.getAttribute('href')),'source urls are complete');
  ok(/ppforging\.com/.test(sr)&&/gearsnet\.com/.test(sr)&&/leapmachine\.com/.test(sr)&&/nbxus\.com/.test(sr),'Nov 6 evidence links');
  ok(/Sources dated Nov 6, 2026/.test(sr)&&/Source date Nov 2, 2026/.test(sr)&&/2026-11-02/.test(sr)&&/2026-11-06/.test(sr),'each supplier keeps its own source date');
