@@ -11,7 +11,7 @@ const allowed=C.ALLOWED_EMAILS.filter(Boolean).map(e=>e.toLowerCase());
 const KEYS=['cap','cert','scale','usexp','cost','lead','geo'], LBL=['Capability','Certs','Scale','US footprint','Cost','Lead time','Geo risk'];
 const DEF=[25,15,10,10,20,10,10];
 const LOCAL_W='fs_local_weights_v1';
-let S={user:null,rows:[],w:[29,19,13,13,0,13,13],lk:[false,false,false,false,true,false,false],f:{cat:'',reg:'',min:0,sort:'score',dsort:{key:'name',dir:'asc'}},t0:Date.now(),open:null,banner:'',logging:false,ping:null};
+let S={user:null,rows:[],w:[29,19,13,13,0,13,13],lk:[false,false,false,false,true,false,false],f:{cat:'',reg:'',min:0,sort:{key:'tool_scale',dir:'asc'},dsort:{key:'tool_scale',dir:'asc'}},t0:Date.now(),open:null,banner:'',logging:false,ping:null};
 const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function log(type,sid,detail){ if(!S.user)return; sb.from('fs_events').insert({user_email:S.user,event_type:type,supplier_id:sid||null,detail:detail||{}}).then(()=>{}); }
@@ -76,8 +76,8 @@ function applyCatalog(){
   S.rows=cat.suppliers.slice();
   S.recheck=cat.recheck||{results:{}};
   const asof=$('#asof');
-  if(asof) asof.textContent='Desk research dated '+cat.original_as_of+', '+cat.china_as_of+', and '+(cat.discovery_as_of||'2026-11-07');
-  S.discovery=Array.isArray(cat.discovery)?cat.discovery:[];
+  if(asof) asof.textContent='Desk research dated '+cat.original_as_of+', '+cat.china_as_of+', and '+(cat.discovery_as_of||'2026-11-07 and 2026-11-10');
+  S.discovery=(Array.isArray(cat.discovery)?cat.discovery:[]).filter(r=>!r.hidden);
   return true;
 }
 async function boot(){
@@ -154,7 +154,7 @@ const CHANNELS={
  planned:[
   ['ImportYeti','https://www.importyeti.com/','US customs bill-of-lading records, useful at three stages. <b>Discovery:</b> search by product description or by the suppliers of similar US buyers to find candidates not on this list. <b>Screening:</b> shipment patterns (frequency, volume, recency) and US customers as an early read on real US export experience. <b>Validation:</b> cross-check a supplier\'s claimed US customers and export history.','Records can be incomplete, delayed, or filed under a parent company, trading company, or forwarder. Shipment data does not prove quality, drawing fit, capacity, MOQ, or pricing.'],
   ['Panjiva (S&P Global)','https://panjiva.com/','Same discovery, screening and validation uses with broader coverage and filters (subscription service).','Paid; same limitations as above.'],
-  ['TIMTOS exhibitor list (Taiwan machine tools)','https://www.timtos.com.tw/en/exhibitor/company-name-data/index.html','Taiwan machining and component makers to deepen the thin Taiwan list.','Exhibiting is not an audit of capability or quality.'],
+  ['TIMTOS exhibitor list (Taiwan machine tools)','https://www.timtos.com.tw/en/exhibitor/company-name-data/index.html','Taiwan machining and component makers.','Exhibiting is not an audit of capability or quality.'],
   ['KOTRA / buyKOREA (Korea)','https://buykorea.org/','Korean manufacturers by category to deepen the thin Korea list. KOTRA main site: kotra.or.kr.','Directory listing is self-reported, not verified capability.'],
   ['PTC ASIA (Shanghai, power transmission & hydraulics)','https://www.ptc-asia.com/index-en.html','Hydraulics and transmission exhibitors in China and Asia.','Exhibitor list not yet located on the site; same directory caveat.'],
   ['EMO Hannover (metalworking)','https://emo-hannover.de/en/','European and global machining and machine-tool exhibitors.','Same directory caveat.']]};
@@ -199,12 +199,12 @@ const RUBRIC=[ ['Capability','25%','Clear public fit to the part family (e.g. HA
 function study(){ log('study_open');
   const li=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
   const ncat=(rows,c)=>rows.filter(r=>r.category===c).length;
-  app.innerHTML=`<h1>Approach</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
+  app.innerHTML=`<h1>Approach</h1><p class="sub">Prepared for Teddy Hume by Philos Kim. Desk research dated Nov 2, 2026, Nov 6, 2026, Nov 7, 2026, and Nov 10, 2026. Live controls are on <a href="#/">Scorecard</a>. The <a href="#/worksheet">worksheet</a> is a blank qualification template. Channels are on <a href="#/sources">Sources</a>.</p>
   ${bannerHtml()}
   <div class="card study">
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
   <h2>Purpose and scope</h2><p>A starting short list for a sourcing review: manufacturers with a public record in the part family, a scorecard that can be re-weighted, and a lead and an alternative in each family. Three families are usually spec-critical for hydraulic bolting tools: hydraulics (pumps, valves, power packs, hoses), forgings and castings, and precision machining. Sockets and fasteners were left out because they are more standardized. The weighted score includes a 1–5 cost-exposure rank from ocean freight. That rank is not a landed cost.</p>
-  <p>The scored list has ${S.rows.length} manufacturers (${ncat(S.rows,'Hydraulics')} hydraulics, ${ncat(S.rows,'Forgings/Castings')} forgings and castings, ${ncat(S.rows,'Precision machining')} precision machining) in China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, the Czech Republic, and Israel), plus ${(S.discovery||[]).length} names dated Nov 7, 2026 that are not scored. Scored names use the same criteria. The Nov 7 names are leads for follow-up, not a ranked result.</p>
+  <p>The scored list has ${S.rows.length} manufacturers (${ncat(S.rows,'Hydraulics')} hydraulics, ${ncat(S.rows,'Forgings/Castings')} forgings and castings, ${ncat(S.rows,'Precision machining')} precision machining) in China, Taiwan, Korea, Japan, India, and Europe (Germany, Austria, Italy, Poland, the Czech Republic, and Israel), plus ${(S.discovery||[]).length} names dated Nov 7, 2026 and Nov 10, 2026 that are not scored. Scored names use the same criteria. The unscored names are leads for follow-up, not a ranked result.</p>
   <p>This is not an exhaustive search, and it is not an evenly balanced survey of every producing country. It is a preliminary desk list of manufacturers already visible in these part families. Desk research is dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. Each name keeps its own source date on <a href="#/sources">Sources</a> and in its detail card.</p>
   <h2>How to read cost, lead time, and geography</h2>
   <p>Cost is a 1–5 exposure rank from sourced ocean freight and, for China, Section 301. It is in the weighted score. It is not a supplier price and not a landed cost. On the sourced lanes, Europe is more favorable than China, and a US plant would be more favorable than both. China is less favorable than Japan, South Korea, and Taiwan because the same high freight band carries a China-only additional duty. Lead time and geography remain in the score only as assumptions: typical freight time and concentration in one country. They are not measured transit times. Capability is catalog fit, not proven quality. Drawing fit, verified quality, US shipment history, MOQ, and willingness to take HYTORC volumes are still open.</p>
@@ -230,7 +230,7 @@ function study(){ log('study_open');
   <h2>Questions for discussion</h2>
   ${li(['Which category (hydraulics, forgings/castings, machining) is the biggest drag today on quality, lead time, or cost?','Which part numbers, volumes, and alloy grades should drive the next pass?','Are there factories already trusted or ruled out, so the list does not duplicate them?'])}
   <h2>Limitations and next checks</h2>
-  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, volume willingness, drawing fit, and verified quality are unknown across the list.','Cost is an ordinal freight and duty-exposure rank, not a price and not a landed cost. Section 301 is included for China and is policy-dependent. Origins without their own sourced lane are flagged. Lead time and geography are indicative assumptions, not quotations or measured outcomes. They do not establish that suppliers in one country are a better fit than suppliers in another.','On Nov 7, 2026 the visible names on ImportYeti’s public HYTORC page were reviewed. The page lists some sea-freight names only. Panjiva and the trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','The list is not an exhaustive world search. Vietnam and Thailand are not yet covered; Taiwan and Korea are thin. The Nov 7 names are not scored.','HYTORC part lists, volumes, and alloy grades are not in this review. Scores should be revisited once those are known.'])}
+  ${li(['All scores are preliminary desk judgments, not qualifications or quotes. Certifications and customs history are unverified. A named certificate, including a registrar row whose expiry was not checked, is not a verified certificate. A US office is not verified US shipment history.','No supplier was contacted and no quote requested. Price, MOQ, volume willingness, drawing fit, and verified quality are unknown across the list.','Cost is an ordinal freight and duty-exposure rank, not a price and not a landed cost. Section 301 is included for China and is policy-dependent. Origins without their own sourced lane are flagged. Lead time and geography are indicative assumptions, not quotations or measured outcomes. They do not establish that suppliers in one country are a better fit than suppliers in another.','On Nov 7, 2026 the visible names on ImportYeti’s public HYTORC page were reviewed. The page lists some sea-freight names only. Panjiva and the trade-show exhibitor lists (TIMTOS, KOTRA, PTC ASIA, EMO) have not been checked. Customs data can widen the candidate list and give an early read on US export experience, then support validation; it cannot by itself qualify a supplier for quality, drawing fit, or MOQ. See <a href="#/sources">Sources</a>.','The list is not an exhaustive world search. Vietnam and Thailand are not yet covered; Korea is still thin. Taiwan custom and OEM shops reviewed Nov 10, 2026 are on the unscored list. The Nov 7 and Nov 10 names are not scored.','HYTORC part lists, volumes, and alloy grades are not in this review. Scores should be revisited once those are known.'])}
   </div>`;
 }
 
@@ -271,14 +271,14 @@ let pt; function savePrefs(){
   clearTimeout(pt);pt=setTimeout(()=>sb.from('fs_weight_prefs').upsert({user_email:S.user,weights:S.w,locked:S.lk,updated_at:new Date().toISOString()}).then(()=>{}),800);
 }
 const score=r=>{if(!r||r.scored===false||r.cap==null)return null; return KEYS.reduce((a,k,i)=>a+(Number(r[k])||0)*S.w[i],0)/100;};
-const COLS=['n','name','cat','country','makes','num','num','num','num','num','num','num','num','uspres','certs','src'];
-const WIDTHS=['3%','10.5%','6.5%','6.5%','11%','3.4%','3.4%','3.6%','6.4%','3.4%','3.4%','3.4%','4.4%','10%','10%','8.1%'];
+const COLS=['n','name','cat','country','toolscale','makes','num','num','num','num','num','num','num','num','uspres','certs','src'];
+const WIDTHS=['3%','10%','6%','6%','9%','9%','3.2%','3.2%','3.4%','6%','3.2%','3.2%','3.2%','4.2%','9%','9%','8.4%'];
 
 function scorecard(){
   const cats=[...new Set(S.rows.map(r=>r.category))].sort(), regs=[...new Set(S.rows.map(r=>r.region))].sort();
   app.innerHTML=`<h1>Supplier scorecard</h1>
   <div class="callout">${esc(window.FSN?FSN.COPY.intro:'')}</div>
-  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, and Nov 7, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/approach">How the scores were set</a></p>
+  <p class="sub">${S.rows.length} scored manufacturers, plus ${(S.discovery||[]).length} names that are not scored. Desk research dated Nov 2, 2026, Nov 6, 2026, Nov 7, 2026, and Nov 10, 2026. The 1–5 scores are preliminary judgments from public pages, not qualifications or quotes. <a href="#/approach">How the scores were set</a></p>
   ${bannerHtml()}
   <div class="callout"><b>Cost is a 1–5 exposure rank, not a price.</b> It uses the ocean-freight lanes on <a href="#/approach">Approach</a>. Higher is more favorable. Europe ranks ahead of China on those lanes, and a US plant would rank ahead of both. It is not a landed cost. Lead time and geography stay in the score as assumptions, not measured transit or a proven result. Capability is catalog fit, not proven quality. Drawing fit, certificates, US shipment history, price, MOQ, and volume willingness are still unverified.</div>
   ${altCards()}
@@ -290,6 +290,7 @@ function scorecard(){
   <label for="fm">Min score <input id="fm" type="number" inputmode="decimal" step="0.1" min="0" max="5" aria-describedby="fmhint"></label>
   <span id="fmhint">0 to 5. Leave blank to show every row at or above 0.</span></div>
   <p class="sortnote" id="sortnote">Click any column heading to sort; click again to reverse. The rank number stays the weighted-score rank.</p>
+  <p class="uslegend" id="tslegend"><b>Tool scale</b> is a desk judgment from public pages: Fits handheld tools, Possible fit, or Built for heavy equipment. The handheld standard used here is tools of about 4–25 lb (HYTORC STEALTH), with larger square-drive models up to about 77 lb. It is not a qualification. The default view lists handheld-scale names first.</p>
   <p class="uslegend" id="uslegend"><b>US footprint</b> is a 1–5 desk score for a US office, subsidiary, or claimed US presence on a public page. A named office is the strong end of the scale. A claim without a clear office is the middle. No US footprint found is the weak end. It is not verified shipment history, and customs records were not used. <b>US note</b> is the sentence kept with that score. For many names dated Nov 2, 2026 the sentence was not recorded, so the note says unknown even though a score is shown.</p>
   <p class="muted" id="counts"></p>
   <p class="callout" id="scalescale">1–5 screening scores: higher is more favorable; differences are not proportional.</p>
@@ -307,7 +308,7 @@ function watchlistHtml(){
   const items=(window.FS_CATALOG&&window.FS_CATALOG.watchlist)||[];
   return `<div class="card watchcard"><h2>Watchlist, not scored</h2>
   <p class="muted">These names are not in the ranked list. Huade and Taifeng do not have a confirmed ~700 bar line, so they are not treated as bolting-pump matches. Suggested numbers from the notes are not shown here.</p>
-  ${items.map(w=>`<article class="watchitem"><h3>${esc(w.name)} <span class="tag alt2">${esc(w.id)}</span></h3><p>${esc(w.why)}</p><p class="muted">${esc(w.checked)}</p>${safeUrl(w.url)?`<p class="u"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>`:''}</article>`).join('')}
+  ${items.map(w=>`<article class="watchitem"><h3>${esc(w.name)} <span class="tag alt2">${esc(w.id)}</span>${w.tool_scale?` <span class="tag toolscale ts-${toolScaleClass(w.tool_scale)}">${esc(w.tool_scale)}</span>`:''}</h3><p>${esc(w.why)}</p>${w.tool_scale_evidence?`<p class="muted">${esc(w.tool_scale_evidence)}</p>`:''}<p class="muted">${esc(w.checked)}</p>${safeUrl(w.url)?`<p class="u"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>`:''}</article>`).join('')}
   </div>`;
 }
 function weights(){
@@ -320,7 +321,7 @@ function weights(){
   document.querySelectorAll('[data-n]').forEach(el=>el.onchange=()=>{setW(+el.dataset.n,+el.value);el.value=S.w[+el.dataset.n];sync();});
   document.querySelectorAll('[data-l]').forEach(el=>el.onchange=()=>{S.lk[+el.dataset.l]=el.checked; savePrefs(); weights();});
 }
-function dateLabel(r){return r.pass==='2026-11-07'?'Researched Nov 7, 2026':r.pass==='2026-11-06'?'Researched Nov 6, 2026':'Researched Nov 2, 2026';}
+function dateLabel(r){return r.pass==='2026-11-10'?'Researched Nov 10, 2026':r.pass==='2026-11-07'?'Researched Nov 7, 2026':r.pass==='2026-11-06'?'Researched Nov 6, 2026':'Researched Nov 2, 2026';}
 function findAny(id){return S.rows.find(x=>x.id===id)||(S.discovery||[]).find(x=>x.id===id);}
 function detailInner(r){
   const ev=evidenceHtml(r), flags=(r.flags||[]).map(f=>`<li>${esc(f)}</li>`).join('');
@@ -329,6 +330,7 @@ function detailInner(r){
   return `<div class="detail"><div class="detailhead"><h2>${esc(r.name)} <span class="tag">${dateLabel(r)}</span></h2><button type="button" class="btn sec" id="dx">Close</button></div>
   <p class="muted">${esc(r.id)} · ${esc(r.category)} · ${esc(r.country)} (${esc(r.region)})${r.supplier_type?' · '+esc(r.supplier_type):''}</p>
   <p>${esc(r.what_they_make)}</p>
+  ${r.tool_scale?`<p><b>Tool scale:</b> ${esc(r.tool_scale)}${r.tool_scale_evidence?` — ${esc(r.tool_scale_evidence)}`:''}</p>`:''}
   ${r.relevance?`<p><b>Why it is listed:</b> ${esc(r.relevance)}</p>`:''}
   ${r.claims?`<p><b>Claims, not verified:</b> ${esc(r.claims)}</p>`:''}
   <p><b>US presence:</b> ${esc(r.us_presence||'Unknown')}</p><p><b>Certs:</b> ${esc(r.certs_note||'Unknown')}</p>
@@ -344,17 +346,21 @@ function detailInner(r){
   ${safeUrl(r.url)?`<p class="u"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></p>`:''}
   <a class="btn" href="#/approach">Score is not a cost</a></div>`;
 }
-const SCORE_KEYS=['rank','name','category','country','makes','cap','cert','scale','usexp','cost','lead','geo','score','uspres','certs','source'];
-const SCORE_LABELS=['#','Supplier','Cat','Country','Makes','Cap','Cert','Scale','US footprint','Cost','Lead','Geo','Score','US note','Certs','Source'];
-const SCORE_TIPS={usexp:'US footprint: 1–5 desk score for a public US office or claimed US presence. Not verified shipment history.',cost:'Cost: 1–5 exposure rank from sourced ocean freight. Higher is more favorable. Not a price. Differences are not proportional.'};
-const DISC_KEYS=['name','category','country','status','source'];
-const DISC_LABELS=['Name','Category','Country','Status','Source'];
+const SCORE_KEYS=['rank','name','category','country','tool_scale','makes','cap','cert','scale','usexp','cost','lead','geo','score','uspres','certs','source'];
+const SCORE_LABELS=['#','Supplier','Cat','Country','Tool scale','Makes','Cap','Cert','Scale','US footprint','Cost','Lead','Geo','Score','US note','Certs','Source'];
+const SCORE_TIPS={tool_scale:'Tool scale: whether public pages point to handheld or tool-size work (about 4–25 lb, HYTORC STEALTH; larger square-drive models up to about 77 lb), a possible fit, or equipment built at heavy-industry scale. Desk judgment, not a qualification.',usexp:'US footprint: 1–5 desk score for a public US office or claimed US presence. Not verified shipment history.',cost:'Cost: 1–5 exposure rank from sourced ocean freight. Higher is more favorable. Not a price. Differences are not proportional.'};
+const DISC_KEYS=['name','category','country','tool_scale','status','source'];
+const DISC_LABELS=['Name','Category','Country','Tool scale','Status','Source'];
+const TOOL_SCALE_RANK={'Fits handheld tools':1,'Possible fit':2,'Built for heavy equipment':3};
+function toolScaleClass(label){return label==='Fits handheld tools'?'fit':label==='Possible fit'?'possible':label==='Built for heavy equipment'?'heavy':'';}
+function toolScaleCell(r){const label=r.tool_scale||''; if(!label) return ''; const tip=r.tool_scale_evidence||'Tool scale is a desk judgment from public pages, not a qualification.'; return `<span class="tag toolscale ts-${toolScaleClass(label)}" title="${esc(tip)}">${esc(label)}</span>`;}
 function rowValue(row,key){
   if(key==='rank') return row._rank;
   if(key==='score') return row._s;
   if(key==='name') return row.name;
   if(key==='category') return row.category;
   if(key==='country') return row.country;
+  if(key==='tool_scale') return TOOL_SCALE_RANK[row.tool_scale]||null;
   if(key==='makes') return row.what_they_make;
   if(key==='cap'||key==='cert'||key==='scale'||key==='usexp'||key==='cost'||key==='lead'||key==='geo') return row[key];
   if(key==='uspres') return row.us_presence;
@@ -404,7 +410,7 @@ function table(){
   let rows=ranked.filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg)&&r._s>=S.f.min);
   rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);
   $('#tb').innerHTML=`<colgroup>${WIDTHS.map(w=>`<col style="width:${w}">`).join('')}</colgroup><thead><tr>${sortHeads('tb',SCORE_KEYS,SCORE_LABELS,COLS)}</tr></thead><tbody>`+
-  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${r._rank}</td><td class="name"><b>${esc(r.name)}</b></td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${SCORE_KEYS.length}">No scored suppliers match these filters.</td></tr>`)+'</tbody>';
+  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td class="n">${r._rank}</td><td class="name"><b>${esc(r.name)}</b></td><td class="cat">${esc(r.category).replace(/\//g,'/<wbr>')}</td><td>${esc(r.country)}</td><td class="toolscale">${toolScaleCell(r)}</td><td class="makes">${esc(r.what_they_make)}</td>${KEYS.map(k=>`<td class="num">${r[k]??''}</td>`).join('')}<td class="num sc">${r._s.toFixed(2)}</td><td class="uspres">${esc(r.us_presence)}</td><td class="certs">${esc(r.certs_note)}</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):`<tr><td class="muted" colspan="${SCORE_KEYS.length}">No scored suppliers match these filters.</td></tr>`)+'</tbody>';
   paintDiscovery();
   bindSort('tb'); bindSort('disc');
   document.querySelectorAll('#tb tr.r').forEach(tr=>tr.onclick=e=>{
@@ -424,12 +430,12 @@ function closePop(){
 function paintDiscovery(){
   const box=$('#discover'); if(!box) return;
   let rows=(S.discovery||[]).filter(r=>(!S.f.cat||r.category===S.f.cat)&&(!S.f.reg||r.region===S.f.reg));
-  if(window.FSS){const cur=FSS.migrateSort(S.f.dsort,['name','category','country','source']); S.f.dsort=cur; rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);}
+  if(window.FSS){const cur=FSS.migrateSort(S.f.dsort,['name','category','country','tool_scale','source']); S.f.dsort=cur; rows=FSS.sortRows(rows,cur.key,cur.dir,rowValue);}
   const scored=document.querySelectorAll('#tb tbody tr.r').length;
   const c=$('#counts'); if(c) c.textContent=scored+' scored in this view · '+rows.length+' not scored in this view. Min score applies only to scored rows. Not-scored names have no rank.';
-  box.innerHTML=`<h2>Not scored</h2><p class="muted">Public pages reviewed Nov 7, 2026. No 1–5 scores were assigned, so these names are not ranked with the scored list and they have no cost rank. Where a customs check was made, it used only the visible names on ImportYeti’s public HYTORC page.</p>
+  box.innerHTML=`<h2>Not scored</h2><p class="muted">Public pages reviewed Nov 7, 2026 and Nov 10, 2026. No 1–5 scores were assigned, so these names are not ranked with the scored list and they have no cost rank. Where a customs check was made, it used only the visible names on ImportYeti’s public HYTORC page.</p>
   <div class="scorewrap"><table class="tbl" id="disc"><thead><tr>${sortHeads('disc',DISC_KEYS,DISC_LABELS,DISC_KEYS.map(()=>''))}</tr></thead><tbody>`+
-  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td>Not scored</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):'<tr><td colspan="5">No unscored names match this category and region.</td></tr>')+
+  (rows.length?rows.map(r=>`<tr class="r${r.id===S.open?' on':''}" data-id="${esc(r.id)}"><td><b>${esc(r.name)}</b><br><span class="muted">${esc(r.id)}</span></td><td>${esc(r.category)}</td><td>${esc(r.country)}</td><td class="toolscale">${toolScaleCell(r)}</td><td>Not scored</td><td class="u">${safeUrl(r.url)?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:''}</td></tr>`).join(''):'<tr><td colspan="6">No unscored names match this category and region.</td></tr>')+
   '</tbody></table></div>';
   box.querySelectorAll('tr.r').forEach(tr=>tr.onclick=e=>{if(e.target.closest('a'))return; e.stopPropagation(); openDetail(tr.dataset.id);});
 }
