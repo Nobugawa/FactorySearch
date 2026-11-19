@@ -1,59 +1,10 @@
+# Live site is unpublished. App source stays in this repo for restore
+# from archive/hytorc-factorysearch-2026-11-19 (commit 1eeeb72).
+# Only the offline/ directory is published to Netlify.
 [build]
-  publish = "."
+  publish = "offline"
 
-# Do not serve repo internals from the public site
 [[redirects]]
-  from = "/scripts/*"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/tests/*"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/schema_fs_v1.sql"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/migration_fs_v1_1_owner_analytics.sql"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/migration_fs_v1_2_reviewer.sql"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/hardening_optional_job_tables.sql"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/README.md"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/migration_fs_v1_3_teddy.sql"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/migration_fs_v1_4_worksheet_details.sql"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/migration_fs_v1_5_china_candidates.sql"
-  to = "/404"
-  status = 404
-  force = true
-[[redirects]]
-  from = "/archive_cost_historical.json"
-  to = "/404"
-  status = 404
-  force = true
+  from = "/*"
+  to = "/index.html"
+  status = 200
